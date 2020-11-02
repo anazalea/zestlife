@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import time, datetime, date
+from datetime import time, datetime
 from typing import List
 
 import numpy as np
@@ -63,7 +63,7 @@ class Stock:
         self.current_time = t
 
     def _update_orders(self, t: datetime) -> List[Order]:
-        """Updates state at time t"""
+        """Updates state at time t accounting for self.pending_orders"""
         new_pending_orders = []
         delivered_orders = []
         for order in self.pending_orders:
@@ -93,32 +93,41 @@ if __name__ == '__main__':
     def get_dummy_datetime(t: time) -> datetime:
         return datetime.combine(datetime.now().date(), t)
 
-    dt0 = get_dummy_datetime(time(0))
-    maxhours = 5
-    itemstock = Stock(10, dt0, 2)
-    cashstock = Stock(9, dt0, 0)
 
-    print ('Comitting orders...')
-    new_orders = [ ]
-    for h in range(maxhours):
+    maxh = 3
+    hourlyconsumption = 1
+    dt0 = get_dummy_datetime(time(0))
+    itemstock = Stock(10., dt0, 0.)
+    cashstock = Stock(9., dt0, 0.)
+
+    print('\nComitting orders...')
+    new_orders = []
+    for h in range(maxh):
         order = Order(dt0, get_dummy_datetime(time(h)), 1)
         order_cost = 1.
         itemstock.add_order(order)
+        balance_prior = cashstock.current_units
         cashstock.update(dt0, withdrawunits=order_cost)
-        print ('{}, Cost: {}, Balance Post: {}'.format(order, order_cost, cashstock.current_units))
+        print('{}, Balance: {} -> {}'.format(order, balance_prior, cashstock.current_units))
 
+    print('\nSimulating stock...')
     x = []
     yprior = []
     ypost = []
-    for h in range(maxhours):
-        for m in [0, 15, 30, 45]:
+    for h in range(maxh):
+        for m in range(60):
             timenow = get_dummy_datetime(time(h, m, 0))
             stockpriorupdate = itemstock.current_units
-            deliveredorderssince = itemstock.update(timenow)
+            deliveredorderssince = itemstock.update(timenow, withdrawunits=hourlyconsumption / 60)
             stockpostupdate = itemstock.current_units
             x.append(timenow)
             yprior.append(stockpriorupdate)
             ypost.append(stockpostupdate)
+            print('timenow: {}, {} -> {}, #orders: {}'.format(
+                timenow,
+                '%.2f' % stockpriorupdate, '%.2f' % stockpostupdate,
+                len(deliveredorderssince)
+            ))
 
     import matplotlib.pyplot as plt
 
