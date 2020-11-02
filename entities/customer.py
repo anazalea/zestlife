@@ -1,22 +1,34 @@
+from enum import Enum
+
 import pygame
 import numpy as np
 import datetime
 import math
 
-class Customer():
-    def __init__(self, screen, arrival_time_generator, pref_generator):
+from entities.base import AnimatedSprite
+
+
+class Customer(AnimatedSprite):
+    class CustomerState(Enum):
+        HAPPY = 'happy'
+        SAD = 'sad'
+        LEMONADE = 'lemonade'
+
+    def __init__(self, position, arrival_time_generator, pref_generator, image_dict):
+        super().__init__(position, image_dict)
+
         self.sprite_im = pygame.image.load('./resources/walking_stick.png')
         self.arrival_time = arrival_time_generator.sample()
         self.spawn_loc = [0,300+np.random.randint(-25,25)]
         self.current_loc = self.spawn_loc
-        self.speed = 10 + 1.5 * np.random.randn() #pixels/minute
+        self.speed = 10 + 1.5 * np.random.randn()  # pixels/minute
         self.frames_at_pose = 0
         self.pose_index = 0
         self.has_lemonade = False
         self.likes_recipe = True
         self.is_waiting = False
         self.line_position = None
-        self.update_pose()
+        # self.update_pose()
         # self.sprite_im = pygame.image.load(f'./resources/walk{str(self.pose_index)}.png')
         # self.crop_sprite = ( 175 * self.pose_index, 0*338, 175, 338)
         self.set_preferences(pref_generator)
@@ -37,7 +49,6 @@ class Customer():
             dest = spot.loc
             if spot.is_occupied:
                 break
-        
 
     def set_preferences(self, pref_generator):
         self.min_sugar_conc = pref_generator.sugar_width * np.random.randn() + pref_generator.min_sugar
@@ -56,12 +67,11 @@ class Customer():
         self.pose_index = (self.pose_index + 1) % 4
         self.frames_at_pose = 0
         if not self.likes_recipe:
-            self.sprite_im = pygame.image.load(f'./resources/p{str(self.pose_index)}sad.png')
+            self.state = 'sad'  # TODO: try Enum
         elif self.has_lemonade:
-            self.sprite_im = pygame.image.load(f'./resources/p{str(self.pose_index)}lemonade.png')
+            self.state = 'lemonade'
         else:
-            self.sprite_im = pygame.image.load(f'./resources/p{str(self.pose_index)}.png')
-        # self.crop_sprite = ( 175 * self.pose_index, 0*338, 175, 338)
+            self.state = 'happy'
 
     def move(self, time_delta):
         new_loc = [self.current_loc[0]+self.speed*time_delta, self.current_loc[1]]
@@ -69,6 +79,9 @@ class Customer():
         self.frames_at_pose += 1
         if self.frames_at_pose == 4:
             self.update_pose()
+
+    def update(self, *args, **kwargs) -> None:
+        super().next_frame()
 
     def customer_likes_recipe(self, recipe, price):
         reason = ''
