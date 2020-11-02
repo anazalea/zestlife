@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import time, datetime
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 
@@ -12,20 +12,28 @@ def get_discounted_value(initial_dt: datetime, current_dt: datetime, discount_pe
     return float(np.exp(-1 * elapsed_days * discount_per_day))
 
 
+class NegativeStockError(Exception):
+    pass
+
+
+class NoTimeTravelError(Exception):
+    pass
+
+
 class Order:
-    def __init__(self, order_dt: datetime, delivery_dt: datetime, units: float):
+    def __init__(self, order_dt: datetime, delivery_dt: datetime, amount: float):
         """Orders are paid for at order_time"""
         self.order_dt = order_dt
         if not (delivery_dt >= order_dt):
             raise ValueError('Check that delivery_time >= order_time')
         self.delivery_dt = delivery_dt
-        if not (units >= 0):
-            raise ValueError('Check that units >= 0')
-        self.units = units
+        if not (amount >= 0):
+            raise ValueError('Check that amount >= 0')
+        self.amount = amount
 
     def __str__(self) -> str:
-        return 'Order made at: {} of amount: {} to be delivered at: {}'.format(
-            self.order_dt, self.units, self.delivery_dt
+        return 'Order of: {} made at: {} to be delivered at: {}'.format(
+            '%.2f' % self.amount, self.order_dt, self.delivery_dt
         )
 
     def __lt__(self, other: Order) -> bool:
@@ -36,34 +44,77 @@ class Order:
         return t >= self.delivery_dt
 
 
+class ShrinkEvent:
+    def __init__(self, dt: datetime, amount: float, reason: str = ''):
+        self.dt = dt
+        if not amount >= 0:
+            raise ValueError('Check amount: {} >= 0'.format(amount))
+        self.amount = amount
+        self.reason = reason
+
+    def __str__(self):
+        return 'Shrink of: {} at {} due to {}'.format(
+            '%.4f' % self.amount, self.dt, self.reason
+        )
+
+
 class Stock:
-    def __init__(self, initial_amount: float, initial_dt: datetime, discount_per_day: float):
+    def __init__(
+            self,
+            initial_amount: float, initial_dt: datetime,
+            discount_per_day: float = 0.,
+            capacity: Optional[float] = None,
+            raise_error_if_neg: bool = True
+    ):
         self.pending_orders: List[Order] = []
-        self.current_dt = initial_dt
+        self.shrink_log: List[ShrinkEvent] = []
+        self.capacity = capacity
+        self.raise_error_if_neg = raise_error_if_neg
+        # initial_amount
         if not initial_amount >= 0:
             raise ValueError('Check initial_amount >= 0')
+        if self.capacity is not None and not initial_amount <= capacity:
+            raise ValueError('Check initial_amount <= capacity')
         self.current_units = initial_amount
+        # initial_dt
+        self.current_dt = initial_dt
+        # discount_per_day
         if not (discount_per_day >= 0):
             raise ValueError('Check discount_per_day >= 0')
         self.discount_per_day = discount_per_day
 
     def __str__(self) -> str:
         return 'Stock of {} as of: {} with pending orders:\n{}'.format(
-            self.current_units, self.current_dt, '\n'.join(str(order) for order in self.pending_orders)
+            '%.4f' % self.current_units, self.current_dt, '\n'.join(str(order) for order in self.pending_orders)
         )
 
+    def _check_no_time_travel(self, t: datetime):
+        if not t >= self.current_dt:
+            raise NoTimeTravelError()
+
     def add_order(self, order: Order) -> None:
-        if not (order.order_dt >= self.current_dt):
-            raise ValueError(
-                'Check that order_time: {} >= current_time: {}'.format(order.order_dt, self.current_dt))
+        self._check_no_time_travel(order.order_dt)
         self.pending_orders.append(order)
 
-    def _update_noorders(self, t: datetime) -> None:
-        self.current_units *= get_discounted_value(self.current_dt, t, self.discount_per_day)
-        self.current_time = t
+    def _check_capacity_bounds(self, new_units: float) -> float:
+        if new_units < 0:
+            if self.raise_error_if_neg:
+                raise NegativeStockError()
+        if self.capacity is not None and new_units > self.capacity:
+            return self.capacity
+        return new_units
+
+    def _update_degradation(self, t: datetime) -> None:
+        """Updates state at time t accounting only for degradation since last update"""
+        new_current_units = self.current_units * get_discounted_value(self.current_dt, t, self.discount_per_day)
+        new_current_units = self._check_capacity_bounds(new_current_units)  # shouldn't raise error.
+        degraded_units = self.current_units - new_current_units
+        self.shrink_log.append(ShrinkEvent(dt=t, amount=degraded_units, reason='Degradation'))
+        self.current_units -= degraded_units
+        self.current_dt = t
 
     def _update_orders(self, t: datetime) -> List[Order]:
-        """Updates state at time t accounting for self.pending_orders"""
+        """Updates state at time t accounting for orders and degradation since last update"""
         new_pending_orders = []
         delivered_orders = []
         for order in self.pending_orders:
@@ -74,41 +125,57 @@ class Stock:
         self.pending_orders = new_pending_orders
         delivered_orders = sorted(delivered_orders)
         for order in delivered_orders:
-            self._update_noorders(order.delivery_dt)
-            self.current_units += order.units
-        self._update_noorders(t)
+            self._update_degradation(order.delivery_dt)
+            # possible over-capacity event here.
+            candidate_units = self.current_units + order.amount
+            new_current_units = self._check_capacity_bounds(candidate_units)
+            wastage = candidate_units - new_current_units
+            if wastage > 0:
+                self.shrink_log.append(
+                    ShrinkEvent(dt=order.delivery_dt, amount=wastage, reason='Over-Capacity')
+                )
+            self.current_units = new_current_units
+        self._update_degradation(t)
         return delivered_orders
 
-    def update(self, t: datetime, withdrawunits: float = 0.) -> List[Order]:
+    def update(self, t: datetime, withdraw: float = 0.) -> List[Order]:
         """Update state at time t and withdraws units. Return delivered orders since last update."""
-        if not withdrawunits >= 0:
+        self._check_no_time_travel(t)
+        if not withdraw >= 0:
             raise ValueError('Check units >= 0')
         delivered_orders = self._update_orders(t)
-        self.current_units -= withdrawunits
+        self.current_units -= withdraw
         return delivered_orders
 
 
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+
 
     def get_dummy_datetime(t: time) -> datetime:
         return datetime.combine(datetime.now().date(), t)
 
 
-    maxh = 3
-    hourlyconsumption = 1
+    maxh = 10
+    hourlyconsumption = 2
+    lemoncapacity = 20.
     dt0 = get_dummy_datetime(time(0))
-    itemstock = Stock(10., dt0, 0.)
-    cashstock = Stock(9., dt0, 0.)
+
+    lemonstock = Stock(initial_amount=10., initial_dt=dt0, discount_per_day=3., capacity=lemoncapacity)
+    # icestock = Stock(initial_amount=10., initial_dt=dt0, discount_per_day=10.)
+    # strawstock = Stock(initial_amount=10., initial_dt=dt0, discount_per_day=.01)
+    cashstock = Stock(initial_amount=100., initial_dt=dt0, discount_per_day=0., raise_error_if_neg=False)
 
     print('\nComitting orders...')
-    new_orders = []
-    for h in range(maxh):
-        order = Order(dt0, get_dummy_datetime(time(h)), 1)
-        order_cost = 1.
-        itemstock.add_order(order)
+    lemonorders = []
+    for h, v in zip([1, 2, 5, 8], [5, 15, 5, 1]):
+        lemonorder = Order(order_dt=dt0, delivery_dt=get_dummy_datetime(time(h)), amount=v)
+        lemonordercost = v / 2
+        lemonorders.append(lemonorder)
+        lemonstock.add_order(lemonorder)
         balance_prior = cashstock.current_units
-        cashstock.update(dt0, withdrawunits=order_cost)
-        print('{}, Balance: {} -> {}'.format(order, balance_prior, cashstock.current_units))
+        cashstock.update(dt0, withdraw=lemonordercost)
+        print('{}, Balance: {} -> {}'.format(lemonorder, balance_prior, cashstock.current_units))
 
     print('\nSimulating stock...')
     x = []
@@ -117,9 +184,9 @@ if __name__ == '__main__':
     for h in range(maxh):
         for m in range(60):
             timenow = get_dummy_datetime(time(h, m, 0))
-            stockpriorupdate = itemstock.current_units
-            deliveredorderssince = itemstock.update(timenow, withdrawunits=hourlyconsumption / 60)
-            stockpostupdate = itemstock.current_units
+            stockpriorupdate = lemonstock.current_units
+            deliveredorderssince = lemonstock.update(timenow, withdraw=hourlyconsumption / 60)
+            stockpostupdate = lemonstock.current_units
             x.append(timenow)
             yprior.append(stockpriorupdate)
             ypost.append(stockpostupdate)
@@ -129,11 +196,16 @@ if __name__ == '__main__':
                 len(deliveredorderssince)
             ))
 
-    import matplotlib.pyplot as plt
+    print('\n'.join(str(i) for i in lemonstock.shrink_log))
 
-    for order in new_orders:
-        plt.axvline(order.delivery_dt, color='red', ls=':', label='order')
     plt.plot(x, yprior, label='prior')
     plt.plot(x, ypost, label='post')
+    plt.axhline(lemoncapacity, color='blue', ls=':', label='lemoncapacity')
+    for order in lemonorders:
+        plt.axvline(order.delivery_dt, color='red', ls=':', label='order amount: {}'.format(order.amount))
+    for shrinkevent in lemonstock.shrink_log:
+        if shrinkevent.reason == 'Over-Capacity':
+            plt.scatter(shrinkevent.dt, lemoncapacity, label='Over-Capacity', color='red', s=25, marker='x')
+    plt.title('lemonstock')
     plt.legend()
     plt.show()
