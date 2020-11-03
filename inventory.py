@@ -21,8 +21,9 @@ class NoTimeTravelError(Exception):
 
 
 class Order:
+    """Orders are paid for at order_dt with amount to be delivered at delivery_dt.
+    """
     def __init__(self, order_dt: datetime, delivery_dt: datetime, amount: float):
-        """Orders are paid for at order_time"""
         self.order_dt = order_dt
         if not (delivery_dt >= order_dt):
             raise ValueError('Check that delivery_time >= order_time')
@@ -45,6 +46,8 @@ class Order:
 
 
 class ShrinkEvent:
+    """Shrink of amount occured at dt due to reason.
+    """
     def __init__(self, dt: datetime, amount: float, reason: str = ''):
         self.dt = dt
         if not amount >= 0:
@@ -59,6 +62,9 @@ class ShrinkEvent:
 
 
 class Stock:
+    """Stock is updated by degradation, delivery of orders and withdraws.
+    Raises NegativeStockError if withdraw results in negative stock if raise_error_if_neg.
+    """
     def __init__(
             self,
             initial_amount: float, initial_dt: datetime,
