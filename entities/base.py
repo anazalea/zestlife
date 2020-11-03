@@ -5,7 +5,7 @@ from pygame.math import Vector2
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, position, image_dict, state=None, velocity: Vector2 = None):
+    def __init__(self, position, image_dict, hold_for_n_frames=1, state=None):
         """
         Animated sprite object.
 
@@ -27,31 +27,14 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
         self.image_dict = image_dict
         self.images = image_dict[self.state]
-        # self.images_left = [pygame.transform.flip(image, True, False) for image in
-        #                     image_dict]  # Flipping every image.
+        self.switch_frames = hold_for_n_frames
+        self.frames_at_image = 0
         self.index = 0
         self.image = self.images[self.index]  # 'image' is the current image of the animation.
         self.rect = pygame.Rect(position, (self.image.get_width(), self.image.get_height()))
 
-        if velocity is None:
-            self.velocity = Vector2(0, 0)
-        else:
-            self.velocity = velocity
-
-        self.animation_time = 0.1
-        self.current_time = 0
-
-        self.animation_frames = 6
-        self.current_frame = 0
-
-    def move(self):
-        pass
-
-    def destroy(self):
-        pass
-
-    def draw(self):
-        pass
+    def move(self, vector):
+        self.rect.move_ip(vector)
 
     @property
     def state(self):
@@ -70,6 +53,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.image = self.images[0]
 
     def next_frame(self):
-        self.index += 1
-        self.index %= len(self.images)
-        self.image = self.images[self.index]
+        self.frames_at_image += 1
+        if self.frames_at_image > self.switch_frames:
+            self.frames_at_image = 0
+            self.index += 1
+            self.index %= len(self.images)
+            self.image = self.images[self.index]

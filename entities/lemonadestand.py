@@ -1,8 +1,9 @@
 import pygame
 import datetime
+from entities.employee import Employee
 
 class LemonadeStand():
-    def __init__(self, screen):
+    def __init__(self, screen, n_employees=0):
         self.image_open = pygame.image.load('./resources/stand.png')
         self.image_closed = pygame.image.load('./resources/stand_closed.png')
         self.im_height = self.image_open.get_height()
@@ -16,6 +17,11 @@ class LemonadeStand():
         self.ice = 200
         self.price = 2.00 # $
         self.account_balance = 0.00 # $
+        self.employees = []
+
+
+    def make_a_sale(self, customer):
+        pass
 
 
     def validate_price(self, value):
