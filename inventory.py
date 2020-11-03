@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import time, datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import numpy as np
 
@@ -23,6 +23,7 @@ class NoTimeTravelError(Exception):
 class Order:
     """Orders are paid for at order_dt with amount to be delivered at delivery_dt.
     """
+
     def __init__(self, order_dt: datetime, delivery_dt: datetime, amount: float):
         self.order_dt = order_dt
         if not (delivery_dt >= order_dt):
@@ -48,6 +49,7 @@ class Order:
 class ShrinkEvent:
     """Shrink of amount occured at dt due to reason.
     """
+
     def __init__(self, dt: datetime, amount: float, reason: str = ''):
         self.dt = dt
         if not amount >= 0:
@@ -65,6 +67,7 @@ class Stock:
     """Stock is updated by degradation, delivery of orders and withdraws.
     Raises NegativeStockError if withdraw results in negative stock if raise_error_if_neg.
     """
+
     def __init__(
             self,
             initial_amount: float, initial_dt: datetime,
@@ -119,7 +122,7 @@ class Stock:
         self.current_units -= degraded_units
         self.current_dt = t
 
-    def _update_orders(self, t: datetime) -> List[Order]:
+    def _update_orders(self, t: datetime) -> Tuple[float, List[Order]]:
         """Updates state at time t accounting for orders and degradation since last update"""
         new_pending_orders = []
         delivered_orders = []
@@ -142,14 +145,14 @@ class Stock:
                 )
             self.current_units = new_current_units
         self._update_degradation(t)
-        return delivered_orders
+        return self.current_units, delivered_orders
 
-    def update(self, t: datetime, withdraw: float = 0.) -> List[Order]:
+    def update(self, t: datetime, withdraw: float = 0.) -> Tuple[float, List[Order]]:
         """Update state at time t and withdraws units. Return delivered orders since last update."""
         self._check_no_time_travel(t)
-        delivered_orders = self._update_orders(t)
+        _, delivered_orders = self._update_orders(t)
         self.current_units -= withdraw
-        return delivered_orders
+        return self.current_units, delivered_orders
 
 
 if __name__ == '__main__':
@@ -195,9 +198,8 @@ if __name__ == '__main__':
             # consumption
             consumption = hourlyconsumption / 60
             totalconsumption += consumption
-            deliveredorderssince = lemonstock.update(timenow, withdraw=consumption)
+            stockpostupdate, deliveredorderssince = lemonstock.update(timenow, withdraw=consumption)
             # accumulate some information regarding post updat state
-            stockpostupdate = lemonstock.current_units
             x.append(timenow)
             yprior.append(stockpriorupdate)
             ypost.append(stockpostupdate)
