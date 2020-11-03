@@ -1,14 +1,9 @@
-import glob
 import pygame
 import pygame_menu
 import pygbutton
 import datetime
 import numpy as np
 
-from entities.analog_clock import AnalogClock
-from entities.weather import Stars, Sun, Cloud
-from entities.employee import Employee
-from dailychores import start_day, end_day
 from entities.lemonadegame import LemonadeGame
 
 
@@ -82,6 +77,7 @@ def play():
     done = False
     pause = False
     while not done:
+        clock.tick(fps)
         if not pause:
             lemonade_game.update_world(game_speed)
             lemonade_game.draw()
