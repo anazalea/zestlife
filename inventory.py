@@ -141,8 +141,6 @@ class Stock:
     def update(self, t: datetime, withdraw: float = 0.) -> List[Order]:
         """Update state at time t and withdraws units. Return delivered orders since last update."""
         self._check_no_time_travel(t)
-        if not withdraw >= 0:
-            raise ValueError('Check units >= 0')
         delivered_orders = self._update_orders(t)
         self.current_units -= withdraw
         return delivered_orders
@@ -156,14 +154,15 @@ if __name__ == '__main__':
         return datetime.combine(datetime.now().date(), t)
 
 
+    # set some parameters
     maxh = 10
     hourlyconsumption = 2
     lemoncapacity = 20.
     dt0 = get_dummy_datetime(time(0))
+    initialstock = 10.
 
-    lemonstock = Stock(initial_amount=10., initial_dt=dt0, discount_per_day=3., capacity=lemoncapacity)
-    # icestock = Stock(initial_amount=10., initial_dt=dt0, discount_per_day=10.)
-    # strawstock = Stock(initial_amount=10., initial_dt=dt0, discount_per_day=.01)
+    # initialize lemon, cash inventory
+    lemonstock = Stock(initial_amount=initialstock, initial_dt=dt0, discount_per_day=3., capacity=lemoncapacity)
     cashstock = Stock(initial_amount=100., initial_dt=dt0, discount_per_day=0., raise_error_if_neg=False)
 
     print('\nComitting orders...')
@@ -181,11 +180,17 @@ if __name__ == '__main__':
     x = []
     yprior = []
     ypost = []
+    totalconsumption = 0
     for h in range(maxh):
         for m in range(60):
             timenow = get_dummy_datetime(time(h, m, 0))
+            # prior state
             stockpriorupdate = lemonstock.current_units
-            deliveredorderssince = lemonstock.update(timenow, withdraw=hourlyconsumption / 60)
+            # consumption
+            consumption = hourlyconsumption / 60
+            totalconsumption += consumption
+            deliveredorderssince = lemonstock.update(timenow, withdraw=consumption)
+            # accumulate some information regarding post updat state
             stockpostupdate = lemonstock.current_units
             x.append(timenow)
             yprior.append(stockpriorupdate)
@@ -198,6 +203,18 @@ if __name__ == '__main__':
 
     print('\n'.join(str(i) for i in lemonstock.shrink_log))
 
+    # visual test
+    totalordered = sum(i.amount for i in lemonorders)
+    totalshrink = sum(i.amount for i in lemonstock.shrink_log)
+    print('initialstock: {}, totalconsumption: {}, totalordered: {}, totalshrink: {}, finalstock: {}'.format(
+        initialstock, totalconsumption, totalordered, totalshrink, lemonstock.current_units
+    ))
+    # the one test
+    print('initialstock - totalconsumption + totalordered - totalshrink = finalstock?: {}'.format(
+        np.abs(initialstock - totalconsumption + totalordered - totalshrink - lemonstock.current_units) < 1e-3
+    ))
+
+    # another visual test
     plt.plot(x, yprior, label='prior')
     plt.plot(x, ypost, label='post')
     plt.axhline(lemoncapacity, color='blue', ls=':', label='lemoncapacity')
