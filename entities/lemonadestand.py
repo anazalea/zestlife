@@ -1,6 +1,7 @@
 import pygame
 import datetime
 from entities.employee import Employee
+from lineup import Lineup
 
 class LemonadeStand():
     def __init__(self, screen, n_employees=0):
@@ -17,6 +18,8 @@ class LemonadeStand():
         self.ice = 200
         self.price = 2.00 # $
         self.account_balance = 0.00 # $
+        self.lineup = Lineup([250,250], [700,250],9)
+        self.prep_time = 30 # minutes/lemonade
         self.employees = []
 
 

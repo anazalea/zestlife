@@ -12,7 +12,7 @@ from recipe import Recipe
 class LemonadeGame():
     def __init__(self, config=None):
         self.screen = pygame.display.set_mode((800, 600))
-        self.current_datetime = datetime.datetime(2020,6,10,0)
+        self.current_datetime = datetime.datetime(2020,6,10,10)
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
         self.lemonade_stand = LemonadeStand(self.screen)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
@@ -56,7 +56,10 @@ class LemonadeGame():
                 self.future_customers.remove(customer)
                 self.active_customers.add(customer)
 
-        self.active_customers.update(game_speed)
+        self.active_customers.update(game_speed, self.lemonade_stand.lineup,
+                                        self.lemonade_stand.prep_time, 
+                                        self.recipe, 
+                                        self.lemonade_stand.price)
 
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))

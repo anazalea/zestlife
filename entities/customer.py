@@ -8,21 +8,24 @@ import math
 from entities.base import AnimatedSprite
 from pygame.math import Vector2
 
-
 class Customer(AnimatedSprite):
     class CustomerState(Enum):
         HAPPY = 'happy'
         SAD = 'sad'
         LEMONADE = 'lemonade'
 
-    def __init__(self, position, arrival_time_generator, pref_generator, image_dict, hold_for_n_frames=1):
+    def __init__(self, position, arrival_time_generator, pref_generator, image_dict, 
+                lineup, hold_for_n_frames=1):
         super().__init__(position, image_dict, hold_for_n_frames)
+        self.spawn_location = position
         self.arrival_time = arrival_time_generator.sample()
         self.speed = 10 + 1.5 * np.random.randn()  # pixels/minute
         self.has_lemonade = False
         self.likes_recipe = True
         self.set_preferences(pref_generator)
-
+        self.destination = lineup.last_loc
+        self.queue_position = None
+        self.time_being_served = 0
 
     def set_preferences(self, pref_generator):
         self.min_sugar_conc = pref_generator.sugar_width * np.random.randn() + pref_generator.min_sugar
@@ -36,12 +39,65 @@ class Customer(AnimatedSprite):
         self.max_spend = pref_generator.spend_width * np.random.randn() + pref_generator.spend_per_ml
         self.straw_preference = np.random.choice(pref_generator.straw_prefs, p = pref_generator.straw_pref_probs)
 
-    def get_displacement(self, timedelta):
-        return Vector2(self.speed*timedelta, 0)
+    def update_destination(self, timedelta, lineup, prep_time, recipe, price):
+        # Try to get in line
+        if self.rect[:2] == lineup.last_loc:
+            if not lineup.spots[lineup.n_positions-1].is_occupied: # take spot, destination unchanged
+                lineup.spots[lineup.n_positions-1].is_occupied = True
+                self.queue_position = lineup.n_positions - 1
+            else: # If you can't get in line, go home
+                self.destination = self.spawn_location
+                # print('fuck this')
 
-    def update(self, timedelta) -> None:
+        # If you're in line, try to move up in line
+        elif self.queue_position is not None and self.queue_position > 0 \
+                and not lineup.spots[self.queue_position-1].is_occupied:
+            self.destination = lineup.spots[self.queue_position-1].loc
+            lineup.spots[self.queue_position-1].is_occupied = True
+            lineup.spots[self.queue_position].is_occupied = False
+            self.queue_position -=1
+            print(f'AM {str(self.queue_position)}th IN LINE!')
+            if self.queue_position == 0:
+                likes_it, reason = self.customer_likes_recipe(recipe, price)
+                print(likes_it, reason)
+                self.likes_recipe = likes_it
+        
+
+        # If you've made it to the front of the line get lemonade or go home
+        elif self.queue_position == 0:
+            if self.likes_recipe and not self.has_lemonade:
+                self.time_being_served += timedelta
+                print('waiting')
+                if self.time_being_served > prep_time: # you've waited long enough
+                    self.destination = self.spawn_location
+                    lineup.spots[0].is_occupied = False
+                    self.has_lemonade = True
+                    if not self.has_lemonade:
+                        print(self.time_being_served)
+            else:
+                self.destination = self.spawn_location
+                lineup.spots[0].is_occupied = False
+
+
+    def get_displacement(self, timedelta, lineup, prep_time, recipe, price):
+        distance = timedelta * self.speed
+        vector_to_dest = Vector2((self.destination[0] - self.rect[0]),(self.destination[1] - self.rect[1]))
+        distance_to_destination = vector_to_dest.magnitude()
+        if distance_to_destination == 0:
+            self.update_destination(timedelta, lineup, prep_time, recipe, price)
+        if distance_to_destination <= distance:
+            distance = distance_to_destination
+            return vector_to_dest
+        else:
+            vector_to_dest.scale_to_length(distance)
+            return vector_to_dest
+                               
+
+    def update(self, timedelta, lineup, prep_time, recipe, price):
         super().next_frame()
-        super().move(self.get_displacement(timedelta))
+        displacement = self.get_displacement(timedelta, lineup, prep_time, recipe, price)
+        super().move(displacement)
+        # TODO: if offscreen, kill
 
     def customer_likes_recipe(self, recipe, price):
         reason = ''
