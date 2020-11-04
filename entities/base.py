@@ -5,7 +5,8 @@ from pygame.math import Vector2
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, position, image_dict, hold_for_n_frames=1, state=None):
+    def __init__(self, position, image_dict, hold_for_n_frames=1,
+                 accessory_images=None, visible_accessories:set=None, state=None,):
         """
         Animated sprite object.
 
@@ -14,9 +15,12 @@ class AnimatedSprite(pygame.sprite.Sprite):
             image_dict: Images to use in the animation. It's a dictionary of state names as key and
                 a list of images as values.
             state: An state for the state of the object
-
+            accessory_images(dict): a dict with name of the accessory as the key and a tuple
+                (p, im) containing the relative position (p) and the image (im)
+            visible_accessories(set): a subset of accessory_images keys that will be visible
         """
         super(AnimatedSprite, self).__init__()
+        self.real_position = position
 
         if state is None:
             self._state = list(image_dict.keys())[0]
@@ -26,7 +30,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self._state = state
 
         self.image_dict = image_dict
-        self.images = image_dict[self.state]
+        self._accessory_images = accessory_images if accessory_images else {}
+        self._visible_accessories = visible_accessories if visible_accessories else set()
+
+        if any(v not in self._accessory_images for v in self._visible_accessories):
+            raise ValueError("visible_accessories must be a subset of accessory_images.keys()")
+
+        self.update_images_with_accessories()
         self.switch_frames = hold_for_n_frames
         self.frames_at_image = 0
         self.index = 0
@@ -51,7 +61,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
             raise ValueError("Provided state is not amongst the initialized images.")
 
         self._state = value
-        self.images = self.image_dict[self._state]
+        self.update_images_with_accessories()
         self.image = self.images[0]
 
     def next_frame(self):
@@ -61,3 +71,30 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.index += 1
             self.index %= len(self.images)
             self.image = self.images[self.index]
+
+    def check_acc_key(self, ac_key):
+        if ac_key not in self._accessory_images:
+            raise ValueError("ac_key must be a member of accessory_images.keys()")
+
+    def show_accessory(self, ac_key):
+        self.check_acc_key(ac_key)
+
+        self._visible_accessories.add(ac_key)
+        self.update_images_with_accessories()
+
+    def hide_accessory(self, ac_key):
+        self._visible_accessories.remove(ac_key)
+        self.update_images_with_accessories()
+
+    def clear_accessories(self):
+        self._visible_accessories = set()
+
+    def update_images_with_accessories(self):
+        images = []
+        for m in self.image_dict[self.state]:
+            m = m.copy()
+            for ac in self._visible_accessories:
+                ac_pos, ac_img = self._accessory_images[ac]
+                m.blit(ac_img, ac_pos)
+            images.append(m)
+        self.images = images

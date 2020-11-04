@@ -2,6 +2,8 @@ import datetime
 import glob
 import numpy as np
 import pygame
+from pygame.math import Vector2
+
 from dailychores import start_day, end_day
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
@@ -27,6 +29,12 @@ class LemonadeGame():
             customer_image_dict[s] = [pygame.image.load(img_path) for img_path in images_path]
             # TODO: do flipping for moving left
         self.customer_image_dict = customer_image_dict
+
+        self.customer_accessories = {
+            'flask': (Vector2(50, -10), pygame.image.load('./resources/flask.png')),
+            'lamp': (Vector2(50, -10), pygame.image.load('./resources/lamp.png')),
+            'coin': (Vector2(50, -10), pygame.image.load('./resources/dollar-coin.png'))
+        }
         self.arrival_time_generator = CustomerArrivalTimeGenerator()
         self.preference_generator = CustomerPreferenceGenerator()
 
@@ -76,6 +84,12 @@ class LemonadeGame():
         self.lemonade_stand.draw(self.current_datetime.time(),
                                     self.screen)
         self.active_customers.draw(self.screen)
+
+        font = pygame.font.SysFont('comicsansmsttf', 20)
+        for c in self.active_customers:
+            id_font = font.render(str(id(c)), 1, (214, 26, 13))
+            # c_id = font.render(id_font, 1, (214, 26, 13))
+            # self.screen.blit(c_id, c.rect[:2])
 
     def print_stats(self):
         font = pygame.font.SysFont('comicsansmsttf',20)

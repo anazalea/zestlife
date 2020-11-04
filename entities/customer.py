@@ -8,18 +8,31 @@ import math
 from entities.base import AnimatedSprite
 from pygame.math import Vector2
 
+
 class Customer(AnimatedSprite):
     class CustomerState(Enum):
         HAPPY = 'happy'
         SAD = 'sad'
         LEMONADE = 'lemonade'
 
-    def __init__(self, position, arrival_time_generator, pref_generator, image_dict, 
-                lineup, hold_for_n_frames=1):
-        super().__init__(position, image_dict, hold_for_n_frames)
+    def __init__(self,
+                 position,
+                 arrival_time_generator,
+                 pref_generator,
+                 image_dict,
+                 lineup,
+                 hold_for_n_frames=1,
+                 accessory_images=None,
+                 visible_accessories=None):
+
+        super().__init__(position,
+                         image_dict,
+                         hold_for_n_frames,
+                         accessory_images,
+                         visible_accessories)
         self.spawn_location = position
         self.arrival_time = arrival_time_generator.sample()
-        self.speed = 3 + np.random.randint(2,6)  # pixels/minute
+        self.speed = 3 + np.random.randint(2, 6)  # pixels/minute
         self.has_lemonade = False
         self.has_seen_recipe = False
         self.likes_recipe = True
@@ -38,31 +51,33 @@ class Customer(AnimatedSprite):
         self.min_volume = pref_generator.volume_width * np.random.randn() + pref_generator.min_volume
         self.max_volume = pref_generator.volume_width * np.random.randn() + pref_generator.max_volume
         self.max_spend = pref_generator.spend_width * np.random.randn() + pref_generator.spend_per_ml
-        self.straw_preference = np.random.choice(pref_generator.straw_prefs, p = pref_generator.straw_pref_probs)
+        self.straw_preference = np.random.choice(pref_generator.straw_prefs,
+                                                 p=pref_generator.straw_pref_probs)
 
     def update_destination(self, timedelta, lineup, recipe, price, customer_outcomes):
         if self.queue_position == -1:
             self.kill()
         # Try to get in line
         if self.destination == lineup.last_loc and self.queue_position == lineup.n_positions + 1:
-            if not lineup.spots[lineup.n_positions-1].is_occupied: # take spot, destination unchanged
+            if not lineup.spots[
+                lineup.n_positions - 1].is_occupied:  # take spot, destination unchanged
                 # import ipdb; ipdb.set_trace()
                 self.queue_position = lineup.n_positions - 1
                 lineup.spots[self.queue_position].is_occupied = True
                 lineup.spots[self.queue_position].occupant = self
-            else: # If you can't get in line, go home
+            else:  # If you can't get in line, go home
                 self.destination = self.spawn_location
                 self.queue_position = -1
                 self.state = 'sad'
                 customer_outcomes.append('Line Too Long')
 
         # If you're in line, try to move up in line
-        elif self.queue_position > 0 and not lineup.spots[self.queue_position-1].is_occupied:
-            lineup.spots[self.queue_position].is_occupied = False # vacate current spot
+        elif self.queue_position > 0 and not lineup.spots[self.queue_position - 1].is_occupied:
+            lineup.spots[self.queue_position].is_occupied = False  # vacate current spot
             lineup.spots[self.queue_position].occupant = None
-            self.queue_position -=1
+            self.queue_position -= 1
             lineup.spots[self.queue_position].occupant = self
-            lineup.spots[self.queue_position].is_occupied = True # occupy next spot
+            lineup.spots[self.queue_position].is_occupied = True  # occupy next spot
             self.destination = lineup.spots[self.queue_position].loc
 
         # If you've made it to the front of the line get lemonade or go home
@@ -70,16 +85,20 @@ class Customer(AnimatedSprite):
             if not self.has_seen_recipe:
                 self.likes_recipe, self.reason = self.customer_likes_recipe(recipe, price)
                 self.has_seen_recipe = True
-            if not self.likes_recipe: # Go home
+            if not self.likes_recipe:  # Go home
                 self.destination = self.spawn_location
                 self.queue_position = -1
+                self.clear_accessories()
+                self.show_accessory('coin')
                 self.state = 'sad'
                 lineup.spots[0].is_occupied = False
                 lineup.spots[0].occupant = None
                 customer_outcomes.append('Bad Experience')
             if self.has_lemonade:
+                self.show_accessory('flask')
+                self.hide_accessory('lamp')
                 self.state = 'lemonade'
-                self.destination = (300,0)#self.spawn_location
+                self.destination = (300, 0)  # self.spawn_location
                 self.queue_position = -1
                 lineup.spots[0].is_occupied = False
                 lineup.spots[0].occupant = None
@@ -87,7 +106,8 @@ class Customer(AnimatedSprite):
 
     def get_displacement(self, timedelta):
         distance = timedelta * self.speed
-        vector_to_dest = Vector2((self.destination[0] - self.rect[0]),(self.destination[1] - self.rect[1]))
+        vector_to_dest = Vector2((self.destination[0] - self.rect[0]),
+                                 (self.destination[1] - self.rect[1]))
         distance_to_destination = vector_to_dest.magnitude()
         if distance_to_destination <= distance:
             distance = distance_to_destination
@@ -96,7 +116,7 @@ class Customer(AnimatedSprite):
         else:
             # print(vector_to_dest)
             vector_to_dest.scale_to_length(distance)
-            return vector_to_dest                            
+            return vector_to_dest
 
     def update(self, timedelta, lineup, recipe, price, customer_outcomes):
         super().next_frame()
@@ -144,10 +164,10 @@ class Customer(AnimatedSprite):
             if recipe.straw == 'plastic':
                 reason += " Won't somebody think of the turtles!?"
                 likes_it = False
-        if self.max_spend < price/recipe.total_volume:
+        if self.max_spend < price / recipe.total_volume:
             reason += ' Not worth the money.'
             likes_it = False
-        
+
         if reason == '':
             reason = 'Yum!'
 
@@ -156,7 +176,7 @@ class Customer(AnimatedSprite):
 
 class CustomerArrivalTimeGenerator():
     def __init__(self):
-        x = np.append(13+1.65*np.random.randn(10000),17+1.25*np.random.randn(10000))
+        x = np.append(13 + 1.65 * np.random.randn(10000), 17 + 1.25 * np.random.randn(10000))
         hist, bin_edges = np.histogram(x, bins=5000, density=True)
         self.input_random = np.cumsum(hist) * np.diff(bin_edges)[0]
         self.output_time = bin_edges[:-1]
@@ -169,21 +189,23 @@ class CustomerArrivalTimeGenerator():
         second = math.floor(60 * (minutes_frac - minute))
         return datetime.time(hour, minute, second)
 
+
 class CustomerPreferenceGenerator():
     def __init__(self):
-        self.min_sugar = 20/350 # g per 350 mL
-        self.max_sugar = 80/350 # g per 350 mL
-        self.sugar_width = 5/350
-        self.min_lemon = 30/350 # mL per 350 mL
-        self.max_lemon = 90/350 # mL per 350 mL
-        self.lemon_width = 5/350
-        self.min_volume = 250 # mL
-        self.max_volume = 1750 # mL
+        self.min_sugar = 20 / 350  # g per 350 mL
+        self.max_sugar = 80 / 350  # g per 350 mL
+        self.sugar_width = 5 / 350
+        self.min_lemon = 30 / 350  # mL per 350 mL
+        self.max_lemon = 90 / 350  # mL per 350 mL
+        self.lemon_width = 5 / 350
+        self.min_volume = 250  # mL
+        self.max_volume = 1750  # mL
         self.volume_width = 25
-        self.min_ice = 1/350 # cubes/350 mL
-        self.max_ice = 9/350 # cubes/350 mL
-        self.ice_width = 1/350
-        self.spend_per_ml = 3.00/350 # $/350 mL
-        self.spend_width = 1.00/350
-        self.straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw', 'anti_paper_straw']
+        self.min_ice = 1 / 350  # cubes/350 mL
+        self.max_ice = 9 / 350  # cubes/350 mL
+        self.ice_width = 1 / 350
+        self.spend_per_ml = 3.00 / 350  # $/350 mL
+        self.spend_width = 1.00 / 350
+        self.straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw',
+                            'anti_paper_straw']
         self.straw_pref_probs = [0.4, 0.3, 0.15, 0.15]

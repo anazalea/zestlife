@@ -15,12 +15,15 @@ def start_day(lemonade_game):
                                         lemonade_game.word_of_mouth_effect)
 
     # generate customers
-    customers =[Customer((np.random.choice([-150,950]), 300 + np.random.randint(-25,25)), 
-                        lemonade_game.arrival_time_generator, 
-                        lemonade_game.preference_generator,
-                        lemonade_game.customer_image_dict,
-                        lemonade_game.lemonade_stand.lineup,
-                        hold_for_n_frames=10) for i in range(n_customers_today)]
+    customers = [Customer((np.random.choice([-150, 950]), 300 + np.random.randint(-25, 25)),
+                          lemonade_game.arrival_time_generator,
+                          lemonade_game.preference_generator,
+                          lemonade_game.customer_image_dict,
+                          lemonade_game.lemonade_stand.lineup,
+                          hold_for_n_frames=10,
+                          accessory_images=lemonade_game.customer_accessories,
+                          visible_accessories={'lamp'}
+                          ) for i in range(n_customers_today)]
 
     return customers
 
