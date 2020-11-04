@@ -50,6 +50,11 @@ def button(surface, text, active_color, inactive_color, rect, font, click):
     surface.blit(text_surf, text_rect)
     return return_value
 
+def menu_button(surface, active_color, inactive_color, rect, font, click):
+    mouse = pygame.mouse.get_pos()
+    return_value = False
+    pass
+
 def main_menu():
     pygame.init()
     pygame.mouse.set_visible(1)
@@ -421,6 +426,180 @@ def price_menu(lemonade_stand):
                 if event.key == pygame.K_ESCAPE:
                     done = True
 
+def pending_orders():
+    pygame.init()
+    pygame.mouse.set_visible(1)
+    screen = pygame.display.set_mode((800,600))
+    pygame.display.set_caption("LEMONADE")
+    done = False
+    click = False
+    background = create_menu_background(screen)
+    order_image = pygame.image.load('./resources/background.png') #Update with price image
+    while not done:
+        screen.blit(background, (0,0))
+        screen.blit(order_image, (0,0))
+
+        font = pygame.font.Font(FONT_STYLE,15) #Edit fonts here
+        draw_text('Purchase(d) Orders', font, (255, 255, 255), screen, 20, 20)
+
+        draw_text('Pending:', font, (255, 255, 255), screen , 20, 60)
+        #Fill in pending orders
+        draw_rect_alpha(screen, (0,0,0,100), (10,80,700,100))
+        draw_text('item', font, (255, 255, 255), screen , 20, 80)
+        draw_text('arrives in', font, (255, 255, 255), screen , 220, 80)
+        draw_text('quantity', font, (255, 255, 255), screen , 490, 80)
+        #Implement logic to loop through orders and write them to the rectangle
+
+def inventory_menu():
+    pygame.init()
+    pygame.mouse.set_visible(1)
+    screen = pygame.display.set_mode((800,600))
+    pygame.display.set_caption("LEMONADE")
+    done = False
+    click = False
+    background = create_menu_background(screen)
+    inventory_image = pygame.image.load('./resources/background.png') #Update with recipe image
+    lemonadestand = LemonadeStand(screen)
+    stock_items = {'lemon juice' : lemonadestand.lemons, 'sugar' : lemonadestand.sugar, 'ice' : lemonadestand.ice} #Get this from another class
+    while not done:
+        screen.blit(background, (0,0))
+        screen.blit(inventory_image, (0,0))
+
+        font = pygame.font.Font(FONT_STYLE,15) #Edit fonts here
+        draw_text('Current Inventory', font, (255, 255, 255), screen, 20, 20)
+
+        #Try to make this into a loop through different ingredients
+        buttons = [False]*len(stock_items)
+        index = 0
+        x_start, y_start = 20, 100
+        button_h, button_w = 100, 25
+        spacing = 100
+        for item, value in stock_items.items():
+            item_name_x = x_start
+            item_name_y = y_start + index*spacing #Next line is 30 down
+            item_display = item + ' in stock:'+ str(value) + ', quantity ordered: 100'
+            draw_text(item_display, font, (255, 255, 255), screen , item_name_x, item_name_y)
+            buttons[index] = button(screen, 'Order', (0,0,0,100), (0,0,0,255), (item_name_x+590,item_name_y+25,button_h,button_w), font, click)
+            index += 1
+        #Buttons to accept recipe and return to game
+        return_to_game = button(screen, 'Resume Game', (0,0,0,100), (0,0,0,255), (400,500,300,50), font, click)
+        if click:
+            if buttons[0]:
+                #lemons
+                lemon_order_menu(lemonadestand)
+            if buttons[1]:
+                #sugar
+                pass
+            if buttons[2]:
+                #ice
+                pass
+            if return_to_game:
+                done = True
+
+        click = False
+        pygame.display.update()
+
+        #Events
+        for event in pygame.event.get():
+            # Close button clicked
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                #Clicked on start game
+                if event.button == 1:
+                    click = True
+            if event.type == pygame.KEYDOWN:
+                # Escape key pressed
+                if event.key == pygame.K_ESCAPE:
+                    done = True
+
+def lemon_order_menu(lemonade_stand):
+    pygame.init()
+    pygame.mouse.set_visible(1)
+    screen = pygame.display.set_mode((800,600))
+    pygame.display.set_caption("LEMONADE")
+    done = False
+    click = False
+    background = create_menu_background(screen)
+    order_lemon_image = pygame.image.load('./resources/background.png')
+    order_message = ''
+    possible_orders = [(1,1),(5,2),(10,6),(100,24)]
+    order_amounts = [0] * len(possible_orders)
+    while not done:
+        screen.blit(background, (0,0))
+        screen.blit(order_lemon_image, (0,0))
+        font = pygame.font.Font(FONT_STYLE,15)
+        draw_text('Order Lemons', font, (255, 255, 255), screen, 20, 20)
+        draw_text('Quantity', font, (255, 255, 255), screen, 20, 70)
+        draw_text('Arrives In', font, (255, 255, 255), screen, 20+200, 70)
+        draw_text('Price', font, (255, 255, 255), screen, 20+400, 70)
+        draw_text('Order', font, (255, 255, 255), screen, 20+600, 70)
+
+        #Implement menu to order from, times in hours
+        amounts_min = 0
+        amounts_max = 10
+        index = 0
+        starting_x = 20
+        starting_y = 100
+        button_dimension = 25
+        buttons = [False] *2*len(possible_orders)
+        for order in possible_orders:
+            item_name_x = starting_x
+            item_name_y = starting_y + index*50
+            lemon_price = 2.0 #lemon_discounted_price()
+            button_coords = [(item_name_x+600, item_name_y, button_dimension, button_dimension),
+                            (item_name_x+640, item_name_y, button_dimension, button_dimension),
+                            (item_name_x+680, item_name_y, button_dimension, button_dimension)]
+
+            draw_text(str(order[0]), font, (255, 255, 255), screen , item_name_x, item_name_y)
+            draw_text(str(order[1])+' HR', font, (255, 255, 255), screen , item_name_x+200, item_name_y)
+            draw_text(str(lemon_price), font, (255, 255, 255), screen , item_name_x+400, item_name_y)
+            buttons[index*2] = button(screen, '-', (0,0,0,100), (0,0,0,255), button_coords[0], font, click)
+            button(screen, str(order_amounts[index]), (0,0,0,0), (0,0,0,0), button_coords[1], font, click)
+            buttons[index*2+1] = button(screen, '+', (0,0,0,100), (0,0,0,255), button_coords[2], font, click)
+            index += 1
+
+        place_order = button(screen, 'Place Order', (0,0,0,100), (0,0,0,255), (50,500,300,50), font, click)
+        return_to_inventory = button(screen, 'Back', (0,0,0,100), (0,0,0,255), (400,500,300,50), font, click)
+
+        if click:
+            for i in range(len(buttons)):
+                if buttons[i]:
+                    if i % 2 != 0:
+                        if order_amounts[int(i/2)] == amounts_max:
+                            pass
+                        else:
+                            order_amounts[int(i/2)] +=1
+                    else:
+                        if order_amounts[int((i+1)/2)] == amounts_min:
+                            pass
+                        else:
+                            order_amounts[int((i+1)/2)] -=1
+            if place_order:
+                #Check for enough cash
+                
+                order_message = 'Order Placed'
+            if return_to_inventory:
+                done = True
+        click = False
+        screen.blit(font.render(order_message, 1, (0,0,0)), [10,380])
+        pygame.display.update()
+
+        #Events
+        for event in pygame.event.get():
+            # Close button clicked
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                #Clicked on start game
+                if event.button == 1:
+                    click = True
+            if event.type == pygame.KEYDOWN:
+                # Escape key pressed
+                if event.key == pygame.K_ESCAPE:
+                    done = True
+
 if __name__ == '__main__':
-    main_menu()
+    #main_menu()
     #recipe_menu()
+    inventory_menu()
