@@ -30,15 +30,15 @@ def get_lemon_discountedprice(lead_time: timedelta, amount: float = 0.) -> float
 def get_sugar_discountedprice(lead_time: timedelta, amount: float = 0.) -> float:
     return get_discountedprice(
         lead_time, amount,
-        # bulk_discount_unitly=.01, lead_discount_daily=1.,
-        # base_price=1., min_price=0.5,
+        bulk_discount_unitly=.02, lead_discount_daily=.2, # sugar is bulky, doesn't degrate
+        base_price=1., min_price=0.5,
     )
 
 def get_ice_discountedprice(lead_time: timedelta, amount: float = 0.) -> float:
     return get_discountedprice(
         lead_time, amount,
-        # bulk_discount_unitly=.01, lead_discount_daily=1.,
-        # base_price=1., min_price=0.5,
+        bulk_discount_unitly=.03, lead_discount_daily=.2, # ice is very bulky, doesn't degrade
+        base_price=1., min_price=0.5,
     )
 
 
