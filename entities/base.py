@@ -52,7 +52,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
         self._state = value
         self.images = self.image_dict[self._state]
-        self.image = self.images[0]
+        self.image = self.images[self.index]
 
     def next_frame(self):
         self.frames_at_image += 1

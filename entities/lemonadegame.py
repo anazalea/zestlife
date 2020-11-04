@@ -7,6 +7,7 @@ from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
 from entities.customer import Customer, CustomerArrivalTimeGenerator, CustomerPreferenceGenerator
+from entities.town import Town
 from recipe import Recipe
 
 class LemonadeGame():
@@ -16,16 +17,19 @@ class LemonadeGame():
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
         self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time())
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
-        self.scenery = pygame.image.load('./resources/background.png')
+        self.town = Town(self.current_datetime.time())
+        # self.scenery = pygame.image.load('./resources/background.png')
         self.customer_outcomes = []
         self.word_of_mouth_effect = 0
 
         # customer
         customer_image_dict = {}
-        for s in ['happy', 'sad', 'lemonade']:
-            images_path = glob.glob(f'./resources/customer_{s}_*.png')
-            customer_image_dict[s] = [pygame.image.load(img_path) for img_path in images_path]
-            # TODO: do flipping for moving left
+        for s in ['walking']:
+            images_path = sorted(glob.glob(f'./resources/customer_{s}_*.png'))
+            print(images_path)
+            customer_image_dict[s+'_right'] = [pygame.image.load(img_path) for img_path in images_path]
+            customer_image_dict[s+'_left'] = [pygame.transform.flip(image, True, False) \
+                                                    for image in customer_image_dict[s+'_right']]
         self.customer_image_dict = customer_image_dict
         self.arrival_time_generator = CustomerArrivalTimeGenerator()
         self.preference_generator = CustomerPreferenceGenerator()
@@ -46,6 +50,7 @@ class LemonadeGame():
         # import ipdb; ipdb.set_trace()
         old_datetime = self.current_datetime
         self.current_datetime += datetime.timedelta(minutes=game_speed)
+        self.town.update_town_time(self.current_datetime.time())
         self.background_sky.update_color(self.current_datetime.time())
         self.analog_clock.current_time = self.current_datetime.time()
 
@@ -72,7 +77,8 @@ class LemonadeGame():
 
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))
-        self.screen.blit(self.scenery, (0,0))
+        self.town.draw(self.screen)
+        # self.screen.blit(self.scenery, (0,0))
         self.lemonade_stand.draw(self.current_datetime.time(),
                                     self.screen)
         self.active_customers.draw(self.screen)

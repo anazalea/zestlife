@@ -5,11 +5,11 @@ from lineup import Lineup
 
 class LemonadeStand():
     def __init__(self, screen, current_time, n_employees=0,):
-        self.image_open = pygame.image.load('./resources/stand.png')
-        self.image_closed = pygame.image.load('./resources/stand_closed.png')
+        self.image_open = pygame.image.load('./resources/standA_small.png')
+        self.image_closed = pygame.image.load('./resources/standB_small.png')
         self.im_height = self.image_open.get_height()
         self.im_width = self.image_open.get_width()
-        self.loc = [int((screen.get_width()-self.im_width)/2), int((screen.get_height()-self.im_height)/1.5)]
+        self.loc = [250,325]#[int((screen.get_width()-self.im_width)/2), int((screen.get_height()-self.im_height)/1.5)]
         self.opening_time = datetime.time(8)
         self.closing_time = datetime.time(20)
         self.open = self.is_open(current_time)
@@ -19,9 +19,9 @@ class LemonadeStand():
         self.ice = 200
         self.price = 2.00 # $
         self.account_balance = 0.00 # $
-        self.lineup = Lineup((300,225),(0,250) ,10)
+        self.lineup = Lineup((300,400),(700,400) ,10)
         self.employees = []
-        self.prep_time = 30 # minutes/lemonade, should depend on number of employees
+        self.prep_time = 45 # minutes/lemonade, should depend on number of employees
         self.time_serving_customer = 0
         self.recent_customer_thought = ''
 
