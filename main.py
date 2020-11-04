@@ -12,7 +12,7 @@ def play():
     pygame.mouse.set_visible(1)
     pygame.display.set_caption("LEMONADE")
     clock = pygame.time.Clock()
-    game_speed = 2
+    game_speed = 0.25
     lemonade_game = LemonadeGame(config=None)
 
     ##############################################################################################

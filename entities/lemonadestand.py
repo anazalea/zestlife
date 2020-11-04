@@ -21,7 +21,7 @@ class LemonadeStand():
         self.account_balance = 0.00 # $
         self.lineup = Lineup((300,225),(0,250) ,5)
         self.employees = []
-        self.prep_time = 30 # minutes/lemonade
+        self.prep_time = 30 # minutes/lemonade, should depend on number of employees
         self.time_serving_customer = 0
 
     def is_open(self, current_time):
@@ -33,8 +33,6 @@ class LemonadeStand():
         self.sugar -= recipe.sugar
         self.account_balance += self.price
 
-
-
     def serve_customer(self, recipe, timedelta):
         if self.lineup.spots[0].is_occupied and \
             self.lineup.spots[0].occupant.likes_recipe and \
@@ -45,6 +43,12 @@ class LemonadeStand():
                 self.lineup.spots[0].occupant.has_lemonade = True
                 self.time_serving_customer = 0
                 self.make_a_sale(recipe)
+        elif self.lineup.spots[0].is_occupied and \
+            (not self.has_enough_stuff(recipe) or not self.open): # go home
+            self.lineup.spots[0].occupant.likes_recipe = False
+            self.time_serving_customer = 0
+
+
 
     def update(self, current_time, timedelta, recipe):
         self.open = self.is_open(current_time)

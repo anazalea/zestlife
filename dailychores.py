@@ -5,7 +5,7 @@ from entities.customer import Customer
 from collections import Counter
 
 def predict_demand(date, word_of_mouth_effect):
-    return 15 #25 + word_of_mouth_effect
+    return 25 + word_of_mouth_effect
 
 def start_day(lemonade_game):
     # update weather
@@ -26,5 +26,5 @@ def start_day(lemonade_game):
 
 def end_day(lemonade_game):
     outcomes = (Counter(lemonade_game.customer_outcomes))
-    word_of_mouth_effect = outcomes['Satisfied Customer'] - outcomes['Dislikes Recipe']
+    word_of_mouth_effect = outcomes['Satisfied Customer'] - outcomes['Bad Experience']
     return outcomes, word_of_mouth_effect

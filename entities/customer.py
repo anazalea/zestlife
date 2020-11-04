@@ -19,7 +19,7 @@ class Customer(AnimatedSprite):
         super().__init__(position, image_dict, hold_for_n_frames)
         self.spawn_location = position
         self.arrival_time = arrival_time_generator.sample()
-        self.speed = 3 + 3 * np.random.randn()  # pixels/minute
+        self.speed = 3 + np.random.randint(2,6)  # pixels/minute
         self.has_lemonade = False
         self.has_seen_recipe = False
         self.likes_recipe = True
@@ -75,7 +75,7 @@ class Customer(AnimatedSprite):
                 self.state = 'sad'
                 lineup.spots[0].is_occupied = False
                 lineup.spots[0].occupant = None
-                customer_outcomes.append('Dislikes Recipe')
+                customer_outcomes.append('Bad Experience')
             if self.has_lemonade:
                 self.state = 'lemonade'
                 self.destination = (300,0)#self.spawn_location
