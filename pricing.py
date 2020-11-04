@@ -27,6 +27,20 @@ def get_lemon_discountedprice(lead_time: timedelta, amount: float = 0.) -> float
         base_price=1., min_price=0.5,
     )
 
+def get_sugar_discountedprice(lead_time: timedelta, amount: float = 0.) -> float:
+    return get_discountedprice(
+        lead_time, amount,
+        # bulk_discount_unitly=.01, lead_discount_daily=1.,
+        # base_price=1., min_price=0.5,
+    )
+
+def get_ice_discountedprice(lead_time: timedelta, amount: float = 0.) -> float:
+    return get_discountedprice(
+        lead_time, amount,
+        # bulk_discount_unitly=.01, lead_discount_daily=1.,
+        # base_price=1., min_price=0.5,
+    )
+
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
