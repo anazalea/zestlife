@@ -27,4 +27,8 @@ def start_day(lemonade_game):
 def end_day(lemonade_game):
     outcomes = (Counter(lemonade_game.customer_outcomes))
     word_of_mouth_effect = outcomes['Satisfied Customer'] - outcomes['Bad Experience']
+
+    # pay employees
+    for employee in lemonade_game.lemonade_stand.employees:
+        lemonade_game.lemonade_stand.account_balance -= employee.daily_wage
     return outcomes, word_of_mouth_effect

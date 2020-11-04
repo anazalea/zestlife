@@ -1,12 +1,13 @@
 import pygame
 import datetime
+import numpy as np
 from entities.employee import Employee
 from lineup import Lineup
 
 class LemonadeStand():
-    def __init__(self, screen, current_time, n_employees=0,):
+    def __init__(self, screen, current_time, employee_image_dict, n_employees=0,):
         self.image_open = pygame.image.load('./resources/standA_small.png')
-        self.image_closed = pygame.image.load('./resources/standB_small.png')
+        self.image_closed = pygame.image.load('./resources/standA_small.png')
         self.im_height = self.image_open.get_height()
         self.im_width = self.image_open.get_width()
         self.loc = [250,325]#[int((screen.get_width()-self.im_width)/2), int((screen.get_height()-self.im_height)/1.5)]
@@ -20,10 +21,31 @@ class LemonadeStand():
         self.price = 2.00 # $
         self.account_balance = 0.00 # $
         self.lineup = Lineup((300,400),(700,400) ,10)
-        self.employees = []
         self.prep_time = 45 # minutes/lemonade, should depend on number of employees
         self.time_serving_customer = 0
         self.recent_customer_thought = ''
+        self.employees = []
+        self.workforce = pygame.sprite.Group(self.employees)
+        self.employee_image_dict = employee_image_dict
+        for i in range(n_employees):
+            self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict)
+
+    def hire_employee(self, start_time, end_time, employee_image_dict):
+        # currently, employees should go in here: (270,350,90,50)
+        new_employee = Employee((250,350), employee_image_dict, self.opening_time, self.closing_time)
+        self.employees.append(new_employee)
+        # reposition existing employees
+        employee_locs = np.linspace(260, 260+90, len(self.employees)+2)
+        states = list(employee_image_dict.keys())
+        last_state = states[0]
+        for i, employee in enumerate(self.employees):
+            if employee.state == last_state:
+                employee.state = states[(states.index(employee.state)+1)%len(states)]
+            employee.rect[:2] = [employee_locs[i+1],360]
+            last_state = employee.state
+        self.workforce = pygame.sprite.Group(self.employees)
+        
+    
 
     def is_open(self, current_time):
         return self.opening_time < current_time < self.closing_time

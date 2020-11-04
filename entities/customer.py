@@ -10,9 +10,11 @@ from pygame.math import Vector2
 
 class Customer(AnimatedSprite):
     class CustomerState(Enum):
-        HAPPY = 'happy'
-        SAD = 'sad'
-        LEMONADE = 'lemonade'
+        WALKING_LEFT = 'walking_left'
+        WALING_RIGHT = 'walking_right'
+        # HAPPY = 'happy'
+        # SAD = 'sad'
+        # LEMONADE = 'lemonade'
 
     def __init__(self, position, arrival_time_generator, pref_generator, image_dict, 
                 lineup, hold_for_n_frames=1):
