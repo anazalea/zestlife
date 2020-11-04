@@ -3,3 +3,6 @@
 
 # pycharm
 .idea/*
+
+#virtual env
+env/
