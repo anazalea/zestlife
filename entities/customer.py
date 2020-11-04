@@ -26,7 +26,6 @@ class Customer(AnimatedSprite):
         self.set_preferences(pref_generator)
         self.destination = lineup.last_loc
         self.queue_position = lineup.n_positions + 1
-        self.time_being_served = 0
 
     def set_preferences(self, pref_generator):
         self.min_sugar_conc = pref_generator.sugar_width * np.random.randn() + pref_generator.min_sugar
@@ -68,7 +67,7 @@ class Customer(AnimatedSprite):
         # If you've made it to the front of the line get lemonade or go home
         elif self.queue_position == 0:
             if not self.has_seen_recipe:
-                self.likes_recipe = self.customer_likes_recipe(recipe, price)[0]
+                self.likes_recipe, self.reason = self.customer_likes_recipe(recipe, price)
                 self.has_seen_recipe = True
             if not self.likes_recipe: # Go home
                 self.destination = self.spawn_location
@@ -93,8 +92,10 @@ class Customer(AnimatedSprite):
         distance_to_destination = vector_to_dest.magnitude()
         if distance_to_destination <= distance:
             distance = distance_to_destination
+            # print(vector_to_dest)
             return vector_to_dest
         else:
+            # print(vector_to_dest)
             vector_to_dest.scale_to_length(distance)
             return vector_to_dest
                                

@@ -43,9 +43,8 @@ class LemonadeGame():
         self.active_customers = pygame.sprite.Group([])
 
     def update_world(self, game_speed):
+        # import ipdb; ipdb.set_trace()
         old_datetime = self.current_datetime
-        # if old_datetime.time() >datetime.time(18,0):
-        #     import ipdb; ipdb.set_trace()
         self.current_datetime += datetime.timedelta(minutes=game_speed)
         self.background_sky.update_color(self.current_datetime.time())
         self.analog_clock.current_time = self.current_datetime.time()
@@ -60,6 +59,7 @@ class LemonadeGame():
             customers = start_day(self)
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
+            self.lemonade_stand.lineup.clear()
 
         # check for new customers arriving, add them to the update group
         for customer in self.future_customers.sprites():

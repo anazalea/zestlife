@@ -28,7 +28,7 @@ class LemonadeStand():
         return self.opening_time < current_time < self.closing_time
 
     def make_a_sale(self, recipe):
-        self.lemons -= recipe.lemon_juice * self.juicing_efficiency
+        self.lemons -= recipe.lemon_juice / self.juicing_efficiency
         self.ice -= recipe.ice
         self.sugar -= recipe.sugar
         self.account_balance += self.price
@@ -38,6 +38,7 @@ class LemonadeStand():
     def serve_customer(self, recipe, timedelta):
         if self.lineup.spots[0].is_occupied and \
             self.lineup.spots[0].occupant.likes_recipe and \
+                not self.lineup.spots[0].occupant.has_lemonade and \
                 self.open and self.has_enough_stuff(recipe):
             self.time_serving_customer += timedelta
             if self.time_serving_customer > self.prep_time:
