@@ -4,5 +4,5 @@
 # pycharm
 .idea/*
 
-# os lint
+# OS lint
 .DS_Store
