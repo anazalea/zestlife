@@ -2,7 +2,7 @@ import datetime
 import glob
 import numpy as np
 import pygame
-from dailychores import start_day
+from dailychores import start_day, end_day
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
@@ -14,9 +14,11 @@ class LemonadeGame():
         self.screen = pygame.display.set_mode((800, 600))
         self.current_datetime = datetime.datetime(2020,6,10,10)
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
-        self.lemonade_stand = LemonadeStand(self.screen)
+        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time())
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
         self.scenery = pygame.image.load('./resources/background.png')
+        self.customer_outcomes = []
+        self.word_of_mouth_effect = 0
 
         # customer
         customer_image_dict = {}
@@ -42,24 +44,31 @@ class LemonadeGame():
 
     def update_world(self, game_speed):
         old_datetime = self.current_datetime
+        # if old_datetime.time() >datetime.time(18,0):
+        #     import ipdb; ipdb.set_trace()
         self.current_datetime += datetime.timedelta(minutes=game_speed)
         self.background_sky.update_color(self.current_datetime.time())
         self.analog_clock.current_time = self.current_datetime.time()
 
+        # if it's the end of the day, recap, setup for tomorrow
         if not self.current_datetime.date() == old_datetime.date():
+            print('END OF DAY')
+            outcomes, word_of_mouth_effect = end_day(self)
+            print(outcomes)
+            self.word_of_mouth_effect = word_of_mouth_effect
+            self.customer_outcomes = []
             customers = start_day(self)
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
 
+        # check for new customers arriving, add them to the update group
         for customer in self.future_customers.sprites():
             if customer.arrival_time < self.current_datetime.time():
                 self.future_customers.remove(customer)
                 self.active_customers.add(customer)
-
-        self.active_customers.update(game_speed, self.lemonade_stand.lineup,
-                                        self.lemonade_stand.prep_time, 
-                                        self.recipe, 
-                                        self.lemonade_stand.price)
+        self.lemonade_stand.update(self.current_datetime.time(), game_speed, self.recipe)
+        self.active_customers.update(game_speed, self.lemonade_stand.lineup, 
+                    self.recipe, self.lemonade_stand.price, self.customer_outcomes)
 
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))

@@ -15,5 +15,5 @@ class Lineup():
         xlocs = np.linspace(loc_first[0], loc_last[0], n_positions)
         ylocs = np.linspace(loc_first[1], loc_last[1], n_positions)
         for i in range(n_positions):
-            self.spots[i] = Spot(loc = (xlocs[i],ylocs[i]))
+            self.spots[i] = Spot(loc = (int(xlocs[i]),int(ylocs[i])))
 

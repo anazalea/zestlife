@@ -2,14 +2,17 @@ import pygame
 import datetime
 import numpy as np
 from entities.customer import Customer
+from collections import Counter
 
-def predict_demand(date):
-    return 25
+def predict_demand(date, word_of_mouth_effect):
+    return 25 + word_of_mouth_effect
+
 def start_day(lemonade_game):
     # update weather
 
     # calculate demand
-    n_customers_today = predict_demand(lemonade_game.current_datetime.date())
+    n_customers_today = predict_demand(lemonade_game.current_datetime.date(),
+                                        lemonade_game.word_of_mouth_effect)
 
     # generate customers
     customers =[Customer((np.random.choice([-150,950]), 300 + np.random.randint(-25,25)), 
@@ -21,5 +24,7 @@ def start_day(lemonade_game):
 
     return customers
 
-def end_day():
-    pass
+def end_day(lemonade_game):
+    outcomes = (Counter(lemonade_game.customer_outcomes))
+    word_of_mouth_effect = outcomes['Satisfied Customer'] - outcomes['Dislikes Recipe']
+    return outcomes, word_of_mouth_effect
