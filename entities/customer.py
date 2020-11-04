@@ -1,43 +1,32 @@
+from enum import Enum
+
 import pygame
 import numpy as np
 import datetime
 import math
 
-class Customer():
-    def __init__(self, screen, arrival_time_generator, pref_generator):
-        self.sprite_im = pygame.image.load('./resources/walking_stick.png')
-        self.arrival_time = arrival_time_generator.sample()
-        self.spawn_loc = [0,300+np.random.randint(-25,25)]
-        self.current_loc = self.spawn_loc
-        self.speed = 10 + 1.5 * np.random.randn() #pixels/minute
-        self.frames_at_pose = 0
-        self.pose_index = 0
-        self.has_lemonade = False
-        self.likes_recipe = True
-        self.is_waiting = False
-        self.line_position = None
-        self.update_pose()
-        # self.sprite_im = pygame.image.load(f'./resources/walk{str(self.pose_index)}.png')
-        # self.crop_sprite = ( 175 * self.pose_index, 0*338, 175, 338)
-        self.set_preferences(pref_generator)
+from entities.base import AnimatedSprite
+from pygame.math import Vector2
 
-    def update_destination(self, lineup):
-        # if you arrive at the end of the line and it's full, go home
-        if self.current_loc == lineup.spots[lineup.n_positions-1].loc:
-            self.destination = self.spawn_loc
-            self.likes_recipe = False
-        # if you are in line and the space in front of you is now free, go there
-        if self.is_waiting and not lineup.spots[self.line_position-1].is_occupied:
-            self.destination = lineup.spots[self.line_position-1].current_loc
-        # if you have just arrived at an unoccupied line spot, occupy it
-        if not self.is_waiting and self.current_loc == self.destination:
-            pass
-        
-        for spot in lineup:
-            dest = spot.loc
-            if spot.is_occupied:
-                break
-        
+class Customer(AnimatedSprite):
+    class CustomerState(Enum):
+        HAPPY = 'happy'
+        SAD = 'sad'
+        LEMONADE = 'lemonade'
+
+    def __init__(self, position, arrival_time_generator, pref_generator, image_dict, 
+                lineup, hold_for_n_frames=1):
+        super().__init__(position, image_dict, hold_for_n_frames)
+        self.spawn_location = position
+        self.arrival_time = arrival_time_generator.sample()
+        self.speed = 3 + np.random.randint(2,6)  # pixels/minute
+        self.has_lemonade = False
+        self.has_seen_recipe = False
+        self.likes_recipe = True
+        self.reason = ''
+        self.set_preferences(pref_generator)
+        self.destination = lineup.last_loc
+        self.queue_position = lineup.n_positions + 1
 
     def set_preferences(self, pref_generator):
         self.min_sugar_conc = pref_generator.sugar_width * np.random.randn() + pref_generator.min_sugar
@@ -50,25 +39,71 @@ class Customer():
         self.max_volume = pref_generator.volume_width * np.random.randn() + pref_generator.max_volume
         self.max_spend = pref_generator.spend_width * np.random.randn() + pref_generator.spend_per_ml
         self.straw_preference = np.random.choice(pref_generator.straw_prefs, p = pref_generator.straw_pref_probs)
-        # print(self.straw_preference)
 
-    def update_pose(self):
-        self.pose_index = (self.pose_index + 1) % 4
-        self.frames_at_pose = 0
-        if not self.likes_recipe:
-            self.sprite_im = pygame.image.load(f'./resources/p{str(self.pose_index)}sad.png')
-        elif self.has_lemonade:
-            self.sprite_im = pygame.image.load(f'./resources/p{str(self.pose_index)}lemonade.png')
+    def update_destination(self, timedelta, lineup, recipe, price, customer_outcomes):
+        if self.queue_position == -1:
+            self.kill()
+        # Try to get in line
+        if self.destination == lineup.last_loc and self.queue_position == lineup.n_positions + 1:
+            if not lineup.spots[lineup.n_positions-1].is_occupied: # take spot, destination unchanged
+                # import ipdb; ipdb.set_trace()
+                self.queue_position = lineup.n_positions - 1
+                lineup.spots[self.queue_position].is_occupied = True
+                lineup.spots[self.queue_position].occupant = self
+            else: # If you can't get in line, go home
+                self.destination = self.spawn_location
+                self.queue_position = -1
+                self.state = 'sad'
+                customer_outcomes.append('Line Too Long')
+
+        # If you're in line, try to move up in line
+        elif self.queue_position > 0 and not lineup.spots[self.queue_position-1].is_occupied:
+            lineup.spots[self.queue_position].is_occupied = False # vacate current spot
+            lineup.spots[self.queue_position].occupant = None
+            self.queue_position -=1
+            lineup.spots[self.queue_position].occupant = self
+            lineup.spots[self.queue_position].is_occupied = True # occupy next spot
+            self.destination = lineup.spots[self.queue_position].loc
+
+        # If you've made it to the front of the line get lemonade or go home
+        elif self.queue_position == 0:
+            if not self.has_seen_recipe:
+                self.likes_recipe, self.reason = self.customer_likes_recipe(recipe, price)
+                self.has_seen_recipe = True
+            if not self.likes_recipe: # Go home
+                self.destination = self.spawn_location
+                self.queue_position = -1
+                self.state = 'sad'
+                lineup.spots[0].is_occupied = False
+                lineup.spots[0].occupant = None
+                customer_outcomes.append('Bad Experience')
+            if self.has_lemonade:
+                self.state = 'lemonade'
+                self.destination = (300,0)#self.spawn_location
+                self.queue_position = -1
+                lineup.spots[0].is_occupied = False
+                lineup.spots[0].occupant = None
+                customer_outcomes.append('Satisfied Customer')
+
+    def get_displacement(self, timedelta):
+        distance = timedelta * self.speed
+        vector_to_dest = Vector2((self.destination[0] - self.rect[0]),(self.destination[1] - self.rect[1]))
+        distance_to_destination = vector_to_dest.magnitude()
+        if distance_to_destination <= distance:
+            distance = distance_to_destination
+            # print(vector_to_dest)
+            return vector_to_dest
         else:
-            self.sprite_im = pygame.image.load(f'./resources/p{str(self.pose_index)}.png')
-        # self.crop_sprite = ( 175 * self.pose_index, 0*338, 175, 338)
+            # print(vector_to_dest)
+            vector_to_dest.scale_to_length(distance)
+            return vector_to_dest                            
 
-    def move(self, time_delta):
-        new_loc = [self.current_loc[0]+self.speed*time_delta, self.current_loc[1]]
-        self.current_loc = new_loc
-        self.frames_at_pose += 1
-        if self.frames_at_pose == 4:
-            self.update_pose()
+    def update(self, timedelta, lineup, recipe, price, customer_outcomes):
+        super().next_frame()
+        if tuple(self.rect[:2]) == self.destination:
+            self.update_destination(timedelta, lineup, recipe, price, customer_outcomes)
+        displacement = self.get_displacement(timedelta)
+        super().move(displacement)
 
     def customer_likes_recipe(self, recipe, price):
         reason = ''

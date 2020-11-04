@@ -14,7 +14,8 @@ class AnalogClock():
         self.loc = [screen.get_width() - self.width, 0]
 
 
-    def draw_hands(self, screen):
+    def draw(self, screen):
+        screen.blit(self.bg, self.loc)
         h = self.current_time.hour % 12
         hour_hand_X = math.cos(math.radians(h*30+270)) * self.radius_h + self.center[0]
         hour_hand_Y = math.sin(math.radians(h*30+270)) * self.radius_h + self.center[1]
