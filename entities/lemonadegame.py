@@ -88,7 +88,7 @@ class LemonadeGame():
             f'JUICING EFFICIENCY {str(self.lemonade_stand.juicing_efficiency)} mL/lemon', 1,
             (214, 26, 13))
         money = font.render(str(self.lemonade_stand.account_balance) + ' $', 1, (0, 0, 0))
-        # thoughts = font.render(recent_customer_thought, 1, (0, 0, 0))
+        thoughts = font.render(self.lemonade_stand.recent_customer_thought, 1, (0, 0, 0))
 
         self.screen.blit(time_stamp, [20, 20])
         self.screen.blit(current_price, [20, 40])
@@ -96,7 +96,7 @@ class LemonadeGame():
         self.screen.blit(n_lemons, [20, 80])
         self.screen.blit(g_sugar, [20, 100])
         self.screen.blit(money, [20, 120])
-        # lemonade_game.screen.blit(thoughts, [10, 580])
+        self.screen.blit(thoughts, [10, 580])
 
         
 

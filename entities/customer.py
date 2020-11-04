@@ -23,6 +23,7 @@ class Customer(AnimatedSprite):
         self.has_lemonade = False
         self.has_seen_recipe = False
         self.likes_recipe = True
+        self.reason = ''
         self.set_preferences(pref_generator)
         self.destination = lineup.last_loc
         self.queue_position = lineup.n_positions + 1
@@ -84,8 +85,6 @@ class Customer(AnimatedSprite):
                 lineup.spots[0].occupant = None
                 customer_outcomes.append('Satisfied Customer')
 
-
-
     def get_displacement(self, timedelta):
         distance = timedelta * self.speed
         vector_to_dest = Vector2((self.destination[0] - self.rect[0]),(self.destination[1] - self.rect[1]))
@@ -97,8 +96,7 @@ class Customer(AnimatedSprite):
         else:
             # print(vector_to_dest)
             vector_to_dest.scale_to_length(distance)
-            return vector_to_dest
-                               
+            return vector_to_dest                            
 
     def update(self, timedelta, lineup, recipe, price, customer_outcomes):
         super().next_frame()
@@ -106,7 +104,6 @@ class Customer(AnimatedSprite):
             self.update_destination(timedelta, lineup, recipe, price, customer_outcomes)
         displacement = self.get_displacement(timedelta)
         super().move(displacement)
-        # TODO: if offscreen, kill
 
     def customer_likes_recipe(self, recipe, price):
         reason = ''

@@ -19,10 +19,11 @@ class LemonadeStand():
         self.ice = 200
         self.price = 2.00 # $
         self.account_balance = 0.00 # $
-        self.lineup = Lineup((300,225),(0,250) ,5)
+        self.lineup = Lineup((300,225),(0,250) ,10)
         self.employees = []
         self.prep_time = 30 # minutes/lemonade, should depend on number of employees
         self.time_serving_customer = 0
+        self.recent_customer_thought = ''
 
     def is_open(self, current_time):
         return self.opening_time < current_time < self.closing_time

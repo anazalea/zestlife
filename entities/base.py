@@ -32,9 +32,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.index = 0
         self.image = self.images[self.index]  # 'image' is the current image of the animation.
         self.rect = pygame.Rect(position, (self.image.get_width(), self.image.get_height()))
+        self.real_position = Vector2(position)
 
     def move(self, vector):
-        self.rect.move_ip(vector)
+        self.real_position += vector
+        self.rect[:2] = self.real_position[:2]
 
     @property
     def state(self):
