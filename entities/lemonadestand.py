@@ -41,7 +41,8 @@ class LemonadeStand():
         for i, employee in enumerate(self.employees):
             if employee.state == last_state:
                 employee.state = states[(states.index(employee.state)+1)%len(states)]
-            employee.rect[:2] = [employee_locs[i+1],360]
+            employee.rect[:2] = [employee_locs[i+1],362 + np.random.randint(-5,5)]
+            employee.index = np.random.choice([0,1,2])
             last_state = employee.state
         self.workforce = pygame.sprite.Group(self.employees)
         
