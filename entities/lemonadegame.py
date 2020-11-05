@@ -34,15 +34,15 @@ class LemonadeGame():
 
         # employee
         employee_image_dict = {}
-        for s in ['juggle','shake']:
+        for s in ['juggle','shake','watch']:
             images_path = sorted(glob.glob(f'./resources/employee_{s}_*'))
             employee_image_dict[s] = [pygame.image.load(img_path) for img_path in images_path]
-
+        print (employee_image_dict)
         self.employee_image_dict = employee_image_dict
         self.screen = pygame.display.set_mode((800, 600))
         self.current_datetime = datetime.datetime(2020,6,10,10)
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
-        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime, self.employee_image_dict, sound, n_employees=2)
+        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime, self.employee_image_dict, sound, n_employees=3)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
         self.town = Town(self.current_datetime.time())
         # self.scenery = pygame.image.load('./resources/background.png')

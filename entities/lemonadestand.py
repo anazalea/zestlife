@@ -21,7 +21,7 @@ class LemonadeStand():
         self.lemonstock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.01, capacity=1000)
         self.sugarstock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.001, capacity=1000) # g
         self.icestock = Stock(initial_amount=200, initial_dt=current_datetime, discount_per_day=0.5, capacity=1000)
-        self.account_balance = 0.00 # $
+        self.account_balance = 1000 # $
         self.price = 2.00
         self.lineup = Lineup((300,400),(700,400) ,10)
         self.prep_time = 45 # minutes/lemonade, should depend on number of employees
@@ -40,13 +40,13 @@ class LemonadeStand():
         # reposition existing employees
         employee_locs = np.linspace(260, 260+90, len(self.employees)+2)
         states = list(employee_image_dict.keys())
-        last_state = states[0]
+
         for i, employee in enumerate(self.employees):
-            if employee.state == last_state:
-                employee.state = states[(states.index(employee.state)+1)%len(states)]
-            employee.rect[:2] = [employee_locs[i+1],362 + np.random.randint(-5,5)]
+            employee.state = states[i%len(states)]
+            if employee.state == 'watch':
+                employee.hold_for_n_frames = 40
+            employee.rect[:2] = [employee_locs[i+1],360 + np.random.randint(-2,5)]
             employee.index = np.random.choice([0,1,2])
-            last_state = employee.state
         self.workforce = pygame.sprite.Group(self.employees)
 
     def is_open(self, current_time):
