@@ -14,7 +14,7 @@ class LemonadeGame():
         self.screen = pygame.display.set_mode((800, 600))
         self.current_datetime = datetime.datetime(2020,6,10,10)
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
-        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time())
+        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
         self.scenery = pygame.image.load('./resources/background.png')
         self.customer_outcomes = []
@@ -66,8 +66,8 @@ class LemonadeGame():
             if customer.arrival_time < self.current_datetime.time():
                 self.future_customers.remove(customer)
                 self.active_customers.add(customer)
-        self.lemonade_stand.update(self.current_datetime.time(), game_speed, self.recipe)
-        self.active_customers.update(game_speed, self.lemonade_stand.lineup, 
+        self.lemonade_stand.update(self.current_datetime, game_speed, self.recipe)
+        self.active_customers.update(game_speed, self.lemonade_stand.lineup,
                     self.recipe, self.lemonade_stand.price, self.customer_outcomes)
 
     def draw(self):
@@ -81,9 +81,9 @@ class LemonadeGame():
         font = pygame.font.SysFont('comicsansmsttf',20)
         time_stamp = font.render(str(self.current_datetime), 1, (214, 26, 13))
         current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, (214, 26, 13))
-        n_lemons = font.render(str(np.round(self.lemonade_stand.lemons, 1)) + ' LEMONS ON HAND', 1,
+        n_lemons = font.render(str(np.round(self.lemonade_stand.lemonstock.current_units, 0)) + ' LEMONS ON HAND', 1,
                                 (214, 26, 13))
-        g_sugar = font.render(str(self.lemonade_stand.sugar) + ' g SUGAR ON HAND', 1, (214, 26, 13))
+        g_sugar = font.render(str(np.round(self.lemonade_stand.sugarstock.current_units, 0)) + ' g SUGAR ON HAND', 1, (214, 26, 13))
         juice_eff = font.render(
             f'JUICING EFFICIENCY {str(self.lemonade_stand.juicing_efficiency)} mL/lemon', 1,
             (214, 26, 13))
@@ -97,7 +97,3 @@ class LemonadeGame():
         self.screen.blit(g_sugar, [20, 100])
         self.screen.blit(money, [20, 120])
         self.screen.blit(thoughts, [10, 580])
-
-        
-
-

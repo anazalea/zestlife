@@ -54,15 +54,15 @@ def play():
 
             buttonEvents = recipe_button.handleEvent(event)
             if 'click' in buttonEvents:
-                menus.recipe_menu(lemonade_game.recipe) #Needs recipe
+                menus.recipe_menu(lemonade_game) #Needs recipe
 
             buttonEvents = price_button.handleEvent(event)
             if 'click' in buttonEvents:
-                menus.price_menu(lemonade_game.lemonade_stand) #Needs lemonade stand
+                menus.price_menu(lemonade_game) #Needs lemonade stand
 
             buttonEvents = inventory_button.handleEvent(event)
             if 'click' in buttonEvents:
-                menus.inventory_menu(lemonade_game.lemonade_stand) #Needs lemonade stand
+                menus.inventory_menu(lemonade_game) #Needs lemonade stand
 
             elif event.type == pygame.KEYDOWN:
                 # Escape key pressed

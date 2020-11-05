@@ -5,9 +5,12 @@ import datetime
 import time
 import numpy as np
 import math
+from datetime import timedelta
 
 from entities.lemonadestand import LemonadeStand
 from recipe import Recipe
+from inventory import Order
+import pricing
 
 #Constants
 FONT_STYLE = './resources/joystix-monospace.ttf'
@@ -94,18 +97,16 @@ def create_menu_background(screen):
     background.fill(color)
     return background
 
-def recipe_menu(recipe):
-    pygame.init()
-    pygame.mouse.set_visible(1)
-    screen = pygame.display.set_mode((800,600))
-    pygame.display.set_caption("LEMONADE")
-    done = False
-    click = False
+def recipe_menu(lemonade_game):
+    screen = lemonade_game.screen
     background = create_menu_background(screen)
     recipe_image = pygame.image.load('./resources/background.png') #Update with recipe image
+    recipe = lemonade_game.recipe
     ingredients = {'lemon juice' : recipe.lemon_juice, 'sugar' : recipe.sugar, 'water' : recipe.water, 'ice' : recipe.ice} #Get this from another class
     ingredient_min, ingredient_max = 0, 500
-    recipe_style = ''
+    recipe_message = ''
+    done = False
+    click = False
     while not done:
         screen.blit(background, (0,0))
         screen.blit(recipe_image, (0,0))
@@ -147,13 +148,12 @@ def recipe_menu(recipe):
             if accept_recipe:
                 recipe.update_ratios(ingredients['lemon juice'], ingredients['sugar'], ingredients['water'], ingredients['ice'])
                 #Write something about the type of lemonade you're making
-                recipe_style = 'The recipe sounds tasty'
+                recipe_message = 'The recipe sounds tasty'
             if return_to_game:
                 done = True
 
         click = False
-        recipe_message = font.render(recipe_style, 1, (0,0,0))
-        screen.blit(recipe_message, [10,380])
+        screen.blit(font.render(recipe_message, 1, (0,0,0)), [10,380])
         pygame.display.update()
 
         #Events
@@ -170,18 +170,16 @@ def recipe_menu(recipe):
                 if event.key == pygame.K_ESCAPE:
                     done = True
 
-def price_menu(lemonade_stand):
-    pygame.init()
-    pygame.mouse.set_visible(1)
-    screen = pygame.display.set_mode((800,600))
-    pygame.display.set_caption("LEMONADE")
-    done = False
-    click = False
+def price_menu(lemonade_game):
+    screen = lemonade_game.screen
     background = create_menu_background(screen)
     price_image = pygame.image.load('./resources/background.png') #Update with price image
+    lemonade_stand = lemonade_game.lemonade_stand
     price = lemonade_stand.price
     price_min, price_max = 0, 50
-    price_style = ''
+    price_message = ''
+    done = False
+    click = False
     while not done:
         screen.blit(background, (0,0))
         screen.blit(price_image, (0,0))
@@ -210,13 +208,12 @@ def price_menu(lemonade_stand):
             if accept_price:
                 lemonade_stand.price = price
                 #Write something about the type of lemonade you're making
-                price_style = 'The price seems reasonable'
+                price_message = 'The price seems reasonable'
             if return_to_game:
                 done = True
 
         click = False
-        price_message = font.render(price_style, 1, (0,0,0))
-        screen.blit(price_message, [10,380])
+        screen.blit(font.render(price_message, 1, (0,0,0)), [10,380])
         pygame.display.update()
 
         #Events
@@ -233,16 +230,14 @@ def price_menu(lemonade_stand):
                 if event.key == pygame.K_ESCAPE:
                     done = True
 
-def inventory_menu(lemonade_stand):
-    pygame.init()
-    pygame.mouse.set_visible(1)
-    screen = pygame.display.set_mode((800,600))
-    pygame.display.set_caption("LEMONADE")
-    done = False
-    click = False
+def inventory_menu(lemonade_game):
+    screen = lemonade_game.screen
     background = create_menu_background(screen)
     inventory_image = pygame.image.load('./resources/background.png') #Update with recipe image
-    stock_items = {'lemon juice' : lemonade_stand.lemons, 'sugar' : lemonade_stand.sugar, 'ice' : lemonade_stand.ice} #Get this from another class
+    lemonade_stand = lemonade_game.lemonade_stand
+    stock_items = {'lemon juice' : lemonade_stand.lemonstock.current_units, 'sugar' : lemonade_stand.sugarstock.current_units, 'ice' : lemonade_stand.icestock.current_units} #Get this from another class
+    done = False
+    click = False
     while not done:
         screen.blit(background, (0,0))
         screen.blit(inventory_image, (0,0))
@@ -259,7 +254,7 @@ def inventory_menu(lemonade_stand):
         for item, value in stock_items.items():
             item_name_x = x_start
             item_name_y = y_start + index*spacing #Next line is 30 down
-            item_display = item + ' in stock:'+ str(value) + ', quantity ordered: 100'
+            item_display = item + ' in stock:'+ str(round(value)) #+ ', quantity ordered:' + str(round(value))
             draw_text(item_display, font, (255, 255, 255), screen , item_name_x, item_name_y)
             buttons[index] = button(screen, 'Order', (0,0,0,100), (0,0,0,255), (item_name_x+590,item_name_y+25,button_h,button_w), font, click)
             index += 1
@@ -268,13 +263,13 @@ def inventory_menu(lemonade_stand):
         if click:
             if buttons[0]:
                 #lemons
-                lemon_order_menu(lemonade_stand)
+                lemon_order_menu(lemonade_game)
             if buttons[1]:
                 #sugar
-                pass
+                sugar_order_menu(lemonade_game)
             if buttons[2]:
                 #ice
-                pass
+                ice_order_menu(lemonade_game)
             if return_to_game:
                 done = True
 
@@ -295,18 +290,17 @@ def inventory_menu(lemonade_stand):
                 if event.key == pygame.K_ESCAPE:
                     done = True
 
-def lemon_order_menu(lemonade_stand):
-    pygame.init()
-    pygame.mouse.set_visible(1)
-    screen = pygame.display.set_mode((800,600))
-    pygame.display.set_caption("LEMONADE")
-    done = False
-    click = False
+def lemon_order_menu(lemonade_game):
+    screen = lemonade_game.screen
     background = create_menu_background(screen)
     order_lemon_image = pygame.image.load('./resources/background.png')
     order_message = ''
+    #(amount, time(hrs))
     possible_orders = [(1,1),(5,2),(10,6),(100,24)]
     order_amounts = [0] * len(possible_orders)
+    lemonade_stand = lemonade_game.lemonade_stand
+    done = False
+    click = False
     while not done:
         screen.blit(background, (0,0))
         screen.blit(order_lemon_image, (0,0))
@@ -325,10 +319,12 @@ def lemon_order_menu(lemonade_stand):
         starting_y = 100
         button_dimension = 25
         buttons = [False] *2*len(possible_orders)
+        prices = []
         for order in possible_orders:
             item_name_x = starting_x
             item_name_y = starting_y + index*50
-            lemon_price = 2.0 #lemon_discounted_price()
+            lemon_price = round(pricing.get_lemon_discountedprice(timedelta(hours=order[1]), order[0]),2)
+            prices.append(lemon_price)
             button_coords = [(item_name_x+600, item_name_y, button_dimension, button_dimension),
                             (item_name_x+640, item_name_y, button_dimension, button_dimension),
                             (item_name_x+680, item_name_y, button_dimension, button_dimension)]
@@ -358,9 +354,240 @@ def lemon_order_menu(lemonade_stand):
                         else:
                             order_amounts[int((i+1)/2)] -=1
             if place_order:
+                #Calculate cost
+                total_cost = 0
+                for i in range(len(order_amounts)):
+                    total_cost += order_amounts[i]*prices[i]
+                print(total_cost)
                 #Check for enough cash
+                if total_cost <= lemonade_stand.account_balance:
+                    order_message = 'Order Placed'
+                    #Do the orders
+                    index = 0
+                    for order in possible_orders:
+                        if order_amounts[index] != 0:
+                            order_num = 0
+                            while order_num < order_amounts[index]:
+                                lemon_order = Order(order_dt=lemonade_game.current_datetime, delivery_dt=lemonade_game.current_datetime+timedelta(hours=order[1]), amount=order[0])
+                                lemonade_stand.lemonstock.add_order(lemon_order)
+                                order_num += 1
+                        index += 1
+                    #Pay
+                    lemonade_stand.account_balance -= total_cost
+                else:
+                    order_message = 'Order too expensive'
+            if return_to_inventory:
+                done = True
+        click = False
+        screen.blit(font.render(order_message, 1, (0,0,0)), [10,380])
+        pygame.display.update()
 
-                order_message = 'Order Placed'
+        #Events
+        for event in pygame.event.get():
+            # Close button clicked
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                #Clicked on start game
+                if event.button == 1:
+                    click = True
+            if event.type == pygame.KEYDOWN:
+                # Escape key pressed
+                if event.key == pygame.K_ESCAPE:
+                    done = True
+
+def sugar_order_menu(lemonade_game):
+    screen = lemonade_game.screen
+    background = create_menu_background(screen)
+    order_sugar_image = pygame.image.load('./resources/background.png')
+    order_message = ''
+    #(amount, time(hrs))
+    possible_orders = [(1,1),(5,2),(10,6),(100,24)]
+    order_amounts = [0] * len(possible_orders)
+    lemonade_stand = lemonade_game.lemonade_stand
+    done = False
+    click = False
+    while not done:
+        screen.blit(background, (0,0))
+        screen.blit(order_sugar_image, (0,0))
+        font = pygame.font.Font(FONT_STYLE,15)
+        draw_text('Order Sugar', font, (255, 255, 255), screen, 20, 20)
+        draw_text('Quantity', font, (255, 255, 255), screen, 20, 70)
+        draw_text('Arrives In', font, (255, 255, 255), screen, 20+200, 70)
+        draw_text('Price', font, (255, 255, 255), screen, 20+400, 70)
+        draw_text('Order', font, (255, 255, 255), screen, 20+600, 70)
+
+        #Implement menu to order from, times in hours
+        amounts_min = 0
+        amounts_max = 10
+        index = 0
+        starting_x = 20
+        starting_y = 100
+        button_dimension = 25
+        buttons = [False] *2*len(possible_orders)
+        prices = []
+        for order in possible_orders:
+            item_name_x = starting_x
+            item_name_y = starting_y + index*50
+            sugar_price = round(pricing.get_sugar_discountedprice(timedelta(hours=order[1]), order[0]),2)
+            prices.append(sugar_price)
+            button_coords = [(item_name_x+600, item_name_y, button_dimension, button_dimension),
+                            (item_name_x+640, item_name_y, button_dimension, button_dimension),
+                            (item_name_x+680, item_name_y, button_dimension, button_dimension)]
+
+            draw_text(str(order[0]), font, (255, 255, 255), screen , item_name_x, item_name_y)
+            draw_text(str(order[1])+' HR', font, (255, 255, 255), screen , item_name_x+200, item_name_y)
+            draw_text(str(sugar_price), font, (255, 255, 255), screen , item_name_x+400, item_name_y)
+            buttons[index*2] = button(screen, '-', (0,0,0,100), (0,0,0,255), button_coords[0], font, click)
+            button(screen, str(order_amounts[index]), (0,0,0,0), (0,0,0,0), button_coords[1], font, click)
+            buttons[index*2+1] = button(screen, '+', (0,0,0,100), (0,0,0,255), button_coords[2], font, click)
+            index += 1
+
+        place_order = button(screen, 'Place Order', (0,0,0,100), (0,0,0,255), (50,500,300,50), font, click)
+        return_to_inventory = button(screen, 'Back', (0,0,0,100), (0,0,0,255), (400,500,300,50), font, click)
+
+        if click:
+            for i in range(len(buttons)):
+                if buttons[i]:
+                    if i % 2 != 0:
+                        if order_amounts[int(i/2)] == amounts_max:
+                            pass
+                        else:
+                            order_amounts[int(i/2)] +=1
+                    else:
+                        if order_amounts[int((i+1)/2)] == amounts_min:
+                            pass
+                        else:
+                            order_amounts[int((i+1)/2)] -=1
+            if place_order:
+                #Calculate cost
+                total_cost = 0
+                for i in range(len(order_amounts)):
+                    total_cost += order_amounts[i]*prices[i]
+                print(total_cost)
+                #Check for enough cash
+                if total_cost <= lemonade_stand.account_balance:
+                    order_message = 'Order Placed'
+                    #Do the orders
+                    index = 0
+                    for order in possible_orders:
+                        if order_amounts[index] != 0:
+                            order_num = 0
+                            while order_num < order_amounts[index]:
+                                sugar_order = Order(order_dt=lemonade_game.current_datetime, delivery_dt=lemonade_game.current_datetime+timedelta(hours=order[1]), amount=order[0])
+                                lemonade_stand.sugarstock.add_order(sugar_order)
+                                order_num += 1
+                        index += 1
+                    #Pay
+                    lemonade_stand.account_balance -= total_cost
+                else:
+                    order_message = 'Order too expensive'
+            if return_to_inventory:
+                done = True
+        click = False
+        screen.blit(font.render(order_message, 1, (0,0,0)), [10,380])
+        pygame.display.update()
+
+        #Events
+        for event in pygame.event.get():
+            # Close button clicked
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                #Clicked on start game
+                if event.button == 1:
+                    click = True
+            if event.type == pygame.KEYDOWN:
+                # Escape key pressed
+                if event.key == pygame.K_ESCAPE:
+                    done = True
+
+def ice_order_menu(lemonade_game):
+    screen = lemonade_game.screen
+    background = create_menu_background(screen)
+    order_ice_image = pygame.image.load('./resources/background.png')
+    order_message = ''
+    #(amount, time(hrs))
+    possible_orders = [(1,1),(5,2),(10,6),(100,24)]
+    order_amounts = [0] * len(possible_orders)
+    lemonade_stand = lemonade_game.lemonade_stand
+    done = False
+    click = False
+    while not done:
+        screen.blit(background, (0,0))
+        screen.blit(order_ice_image, (0,0))
+        font = pygame.font.Font(FONT_STYLE,15)
+        draw_text('Order Ice', font, (255, 255, 255), screen, 20, 20)
+        draw_text('Quantity', font, (255, 255, 255), screen, 20, 70)
+        draw_text('Arrives In', font, (255, 255, 255), screen, 20+200, 70)
+        draw_text('Price', font, (255, 255, 255), screen, 20+400, 70)
+        draw_text('Order', font, (255, 255, 255), screen, 20+600, 70)
+
+        #Implement menu to order from, times in hours
+        amounts_min = 0
+        amounts_max = 10
+        index = 0
+        starting_x = 20
+        starting_y = 100
+        button_dimension = 25
+        buttons = [False] *2*len(possible_orders)
+        prices = []
+        for order in possible_orders:
+            item_name_x = starting_x
+            item_name_y = starting_y + index*50
+            ice_price = 0
+            prices.append(ice_price)
+            button_coords = [(item_name_x+600, item_name_y, button_dimension, button_dimension),
+                            (item_name_x+640, item_name_y, button_dimension, button_dimension),
+                            (item_name_x+680, item_name_y, button_dimension, button_dimension)]
+
+            draw_text(str(order[0]), font, (255, 255, 255), screen , item_name_x, item_name_y)
+            draw_text(str(order[1])+' HR', font, (255, 255, 255), screen , item_name_x+200, item_name_y)
+            draw_text(str(ice_price), font, (255, 255, 255), screen , item_name_x+400, item_name_y)
+            buttons[index*2] = button(screen, '-', (0,0,0,100), (0,0,0,255), button_coords[0], font, click)
+            button(screen, str(order_amounts[index]), (0,0,0,0), (0,0,0,0), button_coords[1], font, click)
+            buttons[index*2+1] = button(screen, '+', (0,0,0,100), (0,0,0,255), button_coords[2], font, click)
+            index += 1
+
+        place_order = button(screen, 'Place Order', (0,0,0,100), (0,0,0,255), (50,500,300,50), font, click)
+        return_to_inventory = button(screen, 'Back', (0,0,0,100), (0,0,0,255), (400,500,300,50), font, click)
+
+        if click:
+            for i in range(len(buttons)):
+                if buttons[i]:
+                    if i % 2 != 0:
+                        if order_amounts[int(i/2)] == amounts_max:
+                            pass
+                        else:
+                            order_amounts[int(i/2)] +=1
+                    else:
+                        if order_amounts[int((i+1)/2)] == amounts_min:
+                            pass
+                        else:
+                            order_amounts[int((i+1)/2)] -=1
+            if place_order:
+                #Calculate cost
+                total_cost = 0
+                for i in range(len(order_amounts)):
+                    total_cost += order_amounts[i]*prices[i]
+                print(total_cost)
+                #Check for enough cash
+                if total_cost <= lemonade_stand.account_balance:
+                    order_message = 'Order Placed'
+                    #Do the orders
+                    index = 0
+                    for order in possible_orders:
+                        if order_amounts[index] != 0:
+                            order_num = 0
+                            while order_num < order_amounts[index]:
+                                ice_order = Order(order_dt=lemonade_game.current_datetime, delivery_dt=lemonade_game.current_datetime+timedelta(hours=order[1]), amount=order[0])
+                                lemonade_stand.icestock.add_order(ice_order)
+                                order_num += 1
+                        index += 1
+                    #Pay
+                    lemonade_stand.account_balance -= total_cost
+                else:
+                    order_message = 'Order too expensive'
             if return_to_inventory:
                 done = True
         click = False

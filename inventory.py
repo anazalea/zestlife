@@ -171,7 +171,7 @@ if __name__ == '__main__':
     initialstock = 10.
 
     # initialize lemon, cash inventory
-    lemonstock = Stock(initial_amount=initialstock, initial_dt=dt0, discount_per_day=3., capacity=lemoncapacity)
+    lemonstock = Stock()
     cashstock = Stock(initial_amount=100., initial_dt=dt0, discount_per_day=0., raise_error_if_neg=False)
 
     print('\nComitting orders...')
