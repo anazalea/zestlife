@@ -2,6 +2,7 @@ import pygame
 import datetime
 import numpy as np
 from entities.employee import Employee
+from entities.coin import Coin, coin_im_dict
 from lineup import Lineup
 from inventory import Stock
 
@@ -30,6 +31,8 @@ class LemonadeStand():
         self.employees = []
         self.workforce = pygame.sprite.Group(self.employees)
         self.employee_image_dict = employee_image_dict
+        self.coin_group = pygame.sprite.Group([])
+
         for i in range(n_employees):
             self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict)
 
@@ -68,6 +71,7 @@ class LemonadeStand():
             self.time_serving_customer += timedelta
             if self.time_serving_customer > self.prep_time:
                 self.lineup.spots[0].occupant.has_lemonade = True
+                self.coin_group.add(Coin((300+np.random.randint(-10,10),305), image_dict=coin_im_dict))
                 self.sound.play_sfx(self.sound.coin)
                 self.time_serving_customer = 0
                 self.make_a_sale(recipe)
@@ -84,6 +88,7 @@ class LemonadeStand():
         self.lemonstock.update(current_datetime)
         self.sugarstock.update(current_datetime)
         self.icestock.update(current_datetime)
+        self.coin_group.update()
 
     def validate_price(self, value):
         try:
@@ -102,6 +107,7 @@ class LemonadeStand():
             screen.blit(self.image_open, self.loc)
         else:
             screen.blit(self.image_closed, self.loc)
+        self.coin_group.draw(screen)
 
     def has_enough_stuff(self, recipe):
         if self.lemonstock.current_units * self.juicing_efficiency < recipe.lemon_juice:
