@@ -5,15 +5,17 @@ import datetime
 import numpy as np
 
 from entities.lemonadegame import LemonadeGame
-
+from sound import Sound
 
 def play():
+    pygame.mixer.pre_init(44100, -16, 2, 4096)
     pygame.init()
+    sound = Sound()
     pygame.mouse.set_visible(1)
     pygame.display.set_caption("LEMONADE")
     clock = pygame.time.Clock()
     game_speed = 0.25
-    lemonade_game = LemonadeGame(config=None)
+    lemonade_game = LemonadeGame(sound, config=None)
 
     ##############################################################################################
     ##############################################################################################

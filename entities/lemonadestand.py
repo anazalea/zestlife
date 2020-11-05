@@ -5,12 +5,13 @@ from entities.employee import Employee
 from lineup import Lineup
 
 class LemonadeStand():
-    def __init__(self, screen, current_time, employee_image_dict, n_employees=0,):
+    def __init__(self, screen, current_time, employee_image_dict, sound, n_employees=0,):
         self.image_open = pygame.image.load('./resources/standA_small.png')
         self.image_closed = pygame.image.load('./resources/standA_small.png')
         self.im_height = self.image_open.get_height()
         self.im_width = self.image_open.get_width()
-        self.loc = [250,325]#[int((screen.get_width()-self.im_width)/2), int((screen.get_height()-self.im_height)/1.5)]
+        self.loc = [250,325]
+        self.sound = sound
         self.opening_time = datetime.time(8)
         self.closing_time = datetime.time(20)
         self.open = self.is_open(current_time)
@@ -63,12 +64,14 @@ class LemonadeStand():
             self.time_serving_customer += timedelta
             if self.time_serving_customer > self.prep_time:
                 self.lineup.spots[0].occupant.has_lemonade = True
+                self.sound.play_sfx(self.sound.coin)
                 self.time_serving_customer = 0
                 self.make_a_sale(recipe)
         elif self.lineup.spots[0].is_occupied and \
             (not self.has_enough_stuff(recipe) or not self.open): # go home
             self.lineup.spots[0].occupant.likes_recipe = False
             self.time_serving_customer = 0
+            self.sound.play_sfx(self.sound.death)
 
 
 

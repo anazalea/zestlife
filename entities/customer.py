@@ -8,6 +8,7 @@ import math
 from entities.base import AnimatedSprite
 from pygame.math import Vector2
 
+
 class Customer(AnimatedSprite):
     class CustomerState(Enum):
         WALKING_LEFT = 'walking_left'
