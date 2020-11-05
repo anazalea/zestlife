@@ -28,7 +28,7 @@ def play():
     price_button = pygbutton.PygButton((800 - 80 - 8 - 64, 520, 64, 64),
                                        normal='./resources/dollar-coin.png')
     inventory_button = pygbutton.PygButton((800 - 80 - 8 - 64 - 8 - 64, 520, 64, 64),
-                                       normal='./resources/dollar-coin.png')
+                                       normal='./resources/delivery-truck.png')
 
     ##############################################################################################
     ##############################################################################################
