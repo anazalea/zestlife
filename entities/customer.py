@@ -10,13 +10,13 @@ from pygame.math import Vector2
 
 class Customer(AnimatedSprite):
     class CustomerState(Enum):
-        HAPPY = 'happy'
-        SAD = 'sad'
-        LEMONADE = 'lemonade'
+        WALKING_LEFT = 'walking_left'
+        WALING_RIGHT = 'walking_right'
 
     def __init__(self, position, arrival_time_generator, pref_generator, image_dict, 
-                lineup, hold_for_n_frames=1):
-        super().__init__(position, image_dict, hold_for_n_frames)
+                lineup, hold_for_n_frames=1, accessory_images=None, visible_accessories=None):
+        super().__init__(position, image_dict, hold_for_n_frames=hold_for_n_frames, 
+                            accessory_images=accessory_images, visible_accessories=visible_accessories)
         self.spawn_location = position
         self.arrival_time = arrival_time_generator.sample()
         self.speed = 3 + np.random.randint(2,6)  # pixels/minute
@@ -53,7 +53,7 @@ class Customer(AnimatedSprite):
             else: # If you can't get in line, go home
                 self.destination = self.spawn_location
                 self.queue_position = -1
-                self.state = 'sad'
+                # self.state = 'sad'
                 customer_outcomes.append('Line Too Long')
 
         # If you're in line, try to move up in line
@@ -73,13 +73,14 @@ class Customer(AnimatedSprite):
             if not self.likes_recipe: # Go home
                 self.destination = self.spawn_location
                 self.queue_position = -1
-                self.state = 'sad'
+                # self.state = 'sad'
                 lineup.spots[0].is_occupied = False
                 lineup.spots[0].occupant = None
                 customer_outcomes.append('Bad Experience')
             if self.has_lemonade:
-                self.state = 'lemonade'
-                self.destination = (300,0)#self.spawn_location
+                self.show_accessory('drink_large_straw')
+                # self.state = 'lemonade'
+                self.destination = self.spawn_location
                 self.queue_position = -1
                 lineup.spots[0].is_occupied = False
                 lineup.spots[0].occupant = None
@@ -103,6 +104,9 @@ class Customer(AnimatedSprite):
         if tuple(self.rect[:2]) == self.destination:
             self.update_destination(timedelta, lineup, recipe, price, customer_outcomes)
         displacement = self.get_displacement(timedelta)
+        self.state = 'walking_left'
+        if displacement[0] > 0:
+            self.state = 'walking_right'
         super().move(displacement)
 
     def customer_likes_recipe(self, recipe, price):

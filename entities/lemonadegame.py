@@ -7,34 +7,45 @@ from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
 from entities.customer import Customer, CustomerArrivalTimeGenerator, CustomerPreferenceGenerator
+from entities.town import Town
 from recipe import Recipe
 
 class LemonadeGame():
     def __init__(self, config=None):
-        self.screen = pygame.display.set_mode((800, 600))
-        self.current_datetime = datetime.datetime(2020,6,10,10)
-        self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
-        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time())
-        self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
-        self.scenery = pygame.image.load('./resources/background.png')
-        self.customer_outcomes = []
-        self.word_of_mouth_effect = 0
-
         # customer
         customer_image_dict = {}
-        for s in ['happy', 'sad', 'lemonade']:
-            images_path = glob.glob(f'./resources/customer_{s}_*.png')
-            customer_image_dict[s] = [pygame.image.load(img_path) for img_path in images_path]
-            # TODO: do flipping for moving left
+        for s in ['walking']:
+            images_path = sorted(glob.glob(f'./resources/customer_{s}_*.png'))
+            customer_image_dict[s+'_right'] = [pygame.image.load(img_path) for img_path in images_path]
+            customer_image_dict[s+'_left'] = [pygame.transform.flip(image, True, False) \
+                                                    for image in customer_image_dict[s+'_right']]
         self.customer_image_dict = customer_image_dict
         self.arrival_time_generator = CustomerArrivalTimeGenerator()
         self.preference_generator = CustomerPreferenceGenerator()
 
+        # customer accessories
+        acc_ims = ['drink_large_straw']
+        accessory_image_dict = {}
+        for im in acc_ims:
+            accessory_image_dict[im] = ((0,0), pygame.image.load(f'./resources/{im}.png'))
+        self.accessory_image_dict = accessory_image_dict
+
         # employee
         employee_image_dict = {}
-        for s in ['juggle']:
-            images_path = glob.glob(f'./resources/employee_{s}_*')
+        for s in ['juggle','shake']:
+            images_path = sorted(glob.glob(f'./resources/employee_{s}_*'))
             employee_image_dict[s] = [pygame.image.load(img_path) for img_path in images_path]
+
+        self.employee_image_dict = employee_image_dict
+        self.screen = pygame.display.set_mode((800, 600))
+        self.current_datetime = datetime.datetime(2020,6,10,10)
+        self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
+        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time(), self.employee_image_dict, n_employees=2)
+        self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
+        self.town = Town(self.current_datetime.time())
+        # self.scenery = pygame.image.load('./resources/background.png')
+        self.customer_outcomes = []
+        self.word_of_mouth_effect = 0
 
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
@@ -43,9 +54,10 @@ class LemonadeGame():
         self.active_customers = pygame.sprite.Group([])
 
     def update_world(self, game_speed):
-        # import ipdb; ipdb.set_trace()
         old_datetime = self.current_datetime
+        self.lemonade_stand.workforce.update()
         self.current_datetime += datetime.timedelta(minutes=game_speed)
+        self.town.update_town_time(self.current_datetime.time())
         self.background_sky.update_color(self.current_datetime.time())
         self.analog_clock.current_time = self.current_datetime.time()
 
@@ -72,10 +84,13 @@ class LemonadeGame():
 
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))
-        self.screen.blit(self.scenery, (0,0))
+        self.town.draw(self.screen)
+        # self.screen.blit(self.scenery, (0,0))
+        # self.lemonade_stand.workforce.draw(self.screen)
         self.lemonade_stand.draw(self.current_datetime.time(),
                                     self.screen)
         self.active_customers.draw(self.screen)
+
 
     def print_stats(self):
         font = pygame.font.SysFont('comicsansmsttf',20)
