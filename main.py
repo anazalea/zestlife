@@ -30,6 +30,9 @@ def play():
     inventory_button = pygbutton.PygButton((800 - 80 - 8 - 64 - 8 - 64, 520, 64, 64),
                                        normal='./resources/dollar-coin.png')
 
+    employees_button = pygbutton.PygButton((800 - 80 - 8 - 64 - 8 - 64 - 8 - 64, 520, 64, 64),
+                                       normal='./resources/flask.png')
+
     ##############################################################################################
     ##############################################################################################
     ##############################################################################################
@@ -47,6 +50,7 @@ def play():
             recipe_button.draw(lemonade_game.screen)
             price_button.draw(lemonade_game.screen)
             inventory_button.draw(lemonade_game.screen)
+            employees_button.draw(lemonade_game.screen)
             pygame.display.update()
 
         for event in pygame.event.get():
@@ -57,15 +61,19 @@ def play():
 
             buttonEvents = recipe_button.handleEvent(event)
             if 'click' in buttonEvents:
-                menus.recipe_menu(lemonade_game) #Needs recipe
+                menus.recipe_menu(lemonade_game)
 
             buttonEvents = price_button.handleEvent(event)
             if 'click' in buttonEvents:
-                menus.price_menu(lemonade_game) #Needs lemonade stand
+                menus.price_menu(lemonade_game)
 
             buttonEvents = inventory_button.handleEvent(event)
             if 'click' in buttonEvents:
-                menus.inventory_menu(lemonade_game) #Needs lemonade stand
+                menus.inventory_menu(lemonade_game)
+
+            buttonEvents = employees_button.handleEvent(event)
+            if 'click' in buttonEvents:
+                menus.employee_menu(lemonade_game)
 
             elif event.type == pygame.KEYDOWN:
                 # Escape key pressed

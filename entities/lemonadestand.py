@@ -33,9 +33,9 @@ class LemonadeStand():
         for i in range(n_employees):
             self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict)
 
-    def hire_employee(self, start_time, end_time, employee_image_dict):
+    def hire_employee(self, start_time, end_time, employee_image_dict, daily_wage=20):
         # currently, employees should go in here: (270,350,90,50)
-        new_employee = Employee((250,350), employee_image_dict, self.opening_time, self.closing_time)
+        new_employee = Employee((250,350), employee_image_dict, self.opening_time, self.closing_time, daily_wage=daily_wage)
         self.employees.append(new_employee)
         # reposition existing employees
         employee_locs = np.linspace(260, 260+90, len(self.employees)+2)
@@ -48,6 +48,27 @@ class LemonadeStand():
             employee.index = np.random.choice([0,1,2])
             last_state = employee.state
         self.workforce = pygame.sprite.Group(self.employees)
+
+    def fire_employee(self, employee_image_dict, daily_wage):
+        #Find an employee with the right wage
+        for i in range(len(self.employees)):
+            if self.employees[i].daily_wage == daily_wage:
+                self.employees.pop(i)
+                break
+        #reposition existing employees
+        employee_locs = np.linspace(260, 260+90, len(self.employees)+2)
+        states = list(employee_image_dict.keys())
+        last_state = states[0]
+        for i, employee in enumerate(self.employees):
+            if employee.state == last_state:
+                employee.state = states[(states.index(employee.state)+1)%len(states)]
+            employee.rect[:2] = [employee_locs[i+1],362 + np.random.randint(-5,5)]
+            employee.index = np.random.choice([0,1,2])
+            last_state = employee.state
+        self.workforce = pygame.sprite.Group(self.employees)
+
+    def get_current_employees(self):
+        return self.employees
 
     def is_open(self, current_time):
         if not self.open and self.opening_time < current_time < self.closing_time:
