@@ -66,6 +66,10 @@ class ShrinkEvent:
 class Stock:
     """Stock is updated by degradation, delivery of orders and withdraws.
     Raises NegativeStockError if withdraw results in negative stock if raise_error_if_neg.
+
+    Methods:
+        self.add_order(Order) adds new order.
+        self.update(t, withdraw, new_capacity) returns current_units, delivered_orders since previous update.
     """
 
     def __init__(
@@ -198,30 +202,23 @@ if __name__ == '__main__':
 
     print('\nSimulating stock...')
     x = []
-    yprior = []
-    ypost = []
+    y = []
     totalconsumption = 0
     for h in range(maxh):
         for m in range(60):
             timenow = get_dummy_datetime(time(h, m, 0))
-            # prior state
-            stockpriorupdate = lemonstock.current_units
             # consumption
             consumption = hourlyconsumption / 60
             totalconsumption += consumption
             if h == 5 and m == 30:
-                stockpostupdate, deliveredorderssince = lemonstock.update(timenow, withdraw=consumption,
-                                                                          new_capacity=newcapacity)
+                units, deliveredorderssince = lemonstock.update(timenow, withdraw=consumption, new_capacity=newcapacity)
             else:
-                stockpostupdate, deliveredorderssince = lemonstock.update(timenow, withdraw=consumption)
+                units, deliveredorderssince = lemonstock.update(timenow, withdraw=consumption)
             # accumulate some information regarding post updat state
             x.append(timenow)
-            yprior.append(stockpriorupdate)
-            ypost.append(stockpostupdate)
-            print('timenow: {}, {} -> {}, #orders: {}'.format(
-                timenow,
-                '%.2f' % stockpriorupdate, '%.2f' % stockpostupdate,
-                len(deliveredorderssince)
+            y.append(units)
+            print('timenow: {}, units: {}, #orders: {}'.format(
+                timenow, '%.2f' % units, len(deliveredorderssince)
             ))
 
     print('\n'.join(str(i) for i in lemonstock.shrink_log))
@@ -238,8 +235,7 @@ if __name__ == '__main__':
     ))
 
     # another visual test
-    plt.plot(x, yprior, label='prior')
-    plt.plot(x, ypost, label='post')
+    plt.plot(x, y, label='units')
     plt.axhline(lemoncapacity, color='blue', ls=':', label='lemoncapacity')
     plt.axhline(newcapacity, color='blue', ls=':', label='newcapacity')
     for order in lemonorders:
