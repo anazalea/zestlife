@@ -20,7 +20,9 @@ def start_day(lemonade_game):
                         lemonade_game.preference_generator,
                         lemonade_game.customer_image_dict,
                         lemonade_game.lemonade_stand.lineup,
-                        hold_for_n_frames=5) for i in range(n_customers_today)]
+                        hold_for_n_frames = 5,
+                        accessory_images = lemonade_game.accessory_image_dict,
+                        visible_accessories = set([])) for i in range(n_customers_today)]
 
     return customers
 

@@ -45,8 +45,6 @@ class LemonadeStand():
             employee.index = np.random.choice([0,1,2])
             last_state = employee.state
         self.workforce = pygame.sprite.Group(self.employees)
-        
-    
 
     def is_open(self, current_time):
         return self.opening_time < current_time < self.closing_time
@@ -91,6 +89,7 @@ class LemonadeStand():
     
     def draw(self, time, screen):
         if time > self.opening_time and time < self.closing_time:
+            self.workforce.draw(screen)
             screen.blit(self.image_open, self.loc)
         else:
             screen.blit(self.image_closed, self.loc)
