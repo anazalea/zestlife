@@ -6,7 +6,7 @@ from lineup import Lineup
 from inventory import Stock
 
 class LemonadeStand():
-    def __init__(self, screen, current_time, employee_image_dict, sound, n_employees=0,):
+    def __init__(self, screen, current_datetime, employee_image_dict, sound, n_employees=0,):
         self.image_open = pygame.image.load('./resources/standA_small.png')
         self.image_closed = pygame.image.load('./resources/standA_small.png')
         self.im_height = self.image_open.get_height()
@@ -15,26 +15,16 @@ class LemonadeStand():
         self.sound = sound
         self.opening_time = datetime.time(8)
         self.closing_time = datetime.time(20)
-<<<<<<< HEAD
         self.open = True
-        self.open = self.is_open(current_time)
-=======
-        self.open = self.is_open(current_time.time())
->>>>>>> inventory-menu
+        self.open = self.is_open(current_datetime.time())
         self.juicing_efficiency = 45 # mL/lemon
-        self.lemonstock = Stock(initial_amount=500, initial_dt=current_time, discount_per_day=0.01, capacity=1000)
-        self.sugarstock = Stock(initial_amount=500, initial_dt=current_time, discount_per_day=0.001, capacity=1000) # g
-        self.icestock = Stock(initial_amount=200, initial_dt=current_time, discount_per_day=0.5, capacity=1000)
+        self.lemonstock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.01, capacity=1000)
+        self.sugarstock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.001, capacity=1000) # g
+        self.icestock = Stock(initial_amount=200, initial_dt=current_datetime, discount_per_day=0.5, capacity=1000)
         self.account_balance = 0.00 # $
-<<<<<<< HEAD
+        self.price = 2.00
         self.lineup = Lineup((300,400),(700,400) ,10)
         self.prep_time = 45 # minutes/lemonade, should depend on number of employees
-=======
-        self.price = 2.00 # $ replace with cash_store
-        self.lineup = Lineup((300,225),(0,250) ,10)
-        self.employees = []
-        self.prep_time = 30 # minutes/lemonade, should depend on number of employees
->>>>>>> inventory-menu
         self.time_serving_customer = 0
         self.recent_customer_thought = ''
         self.employees = []
@@ -88,12 +78,12 @@ class LemonadeStand():
 
 
 
-    def update(self, current_time, timedelta, recipe):
-        self.open = self.is_open(current_time.time())
+    def update(self, current_datetime, timedelta, recipe):
+        self.open = self.is_open(current_datetime.time())
         self.serve_customer(recipe, timedelta)
-        self.lemonstock.update(current_time)
-        self.sugarstock.update(current_time)
-        self.icestock.update(current_time)
+        self.lemonstock.update(current_datetime)
+        self.sugarstock.update(current_datetime)
+        self.icestock.update(current_datetime)
 
     def validate_price(self, value):
         try:

@@ -12,21 +12,8 @@ from recipe import Recipe
 from temperature import get_temperature
 
 class LemonadeGame():
-<<<<<<< HEAD
     def __init__(self, sound, config=None):
         self.sound = sound
-=======
-    def __init__(self, config=None):
-        self.screen = pygame.display.set_mode((800, 600))
-        self.current_datetime = datetime.datetime(2020,6,10,10)
-        self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
-        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime)
-        self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
-        self.scenery = pygame.image.load('./resources/background.png')
-        self.customer_outcomes = []
-        self.word_of_mouth_effect = 0
-
->>>>>>> inventory-menu
         # customer
         customer_image_dict = {}
         for s in ['walking']:
@@ -55,7 +42,7 @@ class LemonadeGame():
         self.screen = pygame.display.set_mode((800, 600))
         self.current_datetime = datetime.datetime(2020,6,10,10)
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
-        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time(), self.employee_image_dict, sound, n_employees=2)
+        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime, self.employee_image_dict, sound, n_employees=2)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
         self.town = Town(self.current_datetime.time())
         # self.scenery = pygame.image.load('./resources/background.png')

@@ -5,12 +5,9 @@ import datetime
 import numpy as np
 
 from entities.lemonadegame import LemonadeGame
-<<<<<<< HEAD
 from sound import Sound
-=======
 import menus
 
->>>>>>> inventory-menu
 
 def play():
     pygame.mixer.pre_init(44100, -16, 2, 4096)
