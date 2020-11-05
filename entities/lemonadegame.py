@@ -7,7 +7,8 @@ from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
 from entities.customer import Customer, CustomerArrivalTimeGenerator, CustomerPreferenceGenerator
-from entities.town import Town
+from entities.scenery import Town, Trees
+from entities.truck import Truck, truck_image_dict
 from recipe import Recipe
 from temperature import get_temperature
 
@@ -45,10 +46,11 @@ class LemonadeGame():
         self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime, self.employee_image_dict, sound, n_employees=3)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
         self.town = Town(self.current_datetime.time())
+        self.trees = Trees()
         # self.scenery = pygame.image.load('./resources/background.png')
         self.customer_outcomes = []
         self.word_of_mouth_effect = 0
-
+        self.trucks = pygame.sprite.Group([Truck((800,240),truck_image_dict)]) # HOW CAN THIS GET ADDED TO AT THE RIGHT TIMES?
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
         customers = start_day(self)
@@ -62,6 +64,7 @@ class LemonadeGame():
         self.town.update_town_time(self.current_datetime.time())
         self.background_sky.update_color(self.current_datetime.time())
         self.analog_clock.current_time = self.current_datetime.time()
+        self.trucks.update()
 
         # if it's the end of the day, recap, setup for tomorrow
         if not self.current_datetime.date() == old_datetime.date():
@@ -87,8 +90,8 @@ class LemonadeGame():
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))
         self.town.draw(self.screen)
-        # self.screen.blit(self.scenery, (0,0))
-        # self.lemonade_stand.workforce.draw(self.screen)
+        self.trucks.draw(self.screen)
+        self.trees.draw(self.screen)
         self.lemonade_stand.draw(self.current_datetime.time(),
                                     self.screen)
         self.active_customers.draw(self.screen)
