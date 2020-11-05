@@ -43,6 +43,7 @@ class LemonadeGame():
         customers = self.get_starting_customers()
         self.future_customers = pygame.sprite.Group(customers)
         self.active_customers = pygame.sprite.Group([])
+        self.daily_report = {}
 
     def get_starting_customers(self):
         return get_starting_customers(
@@ -68,7 +69,7 @@ class LemonadeGame():
         # if it's the end of the day, recap, setup for tomorrow
         if not self.current_datetime.date() == old_datetime.date():
             print('END OF DAY')
-            outcomes, word_of_mouth_effect = end_day(self)
+            outcomes, word_of_mouth_effect, self.daily_report = end_day(self)
             print(outcomes)
             self.word_of_mouth_effect = word_of_mouth_effect
             self.customer_outcomes = []
@@ -76,6 +77,7 @@ class LemonadeGame():
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
+            self.show_daily_report()
 
         # check for new customers arriving, add them to the update group
         for customer in self.future_customers.sprites():
@@ -120,3 +122,10 @@ class LemonadeGame():
         self.screen.blit(g_sugar, [20, 100])
         self.screen.blit(money, [20, 120])
         self.screen.blit(thoughts, [10, 580])
+
+    def show_daily_report(self):
+        pass
+
+
+
+

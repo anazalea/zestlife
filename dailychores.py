@@ -34,6 +34,7 @@ def get_starting_customers(
                          hold_for_n_frames = 5))
     return customers
 
+
 def end_day(lemonade_game):
     # TODO: don't take the entire lemonade_game object. Await merge of https://github.com/anazalea/lemonade/pull/23/files
     outcomes = (Counter(lemonade_game.customer_outcomes))
@@ -42,4 +43,13 @@ def end_day(lemonade_game):
     # pay employees
     for employee in lemonade_game.lemonade_stand.employees:
         lemonade_game.lemonade_stand.account_balance -= employee.daily_wage
-    return outcomes, word_of_mouth_effect
+
+    daily_report = {
+        "inventory": {
+            "lemon": 10,
+            "ice cube": 5,
+            "sugar (grams)": 500,
+        },
+        "income": 0.0,
+    }
+    return outcomes, word_of_mouth_effect, daily_report
