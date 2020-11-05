@@ -1,23 +1,74 @@
+from __future__ import annotations
 from enum import Enum
 
 import pygame
 import numpy as np
 import datetime
 import math
+import glob
 
+from typing import Tuple, Dict, List
 from entities.base import AnimatedSprite
 from pygame.math import Vector2
+from lineup import Lineup
+
+# default faces right
+BASE_CUSTOMER_WALKING_ANIMATIONS = [
+    [pygame.image.load(p) for p in sorted(glob.glob(f'./resources/customer_walking_*.png'))],
+    [pygame.image.load(p) for p in sorted(glob.glob(f'./resources/customer1_walking_*.png'))],
+]
+
+ACCESSORIES_DICT_HAIR = {
+    'short': ((0,0), pygame.image.load(f'./resources/customerhair_short.png')),
+    'bobcut': ((0,0), pygame.image.load(f'./resources/customerhair_bobcut.png')),
+    'bun': ((0,0), pygame.image.load(f'./resources/customerhair_bun.png')),
+    'karen': ((0,0), pygame.image.load(f'./resources/customerhair_karen.png')),
+}
+
+ACCESSORIES_DICT_FACE = {
+    'beard': ((0,0), pygame.image.load(f'./resources/customeraccessories_beard.png')),
+    'mustache': ((0,0), pygame.image.load(f'./resources/customeraccessories_mustache.png')),
+    'shades': ((0,0), pygame.image.load(f'./resources/customeraccessories_shades.png')),
+}
+
+ACCESSORIES_DICT = {
+    'drink_large_straw': ((0,0), pygame.image.load(f'./resources/drink_large_straw.png'))
+}
+
+def get_randomized_customer_image_dict():
+    random_i = np.random.choice(len(BASE_CUSTOMER_WALKING_ANIMATIONS))
+    return {'walking': BASE_CUSTOMER_WALKING_ANIMATIONS[random_i]}
 
 
 class Customer(AnimatedSprite):
     class CustomerState(Enum):
-        WALKING_LEFT = 'walking_left'
-        WALING_RIGHT = 'walking_right'
+        WALKING = 'walking'
 
-    def __init__(self, position, arrival_time_generator, pref_generator, image_dict, 
-                lineup, hold_for_n_frames=1, accessory_images=None, visible_accessories=None):
-        super().__init__(position, image_dict, hold_for_n_frames=hold_for_n_frames, 
-                            accessory_images=accessory_images, visible_accessories=visible_accessories)
+    def __init__(self,
+                 position: Tuple[int, int],
+                 arrival_time_generator: CustomerArrivalTimeGenerator,
+                 pref_generator: CustomerPreferenceGenerator,
+                 lineup: Lineup,
+                 hold_for_n_frames=1,
+                 image_dict: Dict[str, List[pygame.image]] = None,
+                 accessory_images=None,
+                 visible_accessories=None):
+
+        # initialize some stuff prior to AnimatedSprite
+        if image_dict is None:
+            image_dict = get_randomized_customer_image_dict()
+        if accessory_images is None and visible_accessories is None:
+            accessory_images = {
+                **ACCESSORIES_DICT,
+                **ACCESSORIES_DICT_HAIR,
+                **ACCESSORIES_DICT_FACE,
+            }
+            visible_accessories = {np.random.choice(list(d.keys())) for d in [
+                ACCESSORIES_DICT_FACE, ACCESSORIES_DICT_HAIR
+            ]}
+
+        super().__init__(position, image_dict, hold_for_n_frames=hold_for_n_frames,
+                         accessory_images=accessory_images, visible_accessories=visible_accessories)
         self.spawn_location = position
         self.arrival_time = arrival_time_generator.sample()
         self.speed = 3 + np.random.randint(2,6)  # pixels/minute
@@ -98,16 +149,15 @@ class Customer(AnimatedSprite):
         else:
             # print(vector_to_dest)
             vector_to_dest.scale_to_length(distance)
-            return vector_to_dest                            
+            return vector_to_dest
 
     def update(self, timedelta, lineup, recipe, price, customer_outcomes):
         super().next_frame()
         if tuple(self.rect[:2]) == self.destination:
             self.update_destination(timedelta, lineup, recipe, price, customer_outcomes)
         displacement = self.get_displacement(timedelta)
-        self.state = 'walking_left'
-        if displacement[0] > 0:
-            self.state = 'walking_right'
+        # face left (flip of default right) if not moving
+        self.flip = displacement[0] <= 0
         super().move(displacement)
 
     def customer_likes_recipe(self, recipe, price):
@@ -152,7 +202,7 @@ class Customer(AnimatedSprite):
         if self.max_spend < price/recipe.total_volume:
             reason += ' Not worth the money.'
             likes_it = False
-        
+
         if reason == '':
             reason = 'Yum!'
 
