@@ -1,12 +1,20 @@
 from enum import Enum
+from typing import List, Optional, Dict
 
 import pygame
 from pygame.math import Vector2
+from pygame.surface import Surface
+
+
+def get_flipped_version(image: Surface, flip: bool = False) -> Surface:
+    return image if not flip else pygame.transform.flip(image, True, False)
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, position, image_dict, hold_for_n_frames=1, state=None, 
-                    accessory_images=None, visible_accessories=None):
+    def __init__(self, position, image_dict, hold_for_n_frames=1, state=None,
+                 flip: bool = False,
+                 accessory_images=None,
+                 visible_accessories=None):
         """
         Animated sprite object.
 
@@ -30,6 +38,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self._state = state
         self.image_dict = image_dict
         self.images = image_dict[self.state]
+        self.flip = flip
 
         self._accessory_images = accessory_images if accessory_images else {}
         self._visible_accessories = visible_accessories if visible_accessories else set()
@@ -37,7 +46,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
             raise ValueError("visible_accessories must be a subset of accessory_images.keys()")
         self.update_images_with_accessories()
 
-        
         self.switch_frames = hold_for_n_frames
         self.frames_at_image = 0
         self.index = 0
@@ -72,7 +80,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.frames_at_image = 0
             self.index += 1
             self.index %= len(self.images)
-            self.image = self.images[self.index]
+            self.image = get_flipped_version(self.images[self.index], self.flip)
 
     def check_acc_key(self, ac_key):
         if ac_key not in self._accessory_images:
@@ -92,6 +100,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self._visible_accessories = set()
 
     def update_images_with_accessories(self):
+        """More like modifies self.images with appended accessories."""
         images = []
         for m in self.image_dict[self.state]:
             m = m.copy()
@@ -100,4 +109,3 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 m.blit(ac_img, ac_pos)
             images.append(m)
         self.images = images
-
