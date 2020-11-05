@@ -147,11 +147,21 @@ class Stock:
         self._update_degradation(t)
         return self.current_units, delivered_orders
 
-    def update(self, t: datetime, withdraw: float = 0.) -> Tuple[float, List[Order]]:
+    def update(self, t: datetime, withdraw: float = 0., new_capacity: Optional[float] = None) -> Tuple[
+        float, List[Order]]:
         """Update state at time t and withdraws units. Return delivered orders since last update."""
         self._check_no_time_travel(t)
         _, delivered_orders = self._update_orders(t)
         self.current_units -= withdraw
+        if new_capacity is not None:
+            self.capacity = new_capacity
+            new_units = self._check_capacity_bounds(self.current_units)
+            if new_units < self.current_units:
+                wastage = self.current_units - new_units
+                self.shrink_log.append(
+                    ShrinkEvent(dt=t, amount=wastage, reason='Decreased-Capacity')
+                )
+            self.current_units = new_units
         return self.current_units, delivered_orders
 
 
@@ -167,6 +177,7 @@ if __name__ == '__main__':
     maxh = 10
     hourlyconsumption = 2
     lemoncapacity = 20.
+    newcapacity = 10.
     dt0 = get_dummy_datetime(time(0))
     initialstock = 10.
 
@@ -176,7 +187,7 @@ if __name__ == '__main__':
 
     print('\nComitting orders...')
     lemonorders = []
-    for h, v in zip([1, 2, 5, 8], [5, 15, 5, 1]):
+    for h, v in zip([1, 2, 5, 8], [5, 15, 5, 5]):
         lemonorder = Order(order_dt=dt0, delivery_dt=get_dummy_datetime(time(h)), amount=v)
         lemonordercost = v / 2
         lemonorders.append(lemonorder)
@@ -198,7 +209,11 @@ if __name__ == '__main__':
             # consumption
             consumption = hourlyconsumption / 60
             totalconsumption += consumption
-            stockpostupdate, deliveredorderssince = lemonstock.update(timenow, withdraw=consumption)
+            if h == 5 and m == 30:
+                stockpostupdate, deliveredorderssince = lemonstock.update(timenow, withdraw=consumption,
+                                                                          new_capacity=newcapacity)
+            else:
+                stockpostupdate, deliveredorderssince = lemonstock.update(timenow, withdraw=consumption)
             # accumulate some information regarding post updat state
             x.append(timenow)
             yprior.append(stockpriorupdate)
@@ -226,11 +241,14 @@ if __name__ == '__main__':
     plt.plot(x, yprior, label='prior')
     plt.plot(x, ypost, label='post')
     plt.axhline(lemoncapacity, color='blue', ls=':', label='lemoncapacity')
+    plt.axhline(newcapacity, color='blue', ls=':', label='newcapacity')
     for order in lemonorders:
         plt.axvline(order.delivery_dt, color='red', ls=':', label='order amount: {}'.format(order.amount))
     for shrinkevent in lemonstock.shrink_log:
         if shrinkevent.reason == 'Over-Capacity':
             plt.scatter(shrinkevent.dt, lemoncapacity, label='Over-Capacity', color='red', s=25, marker='x')
+        if shrinkevent.reason == 'Decreased-Capacity':
+            plt.scatter(shrinkevent.dt, newcapacity, label='Decreased-Capacity', color='orange', s=25, marker='x')
     plt.title('lemonstock')
     plt.legend()
     plt.show()
