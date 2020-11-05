@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 from entities.employee import Employee
 from lineup import Lineup
+from inventory import Stock
 
 class LemonadeStand():
     def __init__(self, screen, current_time, employee_image_dict, sound, n_employees=0,):
@@ -14,16 +15,26 @@ class LemonadeStand():
         self.sound = sound
         self.opening_time = datetime.time(8)
         self.closing_time = datetime.time(20)
+<<<<<<< HEAD
         self.open = True
         self.open = self.is_open(current_time)
+=======
+        self.open = self.is_open(current_time.time())
+>>>>>>> inventory-menu
         self.juicing_efficiency = 45 # mL/lemon
-        self.lemons = 500 # lemons
-        self.sugar = 500 # g
-        self.ice = 200
-        self.price = 2.00 # $
+        self.lemonstock = Stock(initial_amount=500, initial_dt=current_time, discount_per_day=0.01, capacity=1000)
+        self.sugarstock = Stock(initial_amount=500, initial_dt=current_time, discount_per_day=0.001, capacity=1000) # g
+        self.icestock = Stock(initial_amount=200, initial_dt=current_time, discount_per_day=0.5, capacity=1000)
         self.account_balance = 0.00 # $
+<<<<<<< HEAD
         self.lineup = Lineup((300,400),(700,400) ,10)
         self.prep_time = 45 # minutes/lemonade, should depend on number of employees
+=======
+        self.price = 2.00 # $ replace with cash_store
+        self.lineup = Lineup((300,225),(0,250) ,10)
+        self.employees = []
+        self.prep_time = 30 # minutes/lemonade, should depend on number of employees
+>>>>>>> inventory-menu
         self.time_serving_customer = 0
         self.recent_customer_thought = ''
         self.employees = []
@@ -54,9 +65,9 @@ class LemonadeStand():
         return self.opening_time < current_time < self.closing_time
 
     def make_a_sale(self, recipe):
-        self.lemons -= recipe.lemon_juice / self.juicing_efficiency
-        self.ice -= recipe.ice
-        self.sugar -= recipe.sugar
+        self.lemonstock.current_units -= recipe.lemon_juice / self.juicing_efficiency
+        self.icestock.current_units -= recipe.ice
+        self.sugarstock.current_units -= recipe.sugar
         self.account_balance += self.price
 
     def serve_customer(self, recipe, timedelta):
@@ -78,8 +89,11 @@ class LemonadeStand():
 
 
     def update(self, current_time, timedelta, recipe):
-        self.open = self.is_open(current_time)
+        self.open = self.is_open(current_time.time())
         self.serve_customer(recipe, timedelta)
+        self.lemonstock.update(current_time)
+        self.sugarstock.update(current_time)
+        self.icestock.update(current_time)
 
     def validate_price(self, value):
         try:
@@ -90,8 +104,8 @@ class LemonadeStand():
 
     def update_price(self, new_price):
         print('UPDATING PRICE')
-        self.price = new_price     
-    
+        self.price = new_price
+
     def draw(self, time, screen):
         if time > self.opening_time and time < self.closing_time:
             self.workforce.draw(screen)
@@ -100,11 +114,11 @@ class LemonadeStand():
             screen.blit(self.image_closed, self.loc)
 
     def has_enough_stuff(self, recipe):
-        if self.lemons * self.juicing_efficiency < recipe.lemon_juice:
+        if self.lemonstock.current_units * self.juicing_efficiency < recipe.lemon_juice:
             return False
-        if self.sugar < recipe.sugar:
+        if self.sugarstock.current_units < recipe.sugar:
             return False
-        if self.ice < recipe.ice:
+        if self.icestock.current_units < recipe.ice:
             return False
         else:
             return True

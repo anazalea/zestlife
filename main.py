@@ -5,7 +5,12 @@ import datetime
 import numpy as np
 
 from entities.lemonadegame import LemonadeGame
+<<<<<<< HEAD
 from sound import Sound
+=======
+import menus
+
+>>>>>>> inventory-menu
 
 def play():
     pygame.mixer.pre_init(44100, -16, 2, 4096)
@@ -22,52 +27,10 @@ def play():
     ##############################################################################################
     ##############################################################################################
 
-    # RECIPE STUFF
-    recipe_theme = pygame_menu.themes.THEME_DEFAULT.copy()
-    recipe_theme.background_color = (0, 0, 0, 100)  # Enable transparency
-    recipe_menu = pygame_menu.Menu(
-        theme=recipe_theme,
-        height=400,
-        width=600,
-        onclose=pygame_menu.events.RESET,
-        title='Recipe',
-    )
-    recipe_menu.add_text_input('Lemon Juice [ml] :', default=lemonade_game.recipe.lemon_juice,
-                               onchange=lemonade_game.recipe.validate_lemonjuice, maxwidth=100,
-                               maxwidth_dynamically_update=False)
-    recipe_menu.add_text_input('Sugar [g] :', default=lemonade_game.recipe.sugar,
-                               onchange=lemonade_game.recipe.validate_sugar)
-    recipe_menu.add_text_input('Water [ml] :', default=lemonade_game.recipe.water,
-                               onchange=lemonade_game.recipe.validate_water)
-    recipe_menu.add_text_input('Ice [cubes] :', default=lemonade_game.recipe.ice,
-                               onchange=lemonade_game.recipe.validate_ice)
-    recipe_menu.add_selector('Straw Type ',
-                             [('None', 'no'),
-                              ('Plastic', 'plastic'),
-                              ('Paper', 'paper')],
-                             onchange=lemonade_game.recipe.validate_straw,
-                             selector_id='select_straw')
-
-    recipe_menu.add_button('CLOSE', pygame_menu.events.CLOSE)
-    recipe_menu.disable()
     recipe_button = pygbutton.PygButton((800 - 80, 520, 64, 64), normal='./resources/flask.png')
-
-    # PRICE
-    price_theme = pygame_menu.themes.THEME_DEFAULT.copy()
-    price_theme.background_color = (0, 0, 0, 100)  # Enable transparency
-    price_menu = pygame_menu.Menu(
-        theme=price_theme,
-        height=400,
-        width=600,
-        onclose=pygame_menu.events.RESET,
-        title='PRICING',
-    )
-    price_menu.add_text_input('Price/Cup [$] :',
-                              default=str(np.round(lemonade_game.lemonade_stand.price + 0.001, 2)),
-                              onchange=lemonade_game.lemonade_stand.validate_price)
-    price_menu.add_button('CLOSE', pygame_menu.events.CLOSE)
-    price_menu.disable()
     price_button = pygbutton.PygButton((800 - 80 - 8 - 64, 520, 64, 64),
+                                       normal='./resources/dollar-coin.png')
+    inventory_button = pygbutton.PygButton((800 - 80 - 8 - 64 - 8 - 64, 520, 64, 64),
                                        normal='./resources/dollar-coin.png')
 
     ##############################################################################################
@@ -86,6 +49,7 @@ def play():
             lemonade_game.print_stats()
             recipe_button.draw(lemonade_game.screen)
             price_button.draw(lemonade_game.screen)
+            inventory_button.draw(lemonade_game.screen)
             pygame.display.update()
 
         for event in pygame.event.get():
@@ -96,13 +60,15 @@ def play():
 
             buttonEvents = recipe_button.handleEvent(event)
             if 'click' in buttonEvents:
-                recipe_menu.enable()
-                recipe_menu.mainloop(lemonade_game.screen)
+                menus.recipe_menu(lemonade_game) #Needs recipe
 
             buttonEvents = price_button.handleEvent(event)
             if 'click' in buttonEvents:
-                price_menu.enable()
-                price_menu.mainloop(lemonade_game.screen)
+                menus.price_menu(lemonade_game) #Needs lemonade stand
+
+            buttonEvents = inventory_button.handleEvent(event)
+            if 'click' in buttonEvents:
+                menus.inventory_menu(lemonade_game) #Needs lemonade stand
 
             elif event.type == pygame.KEYDOWN:
                 # Escape key pressed
