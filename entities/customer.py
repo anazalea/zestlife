@@ -63,9 +63,11 @@ class Customer(AnimatedSprite):
                 **ACCESSORIES_DICT_HAIR,
                 **ACCESSORIES_DICT_FACE,
             }
-            visible_accessories = {np.random.choice(list(d.keys())) for d in [
-                ACCESSORIES_DICT_FACE, ACCESSORIES_DICT_HAIR
-            ]}
+            visible_accessories = {
+                np.random.choice(list(d.keys()) + [None]*len(d))
+                for d in [ACCESSORIES_DICT_FACE, ACCESSORIES_DICT_HAIR]
+            }
+            visible_accessories = {k for k in visible_accessories if k is not None}
 
         super().__init__(position, image_dict, hold_for_n_frames=hold_for_n_frames,
                          accessory_images=accessory_images, visible_accessories=visible_accessories)
