@@ -6,7 +6,7 @@ from collections import Counter
 from demand import demand_seasonality
 
 def predict_demand(date, word_of_mouth_effect):
-    return 100 * demand_seasonality(date) + word_of_mouth_effect
+    return int(100 * demand_seasonality(date) + word_of_mouth_effect)
 
 def start_day(lemonade_game):
     # update weather
