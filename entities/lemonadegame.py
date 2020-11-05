@@ -2,10 +2,16 @@ import datetime
 import glob
 import numpy as np
 import pygame
+from pygame import draw
+from pygame.draw import rect
+
+import menus
 from dailychores import get_starting_customers, end_day
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
+from entities.town import Town
+from menus import FONT_STYLE
 from entities.scenery import Town, Trees
 from entities.truck import FleetOfTrucks
 from entities.customer import CustomerArrivalTimeGenerator
@@ -37,7 +43,7 @@ class LemonadeGame():
         self.customer_outcomes = []
         self.word_of_mouth_effect = 0
         self.impending_shipments = []
-        self.trucks = FleetOfTrucks() 
+        self.trucks = FleetOfTrucks()
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
         customers = self.get_starting_customers()
@@ -77,7 +83,7 @@ class LemonadeGame():
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
-            self.show_daily_report()
+            menus.daily_report_menu(self)
 
         # check for new customers arriving, add them to the update group
         for customer in self.future_customers.sprites():
@@ -99,21 +105,27 @@ class LemonadeGame():
 
 
     def print_stats(self):
-        font = pygame.font.SysFont('comicsansmsttf',20)
+        font = pygame.font.Font(FONT_STYLE, 16)  # Edit fonts here
+        txt_color = (255, 255, 255)
         time_stamp = font.render(
             '{datetimstr} ({tempinc} Celcius)'.format(
                 datetimstr=self.current_datetime.strftime('%Y-%m-%d %H:%M %p'),
                 tempinc=get_temperature(self.current_datetime)
-            ), 1, (214, 26, 13))
-        current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, (214, 26, 13))
-        n_lemons = font.render(str(np.round(self.lemonade_stand.lemonstock.current_units, 0)) + ' LEMONS ON HAND', 1,
-                                (214, 26, 13))
-        g_sugar = font.render(str(np.round(self.lemonade_stand.sugarstock.current_units, 0)) + ' g SUGAR ON HAND', 1, (214, 26, 13))
+            ), 1, txt_color)
+        current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, txt_color)
+        n_lemons = font.render(str(int(np.round(self.lemonade_stand.lemonstock.current_units,
+                                             0))) + ' LEMONS ON HAND', 1,
+                               txt_color)
+        g_sugar = font.render(str(np.round(self.lemonade_stand.sugarstock.current_units, 0)) + ' g SUGAR ON HAND', 1,
+                              txt_color)
         juice_eff = font.render(
             f'JUICING EFFICIENCY {str(self.lemonade_stand.juicing_efficiency)} mL/lemon', 1,
-            (214, 26, 13))
-        money = font.render(str(self.lemonade_stand.account_balance) + ' $', 1, (0, 0, 0))
+            txt_color)
+        money = font.render(str(self.lemonade_stand.account_balance) + ' $', 1, (0, 255, 0))
         thoughts = font.render(self.lemonade_stand.recent_customer_thought, 1, (0, 0, 0))
+
+        # TODO: Alpha does not work here!
+        draw.rect(self.screen, pygame.Color(0, 0, 0, 150), pygame.Rect(10, 10, 460, 140))
 
         self.screen.blit(time_stamp, [20, 20])
         self.screen.blit(current_price, [20, 40])
@@ -122,10 +134,6 @@ class LemonadeGame():
         self.screen.blit(g_sugar, [20, 100])
         self.screen.blit(money, [20, 120])
         self.screen.blit(thoughts, [10, 580])
-
-    def show_daily_report(self):
-        pass
-
 
 
 
