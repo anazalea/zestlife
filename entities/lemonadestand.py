@@ -14,6 +14,7 @@ class LemonadeStand():
         self.sound = sound
         self.opening_time = datetime.time(8)
         self.closing_time = datetime.time(20)
+        self.open = True
         self.open = self.is_open(current_time)
         self.juicing_efficiency = 45 # mL/lemon
         self.lemons = 500 # lemons
@@ -48,6 +49,8 @@ class LemonadeStand():
         self.workforce = pygame.sprite.Group(self.employees)
 
     def is_open(self, current_time):
+        if not self.open and self.opening_time < current_time < self.closing_time:
+            self.sound.play_sfx(self.sound.powerup_appear)
         return self.opening_time < current_time < self.closing_time
 
     def make_a_sale(self, recipe):
@@ -71,7 +74,6 @@ class LemonadeStand():
             (not self.has_enough_stuff(recipe) or not self.open): # go home
             self.lineup.spots[0].occupant.likes_recipe = False
             self.time_serving_customer = 0
-            self.sound.play_sfx(self.sound.death)
 
 
 
