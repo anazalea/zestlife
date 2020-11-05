@@ -64,6 +64,7 @@ class Customer(AnimatedSprite):
                 **ACCESSORIES_DICT_FACE,
             }
             visible_accessories = {
+                # sometimes people don't have shit on their faces
                 np.random.choice(list(d.keys()) + [None]*len(d))
                 for d in [ACCESSORIES_DICT_FACE, ACCESSORIES_DICT_HAIR]
             }
