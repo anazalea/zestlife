@@ -9,6 +9,7 @@ from entities.background_sky import BackgroundSky
 from entities.customer import Customer, CustomerArrivalTimeGenerator, CustomerPreferenceGenerator
 from entities.town import Town
 from recipe import Recipe
+from temperature import get_temperature
 
 class LemonadeGame():
     def __init__(self, config=None):
@@ -90,7 +91,11 @@ class LemonadeGame():
 
     def print_stats(self):
         font = pygame.font.SysFont('comicsansmsttf',20)
-        time_stamp = font.render(str(self.current_datetime), 1, (214, 26, 13))
+        time_stamp = font.render(
+            '{datetimstr} ({tempinc} Celcius)'.format(
+                datetimstr=self.current_datetime.strftime('%Y-%m-%d %H:%M %p'),
+                tempinc=get_temperature(self.current_datetime)
+            ), 1, (214, 26, 13))
         current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, (214, 26, 13))
         n_lemons = font.render(str(np.round(self.lemonade_stand.lemons, 1)) + ' LEMONS ON HAND', 1,
                                 (214, 26, 13))
