@@ -16,13 +16,19 @@ class LemonadeGame():
         customer_image_dict = {}
         for s in ['walking']:
             images_path = sorted(glob.glob(f'./resources/customer_{s}_*.png'))
-            print(images_path)
             customer_image_dict[s+'_right'] = [pygame.image.load(img_path) for img_path in images_path]
             customer_image_dict[s+'_left'] = [pygame.transform.flip(image, True, False) \
                                                     for image in customer_image_dict[s+'_right']]
         self.customer_image_dict = customer_image_dict
         self.arrival_time_generator = CustomerArrivalTimeGenerator()
         self.preference_generator = CustomerPreferenceGenerator()
+
+        # customer accessories
+        acc_ims = ['drink_large_straw']
+        accessory_image_dict = {}
+        for im in acc_ims:
+            accessory_image_dict[im] = ((0,0), pygame.image.load(f'./resources/{im}.png'))
+        self.accessory_image_dict = accessory_image_dict
 
         # employee
         employee_image_dict = {}
@@ -34,14 +40,12 @@ class LemonadeGame():
         self.screen = pygame.display.set_mode((800, 600))
         self.current_datetime = datetime.datetime(2020,6,10,10)
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
-        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time(), self.employee_image_dict, n_employees=2)
+        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time(), self.employee_image_dict, n_employees=0)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
         self.town = Town(self.current_datetime.time())
         # self.scenery = pygame.image.load('./resources/background.png')
         self.customer_outcomes = []
         self.word_of_mouth_effect = 0
-
-        
 
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
