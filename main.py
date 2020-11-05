@@ -84,9 +84,6 @@ def play():
                 elif event.key == pygame.K_3:
                     game_speed = 5
 
-                elif event.key == pygame.K_r:
-                    recipe_menu.toggle()
-
 
 if __name__ == '__main__':
     play()
