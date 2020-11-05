@@ -22,6 +22,12 @@ from temperature import get_temperature
 KAREN_PROB = .1
 HIPSTER_PROB = .1
 
+ice_img = pygame.image.load(f'./resources/ice_cube.png')
+lemon_img = pygame.image.load(f'./resources/lemon.png')
+sugar_img = pygame.image.load(f'./resources/sugar.png')
+straw_img = pygame.image.load(f'./resources/straw.png')
+stat_bar = pygame.image.load(f'./resources/inventory_mini_stat.png')
+
 class LemonadeGame():
     def __init__(self, sound, config=None):
         self.sound = sound
@@ -105,35 +111,36 @@ class LemonadeGame():
 
 
     def print_stats(self):
-        font = pygame.font.Font(FONT_STYLE, 16)  # Edit fonts here
+        font = pygame.font.Font(FONT_STYLE, 14)  # Edit fonts here
         txt_color = (255, 255, 255)
-        time_stamp = font.render(
-            '{datetimstr} ({tempinc} Celcius)'.format(
-                datetimstr=self.current_datetime.strftime('%Y-%m-%d %H:%M %p'),
-                tempinc=get_temperature(self.current_datetime)
-            ), 1, txt_color)
-        current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, txt_color)
-        n_lemons = font.render(str(int(np.round(self.lemonade_stand.lemonstock.current_units,
-                                             0))) + ' LEMONS ON HAND', 1,
-                               txt_color)
-        g_sugar = font.render(str(np.round(self.lemonade_stand.sugarstock.current_units, 0)) + ' g SUGAR ON HAND', 1,
-                              txt_color)
-        juice_eff = font.render(
-            f'JUICING EFFICIENCY {str(self.lemonade_stand.juicing_efficiency)} mL/lemon', 1,
-            txt_color)
-        money = font.render(str(self.lemonade_stand.account_balance) + ' $', 1, (0, 255, 0))
-        thoughts = font.render(self.lemonade_stand.recent_customer_thought, 1, (0, 0, 0))
+        # time_stamp = font.render(
+        #     '{datetimstr} ({tempinc} Celcius)'.format(
+        #         datetimstr=self.current_datetime.strftime('%Y-%m-%d %H:%M %p'),
+        #         tempinc=get_temperature(self.current_datetime)
+        #     ), 1, txt_color)
+        # current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, txt_color)
+        n_lemons = font.render(str(int(np.round(
+            self.lemonade_stand.lemonstock.current_units, 0))), 1, txt_color)
+        g_sugar = font.render(str(int(np.round(
+            self.lemonade_stand.sugarstock.current_units, 0))), 1, txt_color)
+        n_ice = font.render(str(int(np.round(
+            self.lemonade_stand.icestock.current_units, 0))), 1, txt_color)
+
+        money = font.render('$ ' + str(self.lemonade_stand.account_balance), 1,  (0, 255, 0))
 
         # TODO: Alpha does not work here!
-        draw.rect(self.screen, pygame.Color(0, 0, 0, 150), pygame.Rect(10, 10, 460, 140))
+        self.screen.blit(pygame.transform.scale(stat_bar, (270, 65)), [10, 530])
 
-        self.screen.blit(time_stamp, [20, 20])
-        self.screen.blit(current_price, [20, 40])
-        self.screen.blit(juice_eff, [20, 60])
-        self.screen.blit(n_lemons, [20, 80])
-        self.screen.blit(g_sugar, [20, 100])
-        self.screen.blit(money, [20, 120])
-        self.screen.blit(thoughts, [10, 580])
+        stat_bar
+        margin = 32
+        img_size = 24
+        for i, img in enumerate([lemon_img, sugar_img, ice_img]):
+            self.screen.blit(pygame.transform.scale(img, (img_size, img_size)),
+                             [20 + (img_size + margin) * i, 540])
+
+        for i, txt in enumerate([n_lemons, g_sugar, n_ice, money]):
+            self.screen.blit(txt, [20 + (img_size + margin) * i, 565])
+
 
 
 

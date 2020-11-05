@@ -45,10 +45,17 @@ def end_day(lemonade_game):
         lemonade_game.lemonade_stand.account_balance -= employee.daily_wage
 
     daily_report = [
+        f"new orders arrived: {0}",
+        f"unsatisfied customers: {0}", "",
         f"inventory:",
-            f"    lemon: {50}",
-            f"    ice cube: {5}",
-            f"    sugar: {500}", "",
-        f"income: ${0.0}"
+        f"    lemon: {50}",
+        f"    sugar: {500}",
+        f"    straw: {0}"
+        f"    ice cube: {5}", "",
+        f"change in inventory:",
+        f"wages deduced: {0}",
+        f"expenses: {0}",
+        f"    storage rent: {0}",
+        f"revenue: ${0.0}",
     ]
     return outcomes, word_of_mouth_effect, daily_report
