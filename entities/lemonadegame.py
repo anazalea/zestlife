@@ -40,7 +40,7 @@ class LemonadeGame():
         self.screen = pygame.display.set_mode((800, 600))
         self.current_datetime = datetime.datetime(2020,6,10,10)
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
-        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time(), self.employee_image_dict, n_employees=0)
+        self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime.time(), self.employee_image_dict, n_employees=2)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
         self.town = Town(self.current_datetime.time())
         # self.scenery = pygame.image.load('./resources/background.png')
@@ -86,7 +86,7 @@ class LemonadeGame():
         self.screen.blit(self.background_sky.background, (0,0))
         self.town.draw(self.screen)
         # self.screen.blit(self.scenery, (0,0))
-        self.lemonade_stand.workforce.draw(self.screen)
+        # self.lemonade_stand.workforce.draw(self.screen)
         self.lemonade_stand.draw(self.current_datetime.time(),
                                     self.screen)
         self.active_customers.draw(self.screen)
