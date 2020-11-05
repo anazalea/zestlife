@@ -45,7 +45,7 @@ class LemonadeStand():
             employee.state = states[i%len(states)]
             if employee.state == 'watch':
                 employee.hold_for_n_frames = 40
-            employee.rect[:2] = [employee_locs[i+1],362 + np.random.randint(-5,5)]
+            employee.rect[:2] = [employee_locs[i+1],360 + np.random.randint(-2,5)]
             employee.index = np.random.choice([0,1,2])
         self.workforce = pygame.sprite.Group(self.employees)
 
