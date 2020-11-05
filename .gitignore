@@ -6,3 +6,6 @@
 
 # OS lint
 .DS_Store
+
+#venv
+./env/
