@@ -9,7 +9,7 @@ truck_image_dict = {'driving_lemons': [pygame.transform.flip(pygame.image.load('
 class Truck(AnimatedSprite):
     def __init__(self, position, image_dict,hold_for_n_frames=3,):
         super().__init__(position, image_dict, hold_for_n_frames)
-        self.speed = -8
+        self.speed = -8/(max(1, np.random.poisson(2)))
         self.destination = (150,230)
         self.frames_at_destination = 0
         self.unload_n_frames = 60
