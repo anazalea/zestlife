@@ -675,13 +675,13 @@ def upgrade_menu(lemonade_game):
     lemonade_stand = lemonade_game.lemonade_stand
     done = False
     click = False
+    fontsize = 25
+    font = pygame.font.Font(FONT_STYLE, fontsize)
     while not done:
         screen.blit(background, (0,0))
         screen.blit(stand_image, (0,0))
-
-        font = pygame.font.Font(FONT_STYLE,25) #Edit fonts here
         draw_text('Upgrade your stand', font, RGB_WHITE, screen, 20, 20)
-        button_w, button_h = 400, 25
+        button_w, button_h = 400, fontsize
         button_x, button_y = 0, 50
         active_color, inactive_color = (0, 0, 0, 100), (0, 0, 0, 255)
 
