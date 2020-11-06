@@ -676,4 +676,48 @@ def employee_menu(lemonade_game):
                     done = True
 
 def upgrade_stand_menu(lemonade_game):
-    lemonade_game.lemonade_stand.upgrade_stand()
+    screen = lemonade_game.screen
+    background = create_menu_background(screen)
+    stand_image = pygame.image.load('./resources/background.png')
+    lemonade_stand = lemonade_game.lemonade_stand
+    done = False
+    click = False
+    while not done:
+        screen.blit(background, (0,0))
+        screen.blit(stand_image, (0,0))
+
+        font = pygame.font.Font(FONT_STYLE,25) #Edit fonts here
+        draw_text('Upgrade your stand', font, (255, 255, 255), screen, 20, 20)
+        buttons = [False]*2
+        x_start, y_start = 20, 100
+        button_h, button_w = 200, 25
+        spacing = 100
+        draw_text('Current juicing efficiency : '+ str(lemonade_stand.juicing_efficiency), font, (255, 255, 255), screen , x_start, y_start)
+        buttons[0] = button(screen, 'Downgrade', (0,0,0,100), (0,0,0,255), (x_start+200,y_start+75,button_h,button_w), font, click)
+        buttons[1] = button(screen, 'Upgrade', (0,0,0,100), (0,0,0,255), (x_start+500,y_start+75,button_h,button_w), font, click)
+        #Buttons to accept recipe and return to game
+        return_to_game = button(screen, 'Resume Game', (0,0,0,100), (0,0,0,255), (400,500,300,50), font, click)
+        if click:
+            if buttons[0]:
+                lemonade_stand.downgrade_stand()
+            if buttons[1]:
+                lemonade_stand.upgrade_stand()
+            if return_to_game:
+                done = True
+
+        click = False
+        pygame.display.update()
+
+        #Events
+        for event in pygame.event.get():
+            # Close button clicked
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                #Clicked on start game
+                if event.button == 1:
+                    click = True
+            if event.type == pygame.KEYDOWN:
+                # Escape key pressed
+                if event.key == pygame.K_ESCAPE:
+                    done = True

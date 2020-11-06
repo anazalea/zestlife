@@ -50,16 +50,19 @@ class LemonadeStand():
 
     def upgrade_stand(self):
         #check if there are available upgrades (0-->1-->3)
-        if self.lemonade_stand_level < 2:
-            #upgrade level
+        if self.lemonade_stand_level == 2:
+            pass
+        else:
             self.lemonade_stand_level += 1
             self.account_balance -= 500
             self.juicing_efficiency += 10
         #update images
         self.set_lemonade_stand_image()
 
-    def downgradegrade_stand(self):
-        if self.lemonade_stand_level > 0:
+    def downgrade_stand(self):
+        if self.lemonade_stand_level == 0:
+            pass
+        else:
             self.lemonade_stand_level -= 1
             self.account_balance += 500
             self.juicing_efficiency -= 10
