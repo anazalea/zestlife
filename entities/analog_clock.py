@@ -10,8 +10,8 @@ class AnalogClock():
         self.width = self.bg.get_width()
         self.radius_m = int(self.height * 0.3)
         self.radius_h = int(self.height * 0.2)
-        self.center = [screen.get_width() - int(self.width/2), int(self.height/2)]
-        self.loc = [screen.get_width() - self.width, 0]
+        self.center = [screen.get_width() - int(self.width/2)-13, int(self.height/2)+22]
+        self.loc = [screen.get_width() - self.width-13, 0+22]
 
 
     def draw(self, screen):
