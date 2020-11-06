@@ -87,10 +87,20 @@ class LemonadeStand():
         self.account_balance += self.price
 
     def serve_customer(self, recipe: Recipe, current_datetime: datetime, deltat: timedelta):
-        if self.lineup.spots[0].is_occupied and \
-            self.lineup.spots[0].occupant.likes_recipe and \
-                not self.lineup.spots[0].occupant.has_lemonade and \
-                self.open and self.has_enough_stuff(recipe):
+        if not self.lineup.spots[0].is_occupied:
+            # nothing happens
+            return None
+        if not self.has_enough_stuff(recipe) or not self.open:
+            # go home
+            self.lineup.spots[0].occupant.likes_recipe = False
+            self.time_serving_customer = 0
+        if all([
+            self.lineup.spots[0].occupant.likes_recipe,
+            not self.lineup.spots[0].occupant.has_lemonade,
+            self.open,
+            self.has_enough_stuff(recipe),
+        ]):
+            # will_have_sale
             self.time_serving_customer += deltat
             if self.time_serving_customer > self.prep_time:
                 self.lineup.spots[0].occupant.has_lemonade = True
@@ -98,11 +108,6 @@ class LemonadeStand():
                 self.sound.play_sfx(self.sound.coin)
                 self.time_serving_customer = 0
                 self.make_a_sale(recipe)
-        elif self.lineup.spots[0].is_occupied and \
-            (not self.has_enough_stuff(recipe) or not self.open): # go home
-            self.lineup.spots[0].occupant.likes_recipe = False
-            self.time_serving_customer = 0
-
 
 
     def update(self, current_datetime: datetime, deltat: timedelta, recipe: Recipe):
