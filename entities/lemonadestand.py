@@ -8,6 +8,11 @@ from lineup import Lineup
 from recipe import Recipe
 from inventory import Stock
 
+LEMON_INISTOCK, LEMON_INICAP = 500, 500
+SUGAR_INISTOCK, SUGAR_INICAP = 500, 500
+ICE_INISTOCK, ICE_INICAP = 500, 500
+CASH_INI = 1000
+
 class LemonadeStand():
     def __init__(self, screen, current_datetime, employee_image_dict, sound, n_employees=3,):
         self.image_open = pygame.image.load('./resources/standA_small.png')
@@ -21,10 +26,19 @@ class LemonadeStand():
         self.open = True
         self.open = self.is_open(current_datetime.time())
         self.juicing_efficiency = 45 # mL/lemon
-        self.lemonstock: Stock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.01, capacity=1000)
-        self.sugarstock: Stock = Stock(initial_amount=1000, initial_dt=current_datetime, discount_per_day=0.001, capacity=1000) # g
-        self.icestock: Stock = Stock(initial_amount=1000, initial_dt=current_datetime, discount_per_day=0.5, capacity=1000)
-        self.account_balance = 1000 # $
+        self.lemonstock: Stock = Stock(
+            initial_amount=LEMON_INISTOCK, initial_dt=current_datetime,
+            discount_per_day=0.01, capacity=LEMON_INICAP
+        )
+        self.sugarstock: Stock = Stock(
+            initial_amount=SUGAR_INISTOCK, initial_dt=current_datetime,
+            discount_per_day=0.001, capacity=SUGAR_INICAP
+        ) # g
+        self.icestock: Stock = Stock(
+            initial_amount=ICE_INISTOCK, initial_dt=current_datetime,
+            discount_per_day=0.5, capacity=ICE_INICAP
+        )
+        self.account_balance = CASH_INI # $
         self.price = 2.00
         self.lineup = Lineup((300,400),(700,400) ,10)
         self.prep_time = 45 # minutes/lemonade, should depend on number of employees
@@ -52,7 +66,7 @@ class LemonadeStand():
                 self.image_closed = pygame.image.load('./resources/standC_small.png')
 
     def upgrade_stand(self):
-        #check if there are available upgrades (0-->1-->3)
+        #check if there are available upgrades (0-->1-->2)
         if self.lemonade_stand_level == 2:
             pass
         else:

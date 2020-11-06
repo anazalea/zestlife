@@ -1,20 +1,13 @@
 import pygame
-import pygame_menu
-import pygbutton
-import datetime
-import time
-import numpy as np
-import math
 from datetime import timedelta
 
-from entities.lemonadestand import LemonadeStand
-from recipe import Recipe
 from inventory import Order
 import pricing
 
 #Constants
 FONT_STYLE = './resources/joystix-monospace.ttf'
 MENU_BG = pygame.image.load('./resources/menu_background.png')
+RGB_WHITE = (255, 255, 255)
 
 #Helper functions
 def text_objects(text, font, color):
@@ -685,27 +678,38 @@ def upgrade_menu(lemonade_game):
     lemonade_stand = lemonade_game.lemonade_stand
     done = False
     click = False
+    fontsize = 20
+    font = pygame.font.Font(FONT_STYLE, fontsize)
     while not done:
         screen.blit(background, (0,0))
         screen.blit(stand_image, (0,0))
 
-        font = pygame.font.Font(FONT_STYLE,25) #Edit fonts here
-        draw_text('Upgrade your stand', font, (255, 255, 255), screen, 20, 20)
-        buttons = [False]*2
-        x_start, y_start = 20, 100
-        button_h, button_w = 200, 25
-        spacing = 100
-        draw_text('Current juicing efficiency : '+ str(lemonade_stand.juicing_efficiency), font, (255, 255, 255), screen , x_start, y_start)
-        buttons[0] = button(screen, 'Downgrade', (0,0,0,100), (0,0,0,255), (x_start+200,y_start+75,button_h,button_w), font, click)
-        buttons[1] = button(screen, 'Upgrade', (0,0,0,100), (0,0,0,255), (x_start+500,y_start+75,button_h,button_w), font, click)
-        draw_text('Upgrade costs $500', font, (255, 255, 255), screen , x_start, y_start+150)
-        draw_text('Downgrade returns $500', font, (255, 255, 255), screen , x_start, y_start+225)
-        #Buttons to accept recipe and return to game
-        return_to_game = button(screen, 'Resume Game', (0,0,0,100), (0,0,0,255), (400,500,300,50), font, click)
+        left_margin = 20
+        top_margin = 20
+
+        draw_text('Upgrade your stand', font, RGB_WHITE, screen, left_margin, top_margin)
+        button_w, button_h = 15*fontsize, fontsize
+        active_color, inactive_color = (0, 0, 0, 100), (0, 0, 0, 255)
+        mid_x = 400
+
+        draw_text('Current Juicing Efficiency: %.2f' % lemonade_stand.juicing_efficiency, font, RGB_WHITE, screen , left_margin, 100)
+        # buttons
+        downgrade_button = button(screen, 'Downgrade (+$500)',
+                                  active_color, inactive_color,
+                                  (left_margin, 50, button_w, button_h),
+                                  font, click)
+        upgrade_button = button(screen, 'Upgrade (-$500)',
+                                active_color, inactive_color,
+                                (mid_x, 50, button_w, button_h),
+                                font, click)
+        return_to_game = button(screen, 'Resume Game',
+                                active_color, inactive_color,
+                                (400,500,300,50),
+                                font, click)
         if click:
-            if buttons[0]:
+            if downgrade_button:
                 lemonade_stand.downgrade_stand()
-            if buttons[1]:
+            if upgrade_button:
                 lemonade_stand.upgrade_stand()
             if return_to_game:
                 done = True
