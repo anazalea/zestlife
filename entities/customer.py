@@ -289,9 +289,11 @@ class CustomerPreferenceGenerator:
 class HipsterPreferenceGenerator(CustomerPreferenceGenerator):
     min_lemon = 60 / 350  # mL per 350 mL
     max_lemon = 120 / 350  # mL per 350 mL
-    lemon_width = 10 / 350
+    lemon_width = 30 / 350
     straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw', 'anti_paper_straw']
     straw_pref_probs = [.5, 0., .5, 0.]
+    spend_per_ml = 15.00/350
+    spend_width = 5./350
 
 
 class KarenPreferenceGenerator(CustomerPreferenceGenerator):
