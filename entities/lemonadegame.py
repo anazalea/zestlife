@@ -166,6 +166,11 @@ class LemonadeGame():
                 font.render('%.0f' % stock.current_units, 1, txt_color),
                 [20 + (img_size + margin) * i, 565]
             )
+            self.screen.blit(
+                font.render('/%.0f' % stock.capacity, 1, txt_color),
+                [20 + (img_size + margin) * i, 578]
+            )
+
         # draw money
         money = self.lemonade_stand.account_balance
         self.screen.blit(
