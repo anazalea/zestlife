@@ -6,7 +6,7 @@ from pygame import draw
 from pygame.draw import rect
 
 import menus
-from dailychores import get_starting_customers, end_day
+from dailychores import get_starting_customers, end_day, track_day_start_stats
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
@@ -88,6 +88,7 @@ class LemonadeGame():
             self.word_of_mouth_effect = word_of_mouth_effect
             self.customer_outcomes = []
             customers = self.get_starting_customers()
+            track_day_start_stats(self)
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()

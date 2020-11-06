@@ -12,6 +12,7 @@ from entities.customer import CustomerArrivalTimeGenerator, CustomerType
 def predict_demand(dt: datetime.date, word_of_mouth_effect: float) -> int:
     return int(100 * demand_seasonality(dt) + word_of_mouth_effect)
 
+
 def get_starting_customers(
         dt: datetime.date,
         word_of_mouth_effect: float,
@@ -33,6 +34,7 @@ def get_starting_customers(
                          lineup=lineup,
                          hold_for_n_frames = 5))
     return customers
+
 
 def track_day_start_stats(lemonade_game):
     # TODO: not nice! this is monkey patching
