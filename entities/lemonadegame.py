@@ -139,7 +139,6 @@ class LemonadeGame():
         #     ), 1, txt_color)
         # current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, txt_color)
 
-        # current values
         margin = 32
         img_size = 24
         self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (270, 65)), [10, 530])
