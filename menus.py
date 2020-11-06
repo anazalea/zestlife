@@ -146,7 +146,12 @@ def recipe_menu(lemonade_game):
                         else:
                             ingredients[list(ingredients.keys())[int((i+1)/2)]] -=1
             if accept_recipe:
-                recipe.update_ratios(ingredients['lemon juice'], ingredients['sugar'], ingredients['water'], ingredients['ice'])
+                recipe.update_lemonjuice(ingredients['lemon juice'])
+                recipe.update_sugar(ingredients['sugar'])
+                recipe.update_ice(ingredients['ice'])
+                recipe.update_water(ingredients['water'])
+                recipe.update_ratios()
+
                 #Write something about the type of lemonade you're making
                 recipe_message = 'The recipe sounds tasty'
             if return_to_game:
