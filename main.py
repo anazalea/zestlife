@@ -76,6 +76,7 @@ def play():
             lemonade_game.update_world(game_speed)
             lemonade_game.draw()
             lemonade_game.print_stats()
+            lemonade_game.print_thought()
             recipe_button.draw(lemonade_game.screen)
             price_button.draw(lemonade_game.screen)
             order_button.draw(lemonade_game.screen)
