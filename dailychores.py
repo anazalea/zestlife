@@ -4,7 +4,7 @@ import numpy as np
 from entities.customer import Customer
 from collections import Counter
 from demand import demand_seasonality
-# from entities.lemonadegame import LemonadeGame
+# from entities.lemonadegame import LemonadeGame # doesn't work due to circular import.
 
 def predict_demand(date, word_of_mouth_effect):
     return int(100 * demand_seasonality(date) + word_of_mouth_effect)
@@ -19,11 +19,11 @@ def start_day(lemonade_game):
                                         lemonade_game.word_of_mouth_effect)
 
     # generate customers
-    customers =[Customer((np.random.choice([-150,950]), 500 + np.random.randint(-25,25)), 
-                        lemonade_game.arrival_time_generator, 
-                        lemonade_game.preference_generator,
-                        lemonade_game.lemonade_stand.lineup,
-                        hold_for_n_frames = 5)
+    customers =[Customer(position=(np.random.choice([-150,950]), 500 + np.random.randint(-25,25)),
+                         arrival_time_generator=lemonade_game.arrival_time_generator,
+                         pref_generator=lemonade_game.preference_generator,
+                         lineup=lemonade_game.lemonade_stand.lineup,
+                         hold_for_n_frames = 5)
                 for i in range(n_customers_today)]
 
     return customers
