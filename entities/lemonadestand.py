@@ -149,7 +149,7 @@ class LemonadeStand():
                 self.coin_group.add(Coin((300+np.random.randint(-10,10),305), image_dict=coin_im_dict))
                 self.sound.play_sfx(self.sound.coin)
                 self.time_serving_customer = 0
-                self.make_a_sale(dt=current_datetime+timedelta(minutes=tdelta_minutes), recipe=recipe)
+                self.make_a_sale(dt=current_datetime+timedelta(minutes=.5*tdelta_minutes), recipe=recipe)
 
 
     def update(self, current_datetime: datetime, tdelta_minutes: float, recipe: Recipe):
