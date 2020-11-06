@@ -44,7 +44,7 @@ class Truck(AnimatedSprite):
 
         if self.rect[0] <= self.destination[0]:
             if self.frames_at_destination == 0:
-                sound.play_sfx(self.sound.pipe)
+                sound.play_sfx(sound.pipe)
             self.frames_at_destination += 1
             if self.frames_at_destination > self.unload_n_frames:
                 super().move(Vector2(self.speed/2,0))

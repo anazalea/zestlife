@@ -101,7 +101,7 @@ class LemonadeGame():
         self.background_sky.update_color(self.current_datetime.time())
         self.analog_clock.current_time = self.current_datetime.time()
         # check for new orders
-        self.trucks.update(self.lemonade_stand, self.current_datetime)
+        self.trucks.update(self.lemonade_stand, self.current_datetime, self.sound)
 
         # if it's the end of the day, recap, setup for tomorrow
         if not self.current_datetime.date() == old_datetime.date():
@@ -117,10 +117,6 @@ class LemonadeGame():
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
             menus.daily_report_menu(self)
-            #reset employees start and end time
-            for e in self.lemonade_stand.employees:
-                e.clock_in(datetime.time(8))
-                e.clock_out(datetime.time(20))
 
         # check for new customers arriving, add them to the update group
         for customer in self.future_customers.sprites():
@@ -143,16 +139,12 @@ class LemonadeGame():
 
     def update_last_thought(self):
         if len(self.customer_thoughts) > 0:
-            # import ipdb; ipbd.set_trace()
             if self.last_thinking_customer != self.customer_thoughts[-1][0]:
                 self.last_customer_thought = f'"{np.random.choice(self.customer_thoughts[-1][1])}"'
-                # print(self.last_customer_thought)
                 self.last_thinking_customer = self.customer_thoughts[-1][0]
                 self.thought_frames = 0
             else:
                 self.thought_frames += 1
-            # if self.thought_frames > 30:
-            #     self.last_customer_thought = ''
 
     def print_thought(self):
         font = pygame.font.Font(FONT_STYLE, 14)
