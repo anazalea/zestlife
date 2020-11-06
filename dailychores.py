@@ -29,6 +29,7 @@ def get_starting_customers(
     return customers
 
 def end_day(lemonade_game):
+    # TODO: don't take the entire lemonade_game object. Await merge of https://github.com/anazalea/lemonade/pull/23/files
     outcomes = (Counter(lemonade_game.customer_outcomes))
     word_of_mouth_effect = outcomes['Satisfied Customer'] - outcomes['Bad Experience']
 
