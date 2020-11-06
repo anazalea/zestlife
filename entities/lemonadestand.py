@@ -54,19 +54,17 @@ DOWNGRADE_REFUND = 400
 STAND_TYPE_ORDERING = [StandType.A, StandType.B, StandType.C]
 
 def get_stand_upgrade(current_stand_type: StandType) -> StandType:
-    upgrade_index = STAND_TYPE_ORDERING.index(current_stand_type) + 1
+    new_index = STAND_TYPE_ORDERING.index(current_stand_type) + 1
     try:
-        return STAND_TYPE_ORDERING[upgrade_index]
+        return STAND_TYPE_ORDERING[new_index]
     except IndexError:
         pass
     return current_stand_type
 
 def get_stand_downgrade(current_stand_type: StandType) -> StandType:
-    upgrade_index = STAND_TYPE_ORDERING.index(current_stand_type) + 1
-    try:
-        return STAND_TYPE_ORDERING[upgrade_index - 1]
-    except IndexError:
-        pass
+    new_index = STAND_TYPE_ORDERING.index(current_stand_type) - 1
+    if new_index >= 0:
+        return STAND_TYPE_ORDERING[new_index]
     return current_stand_type
 
 
@@ -125,12 +123,18 @@ class LemonadeStand():
         self.icestock.update(t=dt, new_capacity=new_config.ice_capacity)
 
     def upgrade_stand(self, dt: datetime.datetime):
-        self.refresh_lemonade_stand_with_new_type(dt=dt, stand_type=get_stand_upgrade(self.stand_type))
-        self.account_balance -= UPGRADE_COST
+        new_stand_type = get_stand_upgrade(self.stand_type)
+        will_change_type = new_stand_type != self.stand_type
+        self.refresh_lemonade_stand_with_new_type(dt=dt, stand_type=new_stand_type)
+        if will_change_type:
+            self.account_balance -= UPGRADE_COST
 
     def downgrade_stand(self, dt: datetime.datetime):
-        self.refresh_lemonade_stand_with_new_type(dt=dt, stand_type=get_stand_downgrade(self.stand_type))
-        self.account_balance += DOWNGRADE_REFUND
+        new_stand_type = get_stand_downgrade(self.stand_type)
+        will_change_type = new_stand_type != self.stand_type
+        self.refresh_lemonade_stand_with_new_type(dt=dt, stand_type=new_stand_type)
+        if will_change_type:
+            self.account_balance += DOWNGRADE_REFUND
 
     def update_prep_time(self):
         if len(self.employees) == 0:

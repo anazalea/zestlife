@@ -689,6 +689,8 @@ def upgrade_menu(lemonade_game):
     current_stand_type = lemonade_stand.stand_type
     upgrade_stand_type = get_stand_upgrade(current_stand_type)
     downgrade_stand_type = get_stand_downgrade(current_stand_type)
+    can_upgrade = upgrade_stand_type != current_stand_type
+    can_downgrade = downgrade_stand_type != current_stand_type
     print (downgrade_stand_type, current_stand_type, upgrade_stand_type)
     # get current and upgrad/downgrade details
     current_stand_config = get_stand_config(current_stand_type)
@@ -713,11 +715,11 @@ def upgrade_menu(lemonade_game):
         mid_x = 400
 
         # buttons
-        downgrade_button = button(screen, 'Downgrade (+${})'.format(stand_downgrade_refund),
+        downgrade_button = button(screen, 'Downgrade (+${})'.format(stand_downgrade_refund if can_downgrade else 0),
                                   active_color, inactive_color,
                                   (left_margin, 50, button_w, button_h),
                                   font, click)
-        upgrade_button = button(screen, 'Upgrade (-${})'.format(stand_upgrade_cost),
+        upgrade_button = button(screen, 'Upgrade (-${})'.format(stand_upgrade_cost if can_upgrade else 0),
                                 active_color, inactive_color,
                                 (mid_x, 50, button_w, button_h),
                                 font, click)
