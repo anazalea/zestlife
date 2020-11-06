@@ -138,10 +138,10 @@ class LemonadeGame():
 
         temp = get_temperature(self.current_datetime)
         temp_color = (max(17 * (temp - 15), 255), 0, 0) if temp > 25 else (0, 0, 0)
-        temp_txt = font.render(str(temp), 1, temp_color)
+        temp_txt = font.render(str(temp) + '°', 1, temp_color)
 
         # draw background of the stats
-        self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (270, 65)), [10, 530])
+        self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (290, 65)), [10, 530])
 
         margin = 32
         img_size = 24
