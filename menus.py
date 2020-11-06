@@ -3,6 +3,11 @@ from datetime import timedelta
 
 from inventory import Order
 import pricing
+from entities.lemonadestand import (
+    get_stand_downgrade, get_stand_upgrade, StandType, get_stand_config,
+    UPGRADE_COST as stand_upgrade_cost,
+    DOWNGRADE_REFUND as stand_downgrade_refund
+)
 
 #Constants
 FONT_STYLE = './resources/joystix-monospace.ttf'
@@ -668,11 +673,26 @@ def employee_menu(lemonade_game):
                 if event.key == pygame.K_ESCAPE:
                     done = True
 
+# from entities.lemonadegame import LemonadeGame # circular import
+# def upgrade_menu(lemonade_game: LemonadeGame):
+
 def upgrade_menu(lemonade_game):
     screen = lemonade_game.screen
     background = create_menu_background(screen)
     stand_image = pygame.image.load('./resources/background.png')
     lemonade_stand = lemonade_game.lemonade_stand
+
+    # current and upgrade/downgrade paths
+    current_stand_type = lemonade_stand.stand_type
+    upgrade_stand_type = get_stand_upgrade(current_stand_type)
+    downgrade_stand_type = get_stand_downgrade(current_stand_type)
+    print (downgrade_stand_type, current_stand_type, upgrade_stand_type)
+    # get current and upgrad/downgrade details
+    current_stand_config = get_stand_config(current_stand_type)
+    upgrade_stand_config = get_stand_config(upgrade_stand_type)
+    downgrade_stand_config = get_stand_config(downgrade_stand_type)
+
+
     done = False
     click = False
     fontsize = 20
@@ -689,26 +709,58 @@ def upgrade_menu(lemonade_game):
         active_color, inactive_color = (0, 0, 0, 100), (0, 0, 0, 255)
         mid_x = 400
 
-        draw_text('Current Juicing Efficiency: %.2f' % lemonade_stand.juicing_efficiency, font, RGB_WHITE, screen , left_margin, 100)
         # buttons
-        downgrade_button = button(screen, 'Downgrade (+$500)',
+        downgrade_button = button(screen, 'Downgrade (+${})'.format(stand_downgrade_refund),
                                   active_color, inactive_color,
                                   (left_margin, 50, button_w, button_h),
                                   font, click)
-        upgrade_button = button(screen, 'Upgrade (-$500)',
+        upgrade_button = button(screen, 'Upgrade (-${})'.format(stand_upgrade_cost),
                                 active_color, inactive_color,
                                 (mid_x, 50, button_w, button_h),
                                 font, click)
+        draw_text(
+            'Juicing Efficiency: {} <- {} -> {}'.format(
+                downgrade_stand_config.juicing_efficiency,
+                current_stand_config.juicing_efficiency,
+                upgrade_stand_config.juicing_efficiency,
+            ),
+            font, RGB_WHITE, screen , left_margin, 100
+        )
+        draw_text(
+            'Lemon Capacity:     {} <- {} -> {}'.format(
+                downgrade_stand_config.lemon_capacity,
+                current_stand_config.lemon_capacity,
+                upgrade_stand_config.lemon_capacity,
+            ),
+            font, RGB_WHITE, screen , left_margin, 120
+        )
+        draw_text(
+            'Sugar Capacity:     {} <- {} -> {}'.format(
+                downgrade_stand_config.sugar_capacity,
+                current_stand_config.sugar_capacity,
+                upgrade_stand_config.sugar_capacity,
+            ),
+            font, RGB_WHITE, screen , left_margin, 140
+        )
+        draw_text(
+            'Ice Capacity:       {} <- {} -> {}'.format(
+                downgrade_stand_config.ice_capacity,
+                current_stand_config.ice_capacity,
+                upgrade_stand_config.ice_capacity,
+            ),
+            font, RGB_WHITE, screen , left_margin, 160
+        )
         return_to_game = button(screen, 'Resume Game',
                                 active_color, inactive_color,
                                 (400,500,300,50),
                                 font, click)
         if click:
             if downgrade_button:
-                lemonade_stand.downgrade_stand()
+                lemonade_stand.downgrade_stand(dt=lemonade_game.current_datetime)
+                done = True
             if upgrade_button:
-                lemonade_stand.upgrade_stand()
-            if return_to_game:
+                lemonade_stand.upgrade_stand(dt=lemonade_game.current_datetime)
+            if any([return_to_game, downgrade_button, upgrade_button]):
                 done = True
 
         click = False

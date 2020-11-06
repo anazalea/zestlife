@@ -7,16 +7,87 @@ from entities.coin import Coin, coin_im_dict
 from lineup import Lineup
 from recipe import Recipe
 from inventory import Stock
+from enum import Enum
 
-LEMON_INISTOCK, LEMON_INICAP = 500, 500
-SUGAR_INISTOCK, SUGAR_INICAP = 500, 500
-ICE_INISTOCK, ICE_INICAP = 500, 500
+LEMON_INISTOCK = 500
+SUGAR_INISTOCK = 500
+ICE_INISTOCK = 500
 CASH_INI = 1000
 
+class StandType(Enum):
+    A = 'A'
+    B = 'B'
+    C = 'C'
+
+class StandTypeConfig:
+    image = pygame.image.load('./resources/standA_small.png')
+    juicing_efficiency = 45
+    lemon_capacity = 500
+    sugar_capacity = 500
+    ice_capacity = 500
+
+class StandTypeConfigB(StandTypeConfig):
+    image = pygame.image.load('./resources/standB_small.png')
+    juicing_efficiency = 55
+    lemon_capacity = 1000
+    sugar_capacity = 1000
+    ice_capacity = 1000
+
+class StandTypeConfigC(StandTypeConfig):
+    image = pygame.image.load('./resources/standC_small.png')
+    juicing_efficiency = 75
+    lemon_capacity = 2000
+    sugar_capacity = 2000
+    ice_capacity = 2000
+
+def get_stand_config(stand_type: StandType) -> StandTypeConfig:
+    if stand_type == StandType.A:
+        return StandTypeConfig
+    elif stand_type == StandType.B:
+        return StandTypeConfigB
+    elif stand_type == StandType.C:
+        return StandTypeConfigC
+    return StandTypeConfig
+
+UPGRADE_COST = 500
+DOWNGRADE_REFUND = 400
+STAND_TYPE_ORDERING = [StandType.A, StandType.B, StandType.C]
+
+def get_stand_upgrade(current_stand_type: StandType) -> StandType:
+    upgrade_index = STAND_TYPE_ORDERING.index(current_stand_type) + 1
+    try:
+        return STAND_TYPE_ORDERING[upgrade_index]
+    except IndexError:
+        pass
+    return current_stand_type
+
+def get_stand_downgrade(current_stand_type: StandType) -> StandType:
+    upgrade_index = STAND_TYPE_ORDERING.index(current_stand_type) + 1
+    try:
+        return STAND_TYPE_ORDERING[upgrade_index - 1]
+    except IndexError:
+        pass
+    return current_stand_type
+
+
 class LemonadeStand():
-    def __init__(self, screen, current_datetime, employee_image_dict, sound, n_employees=0,):
-        self.image_open = pygame.image.load('./resources/standA_small.png')
-        self.image_closed = pygame.image.load('./resources/standA_small.png')
+    def __init__(self, screen, current_datetime, employee_image_dict, sound, n_employees=0, stand_type: StandType = StandType.A):
+        self.stand_type: StandType = stand_type
+        self.lemonstock: Stock = Stock(
+            initial_amount=LEMON_INISTOCK, initial_dt=current_datetime,
+            discount_per_day=0.01, capacity=LEMON_INISTOCK
+        )
+        self.sugarstock: Stock = Stock(
+            initial_amount=SUGAR_INISTOCK, initial_dt=current_datetime,
+            discount_per_day=0.001, capacity=SUGAR_INISTOCK
+        ) # g
+        self.icestock: Stock = Stock(
+            initial_amount=ICE_INISTOCK, initial_dt=current_datetime,
+            discount_per_day=0.5, capacity=ICE_INISTOCK
+        )
+        # this guy updates a bunch of adjustables depending on stand_type
+        self.refresh_lemonade_stand_with_new_type(dt=current_datetime, stand_type=stand_type)
+        # independent of stand_type
         self.im_height = self.image_open.get_height()
         self.im_width = self.image_open.get_width()
         self.loc = [250,325]
@@ -25,19 +96,6 @@ class LemonadeStand():
         self.closing_time = datetime.time(20)
         self.open = True
         self.open = self.is_open(current_datetime.time())
-        self.juicing_efficiency = 45 # mL/lemon
-        self.lemonstock: Stock = Stock(
-            initial_amount=LEMON_INISTOCK, initial_dt=current_datetime,
-            discount_per_day=0.01, capacity=LEMON_INICAP
-        )
-        self.sugarstock: Stock = Stock(
-            initial_amount=SUGAR_INISTOCK, initial_dt=current_datetime,
-            discount_per_day=0.001, capacity=SUGAR_INICAP
-        ) # g
-        self.icestock: Stock = Stock(
-            initial_amount=ICE_INISTOCK, initial_dt=current_datetime,
-            discount_per_day=0.5, capacity=ICE_INICAP
-        )
         self.account_balance = CASH_INI # $
         self.price = 2.00
         self.lineup = Lineup((300,400),(700,400) ,10)
@@ -53,37 +111,25 @@ class LemonadeStand():
         for i in range(n_employees):
             self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict)
 
-    def set_lemonade_stand_image(self):
-        if self.lemonade_stand_level == 0:
-            self.image_open = pygame.image.load('./resources/standA_small.png')
-            self.image_closed = pygame.image.load('./resources/standA_small.png')
-        elif self.lemonade_stand_level == 1:
-                self.image_open = pygame.image.load('./resources/standB_small.png')
-                self.image_closed = pygame.image.load('./resources/standB_small.png')
-        elif self.lemonade_stand_level == 2:
-                self.image_open = pygame.image.load('./resources/standC_small.png')
-                self.image_closed = pygame.image.load('./resources/standC_small.png')
+    def refresh_lemonade_stand_with_new_type(self, dt: datetime.datetime, stand_type: StandType):
+        self.stand_type = stand_type
+        new_config: StandTypeConfig = get_stand_config(stand_type)
+        self.image_open = new_config.image
+        self.image_closed = new_config.image
+        # juicing_efficiency
+        self.juicing_efficiency = new_config.juicing_efficiency
+        # stock capacities
+        self.lemonstock.update(t=dt, new_capacity=new_config.lemon_capacity)
+        self.sugarstock.update(t=dt, new_capacity=new_config.sugar_capacity)
+        self.icestock.update(t=dt, new_capacity=new_config.ice_capacity)
 
-    def upgrade_stand(self):
-        #check if there are available upgrades (0-->1-->2)
-        if self.lemonade_stand_level == 2:
-            pass
-        else:
-            self.lemonade_stand_level += 1
-            self.account_balance -= 500
-            self.juicing_efficiency += 10
-        #update images
-        self.set_lemonade_stand_image()
+    def upgrade_stand(self, dt: datetime.datetime):
+        self.refresh_lemonade_stand_with_new_type(dt=dt, stand_type=get_stand_upgrade(self.stand_type))
+        self.account_balance -= UPGRADE_COST
 
-    def downgrade_stand(self):
-        if self.lemonade_stand_level == 0:
-            pass
-        else:
-            self.lemonade_stand_level -= 1
-            self.account_balance += 500
-            self.juicing_efficiency -= 10
-        #update images
-        self.set_lemonade_stand_image()
+    def downgrade_stand(self, dt: datetime.datetime):
+        self.refresh_lemonade_stand_with_new_type(dt=dt, stand_type=get_stand_downgrade(self.stand_type))
+        self.account_balance += DOWNGRADE_REFUND
 
     def update_prep_time(self):
         if len(self.employees) == 0:
