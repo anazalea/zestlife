@@ -143,9 +143,8 @@ class LemonadeGame():
         #     ), 1, txt_color)
         # current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, txt_color)
 
-        margin = 32
+        margin = 42
         icon_size = 24
-        self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (270, 65)), [10, 530])
         icon_imgs = [
             lemon_img,
             sugar_img,
@@ -156,6 +155,9 @@ class LemonadeGame():
             self.lemonade_stand.sugarstock,
             self.lemonade_stand.icestock
         ]
+        stat_bar_bg_img_x = int(2.25*margin*len(stocks))
+        # print (stat_bar_bg_img_x)
+        self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (stat_bar_bg_img_x, 65)), [10, 530])
         # draw icons
         for i, img in enumerate(icon_imgs):
             self.screen.blit(pygame.transform.scale(img, (icon_size, icon_size)),
@@ -214,4 +216,3 @@ class LemonadeGame():
 
         # clock
         self.analog_clock.draw(self.screen)
-
