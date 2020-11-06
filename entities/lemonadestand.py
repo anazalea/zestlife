@@ -22,8 +22,8 @@ class LemonadeStand():
         self.open = self.is_open(current_datetime.time())
         self.juicing_efficiency = 45 # mL/lemon
         self.lemonstock: Stock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.01, capacity=1000)
-        self.sugarstock: Stock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.001, capacity=1000) # g
-        self.icestock: Stock = Stock(initial_amount=200, initial_dt=current_datetime, discount_per_day=0.5, capacity=1000)
+        self.sugarstock: Stock = Stock(initial_amount=1000, initial_dt=current_datetime, discount_per_day=0.001, capacity=1000) # g
+        self.icestock: Stock = Stock(initial_amount=1000, initial_dt=current_datetime, discount_per_day=0.5, capacity=1000)
         self.account_balance = 1000 # $
         self.price = 2.00
         self.lineup = Lineup((300,400),(700,400) ,10)
