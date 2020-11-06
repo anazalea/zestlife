@@ -55,6 +55,7 @@ class LemonadeGame():
         )
 
     def update_world(self, game_speed):
+        """Updates state to next state given game_speed."""
         old_datetime = self.current_datetime
         self.lemonade_stand.workforce.update()
         self.current_datetime += datetime.timedelta(minutes=game_speed)

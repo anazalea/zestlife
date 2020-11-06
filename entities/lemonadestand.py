@@ -1,9 +1,11 @@
 import pygame
 import datetime
+from datetime import timedelta
 import numpy as np
 from entities.employee import Employee
 from entities.coin import Coin, coin_im_dict
 from lineup import Lineup
+from recipe import Recipe
 from inventory import Stock
 
 class LemonadeStand():
@@ -78,18 +80,18 @@ class LemonadeStand():
             self.sound.play_sfx(self.sound.powerup_appear)
         return self.opening_time < current_time < self.closing_time
 
-    def make_a_sale(self, recipe):
+    def make_a_sale(self, recipe: Recipe):
         self.lemonstock.current_units -= recipe.lemon_juice / self.juicing_efficiency
         self.icestock.current_units -= recipe.ice
         self.sugarstock.current_units -= recipe.sugar
         self.account_balance += self.price
 
-    def serve_customer(self, recipe, timedelta):
+    def serve_customer(self, recipe: Recipe, current_datetime: datetime, deltat: timedelta):
         if self.lineup.spots[0].is_occupied and \
             self.lineup.spots[0].occupant.likes_recipe and \
                 not self.lineup.spots[0].occupant.has_lemonade and \
                 self.open and self.has_enough_stuff(recipe):
-            self.time_serving_customer += timedelta
+            self.time_serving_customer += deltat
             if self.time_serving_customer > self.prep_time:
                 self.lineup.spots[0].occupant.has_lemonade = True
                 self.coin_group.add(Coin((300+np.random.randint(-10,10),305), image_dict=coin_im_dict))
@@ -103,12 +105,13 @@ class LemonadeStand():
 
 
 
-    def update(self, current_datetime, timedelta, recipe):
+    def update(self, current_datetime: datetime, deltat: timedelta, recipe: Recipe):
+        """Updates state to next state from current_datetime to current_datetime to timedelta."""
         self.open = self.is_open(current_datetime.time())
-        self.serve_customer(recipe, timedelta)
-        self.lemonstock.update(current_datetime)
-        self.sugarstock.update(current_datetime)
-        self.icestock.update(current_datetime)
+        self.serve_customer(recipe=recipe, current_datetime=current_datetime, deltat=deltat)
+        _, _ = self.lemonstock.update(current_datetime)
+        _, _ = self.sugarstock.update(current_datetime)
+        _, _ = self.icestock.update(current_datetime)
         self.coin_group.update()
 
     def validate_price(self, value):
