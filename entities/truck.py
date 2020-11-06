@@ -40,9 +40,11 @@ class Truck(AnimatedSprite):
         self.unload_n_frames = 60
         self.unloading = False
 
-    def update(self):
+    def update(self, sound):
 
         if self.rect[0] <= self.destination[0]:
+            if self.frames_at_destination == 0:
+                sound.play_sfx(sound.pipe)
             self.frames_at_destination += 1
             if self.frames_at_destination > self.unload_n_frames:
                 super().move(Vector2(self.speed/2,0))
@@ -61,7 +63,7 @@ class FleetOfTrucks():
         self.orders_shipped = []
         self.open_storage_img = pygame.image.load(f'./resources/storage-right-open.png')
 
-    def update(self, lemonade_stand, current_datetime):
+    def update(self, lemonade_stand, current_datetime, sound):
         for order in lemonade_stand.lemonstock.pending_orders:
             if order.delivery_dt - datetime.timedelta(minutes=82) <= current_datetime \
                 and not id(order) in self.orders_shipped:
@@ -77,7 +79,7 @@ class FleetOfTrucks():
                 and not id(order) in self.orders_shipped:
                 self.orders_shipped.append(id(order))
                 self.trucks.add(Truck((800,240),load_name='ice'))
-        self.trucks.update()
+        self.trucks.update(sound)
 
     def draw(self, screen):
         # open garage doors
