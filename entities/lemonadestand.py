@@ -41,7 +41,6 @@ class LemonadeStand():
             self.prep_time = np.inf
         else:
             self.prep_time = 3 * (len(self.employees) - 5) ** 2 + 5
-            print(self.prep_time)
 
     def hire_employee(self, start_time, end_time, employee_image_dict, daily_wage=20):
         # currently, employees should go in here: (270,350,90,50)
