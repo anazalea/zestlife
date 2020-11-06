@@ -227,21 +227,37 @@ class CustomerArrivalTimeGenerator():
         second = math.floor(60 * (minutes_frac - minute))
         return datetime.time(hour, minute, second)
 
-class CustomerPreferenceGenerator():
-    def __init__(self):
-        self.min_sugar = 20/350 # g per 350 mL
-        self.max_sugar = 80/350 # g per 350 mL
-        self.sugar_width = 5/350
-        self.min_lemon = 30/350 # mL per 350 mL
-        self.max_lemon = 90/350 # mL per 350 mL
-        self.lemon_width = 5/350
-        self.min_volume = 250 # mL
-        self.max_volume = 1750 # mL
-        self.volume_width = 25
-        self.min_ice = 1/350 # cubes/350 mL
-        self.max_ice = 9/350 # cubes/350 mL
-        self.ice_width = 1/350
-        self.spend_per_ml = 3.00/350 # $/350 mL
-        self.spend_width = 1.00/350
-        self.straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw', 'anti_paper_straw']
-        self.straw_pref_probs = [0.4, 0.3, 0.15, 0.15]
+
+class CustomerPreferenceGenerator:
+    min_sugar = 20/350 # g per 350 mL
+    max_sugar = 80/350 # g per 350 mL
+    sugar_width = 5/350
+    min_lemon = 30/350 # mL per 350 mL
+    max_lemon = 90/350 # mL per 350 mL
+    lemon_width = 5/350
+    min_volume = 250 # mL
+    max_volume = 1750 # mL
+    volume_width = 25
+    min_ice = 1/350 # cubes/350 mL
+    max_ice = 9/350 # cubes/350 mL
+    ice_width = 1/350
+    spend_per_ml = 3.00/350 # $/350 mL
+    spend_width = 1.00/350
+    straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw', 'anti_paper_straw']
+    straw_pref_probs = [0.4, 0.3, 0.15, 0.15]
+
+
+class HipsterPreferenceGenerator(CustomerPreferenceGenerator):
+    min_lemon = 60 / 350  # mL per 350 mL
+    max_lemon = 120 / 350  # mL per 350 mL
+    lemon_width = 10 / 350
+    straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw', 'anti_paper_straw']
+    straw_pref_probs = [0., 1., .8, 0.01]
+
+
+class KarenPreferenceGenerator(CustomerPreferenceGenerator):
+    min_sugar = 60/350 # g per 350 mL
+    max_sugar = 120/350 # g per 350 mL
+    sugar_width = 10/350
+    straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw', 'anti_paper_straw']
+    straw_pref_probs = [0., 1., 0.01, .8]
