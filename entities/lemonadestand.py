@@ -22,8 +22,8 @@ class LemonadeStand():
         self.open = self.is_open(current_datetime.time())
         self.juicing_efficiency = 45 # mL/lemon
         self.lemonstock: Stock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.01, capacity=1000)
-        self.sugarstock: Stock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.001, capacity=1000) # g
-        self.icestock: Stock = Stock(initial_amount=200, initial_dt=current_datetime, discount_per_day=0.5, capacity=1000)
+        self.sugarstock: Stock = Stock(initial_amount=1000, initial_dt=current_datetime, discount_per_day=0.001, capacity=1000) # g
+        self.icestock: Stock = Stock(initial_amount=1000, initial_dt=current_datetime, discount_per_day=0.5, capacity=1000)
         self.account_balance = 1000 # $
         self.price = 2.00
         self.lineup = Lineup((300,400),(700,400) ,10)
@@ -34,9 +34,42 @@ class LemonadeStand():
         self.workforce = pygame.sprite.Group(self.employees)
         self.employee_image_dict = employee_image_dict
         self.coin_group = pygame.sprite.Group([])
+        self.lemonade_stand_level = 0
 
         for i in range(n_employees):
             self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict)
+
+    def set_lemonade_stand_image(self):
+        if self.lemonade_stand_level == 0:
+            self.image_open = pygame.image.load('./resources/standA_small.png')
+            self.image_closed = pygame.image.load('./resources/standA_small.png')
+        elif self.lemonade_stand_level == 1:
+                self.image_open = pygame.image.load('./resources/standB_small.png')
+                self.image_closed = pygame.image.load('./resources/standB_small.png')
+        elif self.lemonade_stand_level == 2:
+                self.image_open = pygame.image.load('./resources/standC_small.png')
+                self.image_closed = pygame.image.load('./resources/standC_small.png')
+
+    def upgrade_stand(self):
+        #check if there are available upgrades (0-->1-->3)
+        if self.lemonade_stand_level == 2:
+            pass
+        else:
+            self.lemonade_stand_level += 1
+            self.account_balance -= 500
+            self.juicing_efficiency += 10
+        #update images
+        self.set_lemonade_stand_image()
+
+    def downgrade_stand(self):
+        if self.lemonade_stand_level == 0:
+            pass
+        else:
+            self.lemonade_stand_level -= 1
+            self.account_balance += 500
+            self.juicing_efficiency -= 10
+        #update images
+        self.set_lemonade_stand_image()
 
     def update_prep_time(self):
         if len(self.employees) == 0:

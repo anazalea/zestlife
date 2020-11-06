@@ -41,8 +41,26 @@ def play():
                                            highlight='./resources/upgrade_button_hover.png')
 
     order_button = pygbutton.PygButton((190, 535, 83, 23),
-                                           normal='./resources/order_button_norm.png',
+                                           normal='./resources/order_button_norm.png',  
                                            highlight='./resources/order_button_hover.png')
+
+    # import ipdb; ipdb.set_trace()
+    pause_button = pygbutton.PygButton((800-100, 1,  14, 19),
+                                        normal = './resources/pause_black.png',
+                                        highlight = './resources/pause_red.png')
+
+    play_button = pygbutton.PygButton((800-100+14+6, 1,  13, 19),
+                                        normal = './resources/play_black.png',
+                                        highlight = './resources/play_red.png')
+
+    ff_button = pygbutton.PygButton((800-100+14+6+13+6, 1,  22, 19),
+                                        normal = './resources/ff_black.png',
+                                        highlight = './resources/ff_red.png')
+
+    fff_button = pygbutton.PygButton((800-100+14+6+13+6+22+6, 1,  29, 19),
+                                        normal = './resources/fff_black.png',
+                                        highlight = './resources/fff_red.png')
+ 
 
     ##############################################################################################
     ##############################################################################################
@@ -63,6 +81,10 @@ def play():
             order_button.draw(lemonade_game.screen)
             employees_button.draw(lemonade_game.screen)
             upgrade_button.draw(lemonade_game.screen)
+            pause_button.draw(lemonade_game.screen)
+            play_button.draw(lemonade_game.screen)
+            ff_button.draw(lemonade_game.screen)
+            fff_button.draw(lemonade_game.screen)
             pygame.display.update()
 
         for event in pygame.event.get():
@@ -84,8 +106,22 @@ def play():
                 menus.employee_menu(lemonade_game)
 
             if 'click' in upgrade_button.handleEvent(event):
-                # menus.upgrade_menu(lemonade_game)
-                pass
+                menus.upgrade_menu(lemonade_game)
+               
+            if 'click' in pause_button.handleEvent(event):
+                pause = not pause
+
+            if 'click' in play_button.handleEvent(event):
+                game_speed = 0.25
+                pause = False
+
+            if 'click' in ff_button.handleEvent(event):
+                game_speed = 1
+                pause = False
+
+            if 'click' in fff_button.handleEvent(event):
+                game_speed = 5
+                pause = False
 
             elif event.type == pygame.KEYDOWN:
                 # Escape key pressed
