@@ -51,7 +51,7 @@ class LemonadeStand():
                 self.image_closed = pygame.image.load('./resources/standC_small.png')
 
     def upgrade_stand(self):
-        #check if there are available upgrades (0-->1-->3)
+        #check if there are available upgrades (0-->1-->2)
         if self.lemonade_stand_level == 2:
             pass
         else:
