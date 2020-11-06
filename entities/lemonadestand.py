@@ -1,9 +1,11 @@
 import pygame
 import datetime
+from datetime import timedelta
 import numpy as np
 from entities.employee import Employee
 from entities.coin import Coin, coin_im_dict
 from lineup import Lineup
+from recipe import Recipe
 from inventory import Stock
 
 class LemonadeStand():
@@ -19,9 +21,9 @@ class LemonadeStand():
         self.open = True
         self.open = self.is_open(current_datetime.time())
         self.juicing_efficiency = 45 # mL/lemon
-        self.lemonstock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.01, capacity=1000)
-        self.sugarstock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.001, capacity=1000) # g
-        self.icestock = Stock(initial_amount=200, initial_dt=current_datetime, discount_per_day=0.5, capacity=1000)
+        self.lemonstock: Stock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.01, capacity=1000)
+        self.sugarstock: Stock = Stock(initial_amount=500, initial_dt=current_datetime, discount_per_day=0.001, capacity=1000) # g
+        self.icestock: Stock = Stock(initial_amount=200, initial_dt=current_datetime, discount_per_day=0.5, capacity=1000)
         self.account_balance = 1000 # $
         self.price = 2.00
         self.lineup = Lineup((300,400),(700,400) ,10)
@@ -69,6 +71,12 @@ class LemonadeStand():
         #update images
         self.set_lemonade_stand_image()
 
+    def update_prep_time(self):
+        if len(self.employees) == 0:
+            self.prep_time = np.inf
+        else:
+            self.prep_time = 3 * (len(self.employees) - 5) ** 2 + 5
+
     def hire_employee(self, start_time, end_time, employee_image_dict, daily_wage=20):
         # currently, employees should go in here: (270,350,90,50)
         new_employee = Employee((250,350), employee_image_dict, self.opening_time, self.closing_time, daily_wage=daily_wage)
@@ -82,8 +90,9 @@ class LemonadeStand():
             if employee.state == 'watch':
                 employee.hold_for_n_frames = 40
             employee.rect[:2] = [employee_locs[i+1],360 + np.random.randint(-2,5)]
-            employee.index = np.random.choice([0,1,2])
+            employee.index = 0
         self.workforce = pygame.sprite.Group(self.employees)
+        self.update_prep_time()
 
     def fire_employee(self, employee_image_dict, daily_wage):
         #Find an employee with the right wage
@@ -102,6 +111,7 @@ class LemonadeStand():
             employee.index = np.random.choice([0,1,2])
             last_state = employee.state
         self.workforce = pygame.sprite.Group(self.employees)
+        self.update_prep_time()
 
     def get_current_employees(self):
         return self.employees
@@ -111,37 +121,44 @@ class LemonadeStand():
             self.sound.play_sfx(self.sound.powerup_appear)
         return self.opening_time < current_time < self.closing_time
 
-    def make_a_sale(self, recipe):
-        self.lemonstock.current_units -= recipe.lemon_juice / self.juicing_efficiency
-        self.icestock.current_units -= recipe.ice
-        self.sugarstock.current_units -= recipe.sugar
+    def make_a_sale(self, dt: datetime, recipe: Recipe):
+        _, _ = self.lemonstock.update(t=dt, withdraw=recipe.lemon_juice / self.juicing_efficiency)
+        _, _ = self.icestock.update(t=dt, withdraw=recipe.ice)
+        _, _ = self.sugarstock.update(t=dt, withdraw=recipe.sugar)
         self.account_balance += self.price
 
-    def serve_customer(self, recipe, timedelta):
-        if self.lineup.spots[0].is_occupied and \
-            self.lineup.spots[0].occupant.likes_recipe and \
-                not self.lineup.spots[0].occupant.has_lemonade and \
-                self.open and self.has_enough_stuff(recipe):
-            self.time_serving_customer += timedelta
+    def serve_customer(self, recipe: Recipe, current_datetime: datetime, tdelta_minutes: float):
+        """Processes lineup and makes sale between current_datetime and current_datetime+deltat"""
+        if not self.lineup.spots[0].is_occupied:
+            # nothing happens
+            return None
+        if not self.has_enough_stuff(recipe) or not self.open:
+            # go home
+            self.lineup.spots[0].occupant.likes_recipe = False
+            self.time_serving_customer = 0
+        if all([
+            self.lineup.spots[0].occupant.likes_recipe,
+            not self.lineup.spots[0].occupant.has_lemonade,
+            self.open,
+            self.has_enough_stuff(recipe),
+        ]):
+            # will_have_sale
+            self.time_serving_customer += tdelta_minutes
             if self.time_serving_customer > self.prep_time:
                 self.lineup.spots[0].occupant.has_lemonade = True
                 self.coin_group.add(Coin((300+np.random.randint(-10,10),305), image_dict=coin_im_dict))
                 self.sound.play_sfx(self.sound.coin)
                 self.time_serving_customer = 0
-                self.make_a_sale(recipe)
-        elif self.lineup.spots[0].is_occupied and \
-            (not self.has_enough_stuff(recipe) or not self.open): # go home
-            self.lineup.spots[0].occupant.likes_recipe = False
-            self.time_serving_customer = 0
+                self.make_a_sale(dt=current_datetime+timedelta(minutes=tdelta_minutes), recipe=recipe)
 
 
-
-    def update(self, current_datetime, timedelta, recipe):
+    def update(self, current_datetime: datetime, tdelta_minutes: float, recipe: Recipe):
+        """Updates state to next state from current_datetime to current_datetime to timedelta."""
         self.open = self.is_open(current_datetime.time())
-        self.serve_customer(recipe, timedelta)
-        self.lemonstock.update(current_datetime)
-        self.sugarstock.update(current_datetime)
-        self.icestock.update(current_datetime)
+        _, _ = self.lemonstock.update(current_datetime)
+        _, _ = self.sugarstock.update(current_datetime)
+        _, _ = self.icestock.update(current_datetime)
+        self.serve_customer(recipe=recipe, current_datetime=current_datetime, tdelta_minutes=tdelta_minutes)
         self.coin_group.update()
 
     def validate_price(self, value):

@@ -14,6 +14,7 @@ import pricing
 
 #Constants
 FONT_STYLE = './resources/joystix-monospace.ttf'
+MENU_BG = pygame.image.load('./resources/menu_background.png')
 
 #Helper functions
 def text_objects(text, font, color):
@@ -100,7 +101,6 @@ def create_menu_background(screen):
 def recipe_menu(lemonade_game):
     screen = lemonade_game.screen
     background = create_menu_background(screen)
-    recipe_image = pygame.image.load('./resources/background.png') #Update with recipe image
     recipe = lemonade_game.recipe
     ingredients = {'lemon juice' : recipe.lemon_juice, 'sugar' : recipe.sugar, 'water' : recipe.water, 'ice' : recipe.ice} #Get this from another class
     ingredient_min, ingredient_max = 0, 500
@@ -109,7 +109,7 @@ def recipe_menu(lemonade_game):
     click = False
     while not done:
         screen.blit(background, (0,0))
-        screen.blit(recipe_image, (0,0))
+        screen.blit(MENU_BG, (0,0))
 
         font = pygame.font.Font(FONT_STYLE,25) #Edit fonts here
         draw_text('Set your recipe', font, (255, 255, 255), screen, 20, 20)
@@ -675,7 +675,7 @@ def employee_menu(lemonade_game):
                 if event.key == pygame.K_ESCAPE:
                     done = True
 
-def upgrade_stand_menu(lemonade_game):
+def upgrade_menu(lemonade_game):
     screen = lemonade_game.screen
     background = create_menu_background(screen)
     stand_image = pygame.image.load('./resources/background.png')
@@ -723,3 +723,25 @@ def upgrade_stand_menu(lemonade_game):
                 # Escape key pressed
                 if event.key == pygame.K_ESCAPE:
                     done = True
+
+def daily_report_menu(lemonade_game):
+    screen = lemonade_game.screen
+    done = False
+    font = pygame.font.Font(FONT_STYLE, 15)
+    title_font = pygame.font.Font(FONT_STYLE, 30)
+    while not done:
+        screen.blit(MENU_BG, (0, 0))
+        draw_text("DAILY REPORT", title_font, (255, 255, 0), screen, 250, 20)
+        top_margin = 80
+        line_space = 20
+        for i, line in enumerate(lemonade_game.daily_report):
+            draw_text(line, font, (255, 255, 255), screen, 40, top_margin + i * line_space)
+
+        draw_text("Press any key to continue.", font, (0, 0, 0), screen, 250, 560)
+
+        pygame.display.update()
+
+        # Events
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN or  event.type == pygame.KEYDOWN:
+                done = True

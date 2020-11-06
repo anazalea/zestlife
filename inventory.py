@@ -103,7 +103,7 @@ class Stock:
 
     def _check_no_time_travel(self, t: datetime):
         if not t >= self.current_dt:
-            raise NoTimeTravelError()
+            raise NoTimeTravelError('Cannot update from {} to {}'.format(self.current_dt, t))
 
     def add_order(self, order: Order) -> None:
         self._check_no_time_travel(order.order_dt)
