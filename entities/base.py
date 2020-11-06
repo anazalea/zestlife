@@ -49,7 +49,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.switch_frames = hold_for_n_frames
         self.frames_at_image = 0
         self.index = 0
-        self.image = self.images[self.index]  # 'image' is the current image of the animation.
+        # 'image' is the current image of the animation.
+        self.image = get_flipped_version(self.images[self.index], self.flip)
         self.rect = pygame.Rect(position, (self.image.get_width(), self.image.get_height()))
         self.real_position = Vector2(position)
 
@@ -72,7 +73,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self._state = value
         self.images = self.image_dict[self._state]
         self.update_images_with_accessories()
-        self.image = self.images[self.index]
+        self.image = get_flipped_version(self.images[self.index], self.flip)
 
     def next_frame(self):
         self.frames_at_image += 1
