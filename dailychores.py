@@ -65,7 +65,7 @@ def end_day(lemonade_game):
     daily_report = [
         f"Customers:                          {sum(outcomes.values())}",
         f"    Left because line was too long: {outcomes['Line Too Long']}",
-        f"    Bad Experience:                 {outcomes['Bad Experience']}",
+        f"    Disliked Product or Price:      {outcomes['Bad Experience']}",
         f"    Satisfied Customer:             {outcomes['Satisfied Customer']}",
         "",
         f"Change in inventory:",
