@@ -402,7 +402,7 @@ def sugar_order_menu(lemonade_game):
     order_sugar_image = pygame.image.load('./resources/background.png')
     order_message = ''
     #(amount, time(hrs))
-    possible_orders = [(1,1),(5,2),(10,6),(100,24)]
+    possible_orders = [(100,1),(250,2),(500,6),(1000,24)]
     order_amounts = [0] * len(possible_orders)
     lemonade_stand = lemonade_game.lemonade_stand
     done = False
@@ -429,7 +429,8 @@ def sugar_order_menu(lemonade_game):
         for order in possible_orders:
             item_name_x = starting_x
             item_name_y = starting_y + index*50
-            sugar_price = round(pricing.get_sugar_discountedprice(timedelta(hours=order[1]), order[0]),2)
+            #Convert amount ordered to kg so pricing makes sense
+            sugar_price = round(pricing.get_sugar_discountedprice(timedelta(hours=order[1]), order[0]/1000),2)
             prices.append(sugar_price)
             button_coords = [(item_name_x+600, item_name_y, button_dimension, button_dimension),
                             (item_name_x+640, item_name_y, button_dimension, button_dimension),
