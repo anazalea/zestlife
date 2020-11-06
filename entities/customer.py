@@ -130,7 +130,7 @@ class Customer(AnimatedSprite):
         self.max_spend = pref_generator.spend_width * np.random.randn() + pref_generator.spend_per_ml
         self.straw_preference = np.random.choice(pref_generator.straw_prefs, p = pref_generator.straw_pref_probs)
 
-    def update_destination(self, timedelta, lineup, recipe, price, customer_outcomes):
+    def update_destination(self, timedelta, lineup, recipe, price, customer_outcomes, sound):
         if self.queue_position == -1:
             self.kill()
         # Try to get in line
@@ -158,7 +158,7 @@ class Customer(AnimatedSprite):
         # If you've made it to the front of the line get lemonade or go home
         elif self.queue_position == 0:
             if not self.has_seen_recipe:
-                self.likes_recipe, self.reason = self.customer_likes_recipe(recipe, price)
+                self.likes_recipe, self.reason = self.customer_likes_recipe(recipe, price,sound)
                 self.has_seen_recipe = True
             if not self.likes_recipe: # Go home
                 self.destination = self.spawn_location
@@ -189,16 +189,16 @@ class Customer(AnimatedSprite):
             vector_to_dest.scale_to_length(distance)
             return vector_to_dest
 
-    def update(self, timedelta, lineup, recipe, price, customer_outcomes):
+    def update(self, timedelta, lineup, recipe, price, customer_outcomes, sound):
         super().next_frame()
         if tuple(self.rect[:2]) == self.destination:
-            self.update_destination(timedelta, lineup, recipe, price, customer_outcomes)
+            self.update_destination(timedelta, lineup, recipe, price, customer_outcomes, sound)
         displacement = self.get_displacement(timedelta)
         # face left (flip of default right) if not moving
         self.flip = displacement[0] <= 0
         super().move(displacement)
 
-    def customer_likes_recipe(self, recipe, price):
+    def customer_likes_recipe(self, recipe, price, sound):
         reason = ''
         likes_it = True
         if recipe.lemon_concentration < self.min_lemon_conc:
@@ -243,7 +243,8 @@ class Customer(AnimatedSprite):
 
         if reason == '':
             reason = 'Yum!'
-
+        if not likes_it:
+            sound.play_sfx(sound.hit)
         return likes_it, reason
 
 

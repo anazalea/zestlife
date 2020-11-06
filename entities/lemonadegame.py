@@ -116,7 +116,7 @@ class LemonadeGame():
                 self.active_customers.add(customer)
         self.lemonade_stand.update(self.current_datetime, game_speed_in_minutes, self.recipe)
         self.active_customers.update(game_speed_in_minutes, self.lemonade_stand.lineup,
-                                     self.recipe, self.lemonade_stand.price, self.customer_outcomes)
+                                     self.recipe, self.lemonade_stand.price, self.customer_outcomes, self.sound)
 
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))
