@@ -106,9 +106,8 @@ def play():
                 menus.employee_menu(lemonade_game)
 
             if 'click' in upgrade_button.handleEvent(event):
-                # menus.upgrade_menu(lemonade_game)
-                pass
-            
+                menus.upgrade_menu(lemonade_game)
+               
             if 'click' in pause_button.handleEvent(event):
                 pause = not pause
 

@@ -17,7 +17,8 @@ from entities.truck import FleetOfTrucks
 from entities.customer import CustomerArrivalTimeGenerator
 from recipe import Recipe
 from temperature import get_temperature
-
+from inventory import Order
+from typing import List, Tuple, Optional
 
 KAREN_PROB = .1
 HIPSTER_PROB = .1
@@ -29,6 +30,19 @@ straw_img = pygame.image.load(f'./resources/straw.png')
 stat_bar_bg_img = pygame.image.load(f'./resources/inventory_mini_stat.png')
 clock_img = pygame.image.load(f'./resources/clock_face.png')
 thermo_img = pygame.image.load(f'./resources/thermometer.png')
+
+
+def get_earliest_order_stats(orders: List[Order]) -> Tuple[Optional[datetime.datetime], Optional[float]]:
+    if len(orders) == 0:
+        return (None, None)
+    earliest_order = min(orders)
+    return (earliest_order.delivery_dt, earliest_order.amount)
+
+
+def get_compact_rep_timedelta(tdelta: datetime.timedelta) -> str:
+    return '%.0f H' % (tdelta.seconds / 3600)
+
+
 
 class LemonadeGame():
     def __init__(self, sound, config=None):
@@ -125,36 +139,69 @@ class LemonadeGame():
         #     ), 1, txt_color)
         # current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, txt_color)
 
-        n_lemons = font.render(str(int(np.round(
-            self.lemonade_stand.lemonstock.current_units, 0))), 1, txt_color)
-        g_sugar = font.render(str(int(np.round(
-            self.lemonade_stand.sugarstock.current_units, 0))), 1, txt_color)
-        n_ice = font.render(str(int(np.round(
-            self.lemonade_stand.icestock.current_units, 0))), 1, txt_color)
-
-        money = self.lemonade_stand.account_balance
-        money_color = (0, 255, 0) if money > 0 else (255, 0, 0)
-        money = font.render('$ %.2f' % money, 1, money_color)
-
-        temp = get_temperature(self.current_datetime)
-        temp_color = (max(17 * (temp - 15), 255), 0, 0) if temp > 25 else (0, 0, 0)
-        temp_txt = font.render(str(temp) + '°', 1, temp_color)
-
-        # draw background of the stats
-        self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (290, 65)), [10, 530])
-
         margin = 32
         img_size = 24
+        self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (270, 65)), [10, 530])
+        icon_imgs = [
+            lemon_img,
+            sugar_img,
+            ice_img
+        ]
+        stocks = [
+            self.lemonade_stand.lemonstock,
+            self.lemonade_stand.sugarstock,
+            self.lemonade_stand.icestock
+        ]
         # draw icons
-        for i, img in enumerate([lemon_img, sugar_img, ice_img]):
+        for i, img in enumerate(icon_imgs):
             self.screen.blit(pygame.transform.scale(img, (img_size, img_size)),
                              [20 + (img_size + margin) * i, 540])
         # draw values
-        for i, txt in enumerate([n_lemons, g_sugar, n_ice, money]):
-            self.screen.blit(txt, [20 + (img_size + margin) * i, 565])
+        for i, stock in enumerate(stocks):
+            self.screen.blit(
+                font.render('%.0f' % stock.current_units, 1, txt_color),
+                [20 + (img_size + margin) * i, 565]
+            )
+        # draw money
+        money = self.lemonade_stand.account_balance
+        money_color = (0, 255, 0) if money > 0 else (255, 0, 0)
+        self.screen.blit(
+            font.render('$ %.0f' % money, 1, money_color),
+            [20 + (img_size + margin) * len(stocks), 565]
+        )
+        # draw countdown
+        countdown_offset = 505
+        any_pending_orders = False
+        for i, stock in enumerate(stocks):
+            delivery_dt, amount = get_earliest_order_stats(stock.pending_orders)
+            time_to_next_order_string = ''
+            if delivery_dt is not None:
+                any_pending_orders = True
+                time_to_next_order_string = get_compact_rep_timedelta(delivery_dt - self.current_datetime)
+            self.screen.blit(
+                font.render(time_to_next_order_string, 1, txt_color),
+                [20 + (img_size + margin) * i, countdown_offset]
+            )
+            amount_of_next_order_string = ''
+            if amount is not None:
+                amount_of_next_order_string = '+ %.0f' % amount
+            self.screen.blit(
+                font.render(amount_of_next_order_string, 1, txt_color),
+                [20 + (img_size + margin) * i, countdown_offset - 20]
+            )
+        if any_pending_orders:
+            self.screen.blit(
+                font.render('Pending Order', 1, txt_color),
+                [20, countdown_offset - 40]
+            )
 
+        # temperature
+        temp = get_temperature(self.current_datetime)
+        temp_color = (max(17 * (temp - 15), 255), 0, 0) if temp > 25 else (0, 0, 0)
+        temp_txt = font.render(str(temp), 1, temp_color)
         self.screen.blit(thermo_img, [0, 5])
         self.screen.blit(temp_txt, [40, 20])
 
+        # clock
         self.analog_clock.draw(self.screen)
 
