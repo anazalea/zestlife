@@ -54,10 +54,11 @@ class LemonadeGame():
             lineup=self.lemonade_stand.lineup,
         )
 
-    def update_world(self, game_speed):
+    def update_world(self, game_speed_in_minutes: float):
+        """Updates state to next state given game_speed."""
         old_datetime = self.current_datetime
         self.lemonade_stand.workforce.update()
-        self.current_datetime += datetime.timedelta(minutes=game_speed)
+        self.current_datetime += datetime.timedelta(minutes=game_speed_in_minutes)
         self.town.update_town_time(self.current_datetime.time())
         self.background_sky.update_color(self.current_datetime.time())
         self.analog_clock.current_time = self.current_datetime.time()
@@ -81,9 +82,9 @@ class LemonadeGame():
             if customer.arrival_time < self.current_datetime.time():
                 self.future_customers.remove(customer)
                 self.active_customers.add(customer)
-        self.lemonade_stand.update(self.current_datetime, game_speed, self.recipe)
-        self.active_customers.update(game_speed, self.lemonade_stand.lineup,
-                    self.recipe, self.lemonade_stand.price, self.customer_outcomes)
+        self.lemonade_stand.update(self.current_datetime, game_speed_in_minutes, self.recipe)
+        self.active_customers.update(game_speed_in_minutes, self.lemonade_stand.lineup,
+                                     self.recipe, self.lemonade_stand.price, self.customer_outcomes)
 
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))
