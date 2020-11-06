@@ -23,6 +23,10 @@ from typing import List, Tuple, Optional
 KAREN_PROB = .1
 HIPSTER_PROB = .1
 
+RGB_GREEN = (0, 255, 0)
+RGB_RED = (255, 0, 0)
+RGB_WHITE = (255, 255, 255)
+
 ice_img = pygame.image.load(f'./resources/ice_cube.png')
 lemon_img = pygame.image.load(f'./resources/lemon.png')
 sugar_img = pygame.image.load(f'./resources/sugar.png')
@@ -130,7 +134,7 @@ class LemonadeGame():
 
     def print_stats(self):
         font = pygame.font.Font(FONT_STYLE, 14)  # Edit fonts here
-        txt_color = (255, 255, 255)
+        txt_color = RGB_WHITE
 
         # time_stamp = font.render(
         #     '{datetimstr} ({temp_txt} Celcius)'.format(
@@ -164,9 +168,8 @@ class LemonadeGame():
             )
         # draw money
         money = self.lemonade_stand.account_balance
-        money_color = (0, 255, 0) if money > 0 else (255, 0, 0)
         self.screen.blit(
-            font.render('$ %.0f' % money, 1, money_color),
+            font.render('$ %.0f' % money, 1, RGB_GREEN if money > 0 else RGB_RED),
             [20 + (img_size + margin) * len(stocks), 565]
         )
         # draw countdown
@@ -183,10 +186,12 @@ class LemonadeGame():
                 [20 + (img_size + margin) * i, countdown_offset]
             )
             amount_of_next_order_string = ''
+            will_fit = True
             if amount is not None:
                 amount_of_next_order_string = '+ %.0f' % amount
+                will_fit = (stock.current_units + amount) <= stock.capacity
             self.screen.blit(
-                font.render(amount_of_next_order_string, 1, txt_color),
+                font.render(amount_of_next_order_string, 1, txt_color if will_fit else RGB_RED),
                 [20 + (img_size + margin) * i, countdown_offset - 20]
             )
         if any_pending_orders:
