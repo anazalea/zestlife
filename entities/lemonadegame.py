@@ -2,7 +2,7 @@ import datetime
 import glob
 import numpy as np
 import pygame
-from dailychores import start_day, end_day
+from dailychores import get_starting_customers, end_day
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
@@ -36,9 +36,18 @@ class LemonadeGame():
 
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
-        customers = start_day(self)
+        customers = self.get_starting_customers()
         self.future_customers = pygame.sprite.Group(customers)
         self.active_customers = pygame.sprite.Group([])
+
+    def get_starting_customers(self):
+        return get_starting_customers(
+            dt=self.current_datetime.date(),
+            word_of_mouth_effect=self.word_of_mouth_effect,
+            arrival_time_generator=self.arrival_time_generator,
+            preference_generator=self.preference_generator,
+            lineup=self.lemonade_stand.lineup,
+        )
 
     def update_world(self, game_speed):
         old_datetime = self.current_datetime
@@ -55,7 +64,7 @@ class LemonadeGame():
             print(outcomes)
             self.word_of_mouth_effect = word_of_mouth_effect
             self.customer_outcomes = []
-            customers = start_day(self)
+            customers = self.get_starting_customers()
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
