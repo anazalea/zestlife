@@ -94,6 +94,10 @@ class LemonadeGame():
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
             menus.daily_report_menu(self)
+            #reset employees start and end time
+            for e in self.lemonade_stand.employees:
+                e.clock_in(datetime.time(8))
+                e.clock_out(datetime.time(20))
 
         # check for new customers arriving, add them to the update group
         for customer in self.future_customers.sprites():
@@ -157,4 +161,3 @@ class LemonadeGame():
         self.screen.blit(temp_txt, [40, 20])
 
         self.analog_clock.draw(self.screen)
-
