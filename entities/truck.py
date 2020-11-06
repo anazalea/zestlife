@@ -4,6 +4,8 @@ import datetime
 from pygame.math import Vector2
 from entities.base import AnimatedSprite
 
+TRUCT_DESTINATION_LOCATION = (150,230)
+
 TRUCK_IMAGE_DICT = {
     'driving': [pygame.image.load('./resources/truck.png')]
 }
@@ -33,7 +35,7 @@ class Truck(AnimatedSprite):
             visible_accessories={load_name},
         )
         self.speed = -8
-        self.destination = (150,230)
+        self.destination = TRUCT_DESTINATION_LOCATION
         self.frames_at_destination = 0
         self.unload_n_frames = 60
 
