@@ -691,7 +691,7 @@ def upgrade_menu(lemonade_game):
     downgrade_stand_type = get_stand_downgrade(current_stand_type)
     can_upgrade = upgrade_stand_type != current_stand_type
     can_downgrade = downgrade_stand_type != current_stand_type
-    print (downgrade_stand_type, current_stand_type, upgrade_stand_type)
+    print ('{} <- {} -> {}'.format(downgrade_stand_type, current_stand_type, upgrade_stand_type))
     # get current and upgrad/downgrade details
     current_stand_config = get_stand_config(current_stand_type)
     upgrade_stand_config = get_stand_config(upgrade_stand_type)
