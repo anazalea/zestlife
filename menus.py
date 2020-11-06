@@ -675,25 +675,29 @@ def upgrade_menu(lemonade_game):
     lemonade_stand = lemonade_game.lemonade_stand
     done = False
     click = False
-    fontsize = 25
+    fontsize = 20
     font = pygame.font.Font(FONT_STYLE, fontsize)
     while not done:
         screen.blit(background, (0,0))
         screen.blit(stand_image, (0,0))
-        draw_text('Upgrade your stand', font, RGB_WHITE, screen, 20, 20)
-        button_w, button_h = 400, fontsize
-        button_x, button_y = 0, 50
-        active_color, inactive_color = (0, 0, 0, 100), (0, 0, 0, 255)
 
-        draw_text('Current juicing efficiency: %.2f' % lemonade_stand.juicing_efficiency, font, RGB_WHITE, screen , 20, 100)
+        left_margin = 20
+        top_margin = 20
+
+        draw_text('Upgrade your stand', font, RGB_WHITE, screen, left_margin, top_margin)
+        button_w, button_h = 15*fontsize, fontsize
+        active_color, inactive_color = (0, 0, 0, 100), (0, 0, 0, 255)
+        mid_x = 400
+
+        draw_text('Current Juicing Efficiency: %.2f' % lemonade_stand.juicing_efficiency, font, RGB_WHITE, screen , left_margin, 100)
         # buttons
         downgrade_button = button(screen, 'Downgrade (+$500)',
                                   active_color, inactive_color,
-                                  (button_x, button_y, button_w, button_h),
+                                  (left_margin, 50, button_w, button_h),
                                   font, click)
         upgrade_button = button(screen, 'Upgrade (-$500)',
                                 active_color, inactive_color,
-                                (button_x+button_w, button_y, button_w, button_h),
+                                (mid_x, 50, button_w, button_h),
                                 font, click)
         return_to_game = button(screen, 'Resume Game',
                                 active_color, inactive_color,
