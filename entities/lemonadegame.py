@@ -67,6 +67,10 @@ class LemonadeGame():
         self.town = Town(self.current_datetime.time())
         self.trees = Trees()
         self.customer_outcomes = []
+        self.last_thinking_customer = None
+        self.last_customer_thought = ''
+        self.customer_thoughts = []
+        self.thought_frames = 0
         self.word_of_mouth_effect = 0
         self.impending_shipments = []
         self.trucks = FleetOfTrucks()
@@ -97,15 +101,16 @@ class LemonadeGame():
         self.background_sky.update_color(self.current_datetime.time())
         self.analog_clock.current_time = self.current_datetime.time()
         # check for new orders
-        self.trucks.update(self.lemonade_stand, self.current_datetime)
+        self.trucks.update(self.lemonade_stand, self.current_datetime, self.sound)
 
         # if it's the end of the day, recap, setup for tomorrow
         if not self.current_datetime.date() == old_datetime.date():
-            print('END OF DAY')
             outcomes, word_of_mouth_effect, self.daily_report = end_day(self)
             print(outcomes)
             self.word_of_mouth_effect = word_of_mouth_effect
             self.customer_outcomes = []
+            self.customer_thoughts = []
+            self.last_customer_thought = ''
             customers = self.get_starting_customers()
             track_day_start_stats(self)
             self.future_customers = pygame.sprite.Group(customers)
@@ -120,7 +125,8 @@ class LemonadeGame():
                 self.active_customers.add(customer)
         self.lemonade_stand.update(self.current_datetime, game_speed_in_minutes, self.recipe)
         self.active_customers.update(game_speed_in_minutes, self.lemonade_stand.lineup,
-                                     self.recipe, self.lemonade_stand.price, self.customer_outcomes)
+                                     self.recipe, self.lemonade_stand.price, self.customer_outcomes, self.customer_thoughts, self.sound)
+        self.update_last_thought()
 
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))
@@ -131,10 +137,30 @@ class LemonadeGame():
                                     self.screen)
         self.active_customers.draw(self.screen)
 
+    def update_last_thought(self):
+        if len(self.customer_thoughts) > 0:
+            if self.last_thinking_customer != self.customer_thoughts[-1][0]:
+                self.last_customer_thought = f'"{np.random.choice(self.customer_thoughts[-1][1])}"'
+                self.last_thinking_customer = self.customer_thoughts[-1][0]
+                self.thought_frames = 0
+            else:
+                self.thought_frames += 1
+
+    def print_thought(self):
+        font = pygame.font.Font(FONT_STYLE, 14)
+        txt_color = RGB_WHITE
+        if self.thought_frames < 30:
+            self.screen.blit(
+                    font.render(self.last_customer_thought, 1, txt_color), 
+                    [(self.screen.get_width()/2) - 6*len(self.last_customer_thought), 5]
+                )
+
+
 
     def print_stats(self):
         font = pygame.font.Font(FONT_STYLE, 14)  # Edit fonts here
         txt_color = RGB_WHITE
+
 
         # time_stamp = font.render(
         #     '{datetimstr} ({temp_txt} Celcius)'.format(
