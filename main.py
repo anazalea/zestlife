@@ -33,6 +33,9 @@ def play():
     employees_button = pygbutton.PygButton((800 - 80 - 8 - 64 - 8 - 64 - 8 - 64, 520, 64, 64),
                                        normal='./resources/flask.png')
 
+    upgrade_button = pygbutton.PygButton((800 - 80 - 8 - 64 - 8 - 64 - 8 - 64 - 8 - 64, 520, 64, 64),
+                                           normal='./resources/flask.png')
+
     ##############################################################################################
     ##############################################################################################
     ##############################################################################################
@@ -51,6 +54,7 @@ def play():
             price_button.draw(lemonade_game.screen)
             inventory_button.draw(lemonade_game.screen)
             employees_button.draw(lemonade_game.screen)
+            upgrade_button.draw(lemonade_game.screen)
             pygame.display.update()
 
         for event in pygame.event.get():
@@ -74,6 +78,10 @@ def play():
             buttonEvents = employees_button.handleEvent(event)
             if 'click' in buttonEvents:
                 menus.employee_menu(lemonade_game)
+
+            buttonEvents = upgrade_button.handleEvent(event)
+            if 'click' in buttonEvents:
+                menus.upgrade_stand_menu(lemonade_game)
 
             elif event.type == pygame.KEYDOWN:
                 # Escape key pressed

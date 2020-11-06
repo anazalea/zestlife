@@ -674,3 +674,6 @@ def employee_menu(lemonade_game):
                 # Escape key pressed
                 if event.key == pygame.K_ESCAPE:
                     done = True
+
+def upgrade_stand_menu(lemonade_game):
+    lemonade_game.lemonade_stand.upgrade_stand()

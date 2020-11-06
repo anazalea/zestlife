@@ -32,9 +32,39 @@ class LemonadeStand():
         self.workforce = pygame.sprite.Group(self.employees)
         self.employee_image_dict = employee_image_dict
         self.coin_group = pygame.sprite.Group([])
+        self.lemonade_stand_level = 0
 
         for i in range(n_employees):
             self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict)
+
+    def set_lemonade_stand_image(self):
+        if self.lemonade_stand_level == 0:
+            self.image_open = pygame.image.load('./resources/standA_small.png')
+            self.image_closed = pygame.image.load('./resources/standA_small.png')
+        elif self.lemonade_stand_level == 1:
+                self.image_open = pygame.image.load('./resources/standB_small.png')
+                self.image_closed = pygame.image.load('./resources/standB_small.png')
+        elif self.lemonade_stand_level == 2:
+                self.image_open = pygame.image.load('./resources/standC_small.png')
+                self.image_closed = pygame.image.load('./resources/standC_small.png')
+
+    def upgrade_stand(self):
+        #check if there are available upgrades (0-->1-->3)
+        if self.lemonade_stand_level < 2:
+            #upgrade level
+            self.lemonade_stand_level += 1
+            self.account_balance -= 500
+            self.juicing_efficiency += 10
+        #update images
+        self.set_lemonade_stand_image()
+
+    def downgradegrade_stand(self):
+        if self.lemonade_stand_level > 0:
+            self.lemonade_stand_level -= 1
+            self.account_balance += 500
+            self.juicing_efficiency -= 10
+        #update images
+        self.set_lemonade_stand_image()
 
     def hire_employee(self, start_time, end_time, employee_image_dict, daily_wage=20):
         # currently, employees should go in here: (270,350,90,50)
