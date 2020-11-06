@@ -36,6 +36,13 @@ class LemonadeStand():
         for i in range(n_employees):
             self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict)
 
+    def update_prep_time(self):
+        if len(self.employees) == 0:
+            self.prep_time = np.inf
+        else:
+            self.prep_time = 3 * (len(self.employees) - 5) ** 2 + 5
+            print(self.prep_time)
+
     def hire_employee(self, start_time, end_time, employee_image_dict, daily_wage=20):
         # currently, employees should go in here: (270,350,90,50)
         new_employee = Employee((250,350), employee_image_dict, self.opening_time, self.closing_time, daily_wage=daily_wage)
@@ -51,6 +58,7 @@ class LemonadeStand():
             employee.rect[:2] = [employee_locs[i+1],360 + np.random.randint(-2,5)]
             employee.index = np.random.choice([0,1,2])
         self.workforce = pygame.sprite.Group(self.employees)
+        self.update_prep_time()
 
     def fire_employee(self, employee_image_dict, daily_wage):
         #Find an employee with the right wage
@@ -69,6 +77,7 @@ class LemonadeStand():
             employee.index = np.random.choice([0,1,2])
             last_state = employee.state
         self.workforce = pygame.sprite.Group(self.employees)
+        self.update_prep_time()
 
     def get_current_employees(self):
         return self.employees
