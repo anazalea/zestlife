@@ -16,6 +16,7 @@ class Sound:
         # self.stomp = mixer.Sound("./sfx/stomp.ogg")
         # self.jump = mixer.Sound("./sfx/small_jump.ogg")
         self.death = pygame.mixer.Sound("./resources/death.wav")
+        # self.hit = pygame.mixer.Sound("./resources/hit.ogg")
         # self.kick = mixer.Sound("./sfx/kick.ogg")
         # self.brick_bump = mixer.Sound("./sfx/brick-bump.ogg")
         # self.powerup = mixer.Sound('./sfx/powerup.ogg')

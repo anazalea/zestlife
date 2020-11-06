@@ -130,7 +130,7 @@ class Customer(AnimatedSprite):
         self.max_spend = pref_generator.spend_width * np.random.randn() + pref_generator.spend_per_ml
         self.straw_preference = np.random.choice(pref_generator.straw_prefs, p = pref_generator.straw_pref_probs)
 
-    def update_destination(self, timedelta, lineup, recipe, price, customer_outcomes):
+    def update_destination(self, timedelta, lineup, recipe, price, customer_outcomes, customer_thoughts, sound):
         if self.queue_position == -1:
             self.kill()
         # Try to get in line
@@ -158,7 +158,9 @@ class Customer(AnimatedSprite):
         # If you've made it to the front of the line get lemonade or go home
         elif self.queue_position == 0:
             if not self.has_seen_recipe:
-                self.likes_recipe, self.reason = self.customer_likes_recipe(recipe, price)
+                self.likes_recipe, self.reason = self.customer_likes_recipe(recipe, price, sound)
+                if not self.likes_recipe:
+                    customer_thoughts.append([id(self), self.reason])
                 self.has_seen_recipe = True
             if not self.likes_recipe: # Go home
                 self.destination = self.spawn_location
@@ -189,61 +191,63 @@ class Customer(AnimatedSprite):
             vector_to_dest.scale_to_length(distance)
             return vector_to_dest
 
-    def update(self, timedelta, lineup, recipe, price, customer_outcomes):
+    def update(self, timedelta, lineup, recipe, price, customer_outcomes, customer_thoughts, sound):
         super().next_frame()
         if tuple(self.rect[:2]) == self.destination:
-            self.update_destination(timedelta, lineup, recipe, price, customer_outcomes)
+            self.update_destination(timedelta, lineup, recipe, price, customer_outcomes, customer_thoughts, sound)
         displacement = self.get_displacement(timedelta)
         # face left (flip of default right) if not moving
         self.flip = displacement[0] <= 0
         super().move(displacement)
 
-    def customer_likes_recipe(self, recipe, price):
-        reason = ''
+    def customer_likes_recipe(self, recipe, price, sound):
+        reason = []
         likes_it = True
         if recipe.lemon_concentration < self.min_lemon_conc:
-            reason += ' Flavourless.'
+            reason .append('Flavourless.')
             likes_it = False
         if recipe.lemon_concentration > self.max_lemon_conc:
-            reason += ' Too sour.'
+            reason .append('Too sour.')
             likes_it = False
         if recipe.sugar_concentration < self.min_sugar_conc:
-            reason += ' Not sweet enough.'
+            reason.append('Not sweet enough.')
             likes_it = False
         if recipe.sugar_concentration > self.max_sugar_conc:
-            reason += ' Too sweet.'
+            reason.append('Too sweet.')
             likes_it = False
         if recipe.total_volume < self.min_volume:
-            reason += " This won't quench my thirst."
+            reason.append("This won't quench my thirst.")
             likes_it = False
         if recipe.total_volume > self.max_volume:
-            reason += ' Who could even lift that?'
+            reason.append('Who could even lift that?')
             likes_it = False
         if recipe.ice_concentration < self.min_ice_conc:
-            reason += ' Too stingy with the ice.'
+            reason.append(' Too stingy with the ice.')
             likes_it = False
         if recipe.ice_concentration > self.max_ice_conc:
-            reason += " That's mostly ice!"
+            reason.append(" That's mostly ice!")
             likes_it = False
         if self.straw_preference == 'needs_straw':
             if recipe.straw == 'no':
-                reason += ' I like straws.'
+                reason.append('I refuse to buy a drink without a straw.')
                 likes_it = False
         if self.straw_preference == 'anti_paper_straw':
             if recipe.straw == 'paper':
-                reason += ' Paper straws are garbage.'
+                reason.append('Paper straws are garbage.')
                 likes_it = False
         if self.straw_preference == 'anti_plastic_straw':
             if recipe.straw == 'plastic':
-                reason += " Won't somebody think of the turtles!?"
+                reason.append("Won't somebody think of the turtles!? PLASTIC STRAWS KILL.")
                 likes_it = False
         if self.max_spend < price/recipe.total_volume:
-            reason += ' Not worth the money.'
+            reason.append('Too expensive.')
             likes_it = False
 
-        if reason == '':
-            reason = 'Yum!'
-
+        # if reason == '':
+        #     reason = 'Yum!'
+        if not likes_it:
+            pass
+            # sound.play_sfx(sound.hit)
         return likes_it, reason
 
 

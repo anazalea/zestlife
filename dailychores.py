@@ -53,7 +53,9 @@ def end_day(lemonade_game):
     word_of_mouth_effect = outcomes['Satisfied Customer'] - outcomes['Bad Experience']
 
     # pay employees
-    total_wage = sum(e.daily_wage for e in lemonade_game.lemonade_stand.employees)
+    total_wage = sum(e.get_owed_wages() for e in lemonade_game.lemonade_stand.employees) + lemonade_game.lemonade_stand.outstanding_wages
+    #set outstanding wages back to zero for the next DAY
+    lemonade_game.lemonade_stand.outstanding_wages = 0
     lemonade_game.lemonade_stand.account_balance -= total_wage
     lemonade_game.lemonade_stand
 
@@ -63,7 +65,7 @@ def end_day(lemonade_game):
     daily_report = [
         f"Customers:                          {sum(outcomes.values())}",
         f"    Left because line was too long: {outcomes['Line Too Long']}",
-        f"    Bad Experience:                 {outcomes['Bad Experience']}",
+        f"    Disliked Product or Price:      {outcomes['Bad Experience']}",
         f"    Satisfied Customer:             {outcomes['Satisfied Customer']}",
         "",
         f"Change in inventory:",

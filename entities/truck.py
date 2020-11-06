@@ -38,6 +38,7 @@ class Truck(AnimatedSprite):
         self.destination = TRUCT_DESTINATION_LOCATION
         self.frames_at_destination = 0
         self.unload_n_frames = 60
+        self.unloading = False
 
     def update(self):
 
@@ -45,6 +46,9 @@ class Truck(AnimatedSprite):
             self.frames_at_destination += 1
             if self.frames_at_destination > self.unload_n_frames:
                 super().move(Vector2(self.speed/2,0))
+                self.unloading = False
+            else:
+                self.unloading = True
         else:
             super().move(Vector2(self.speed,0))        
         
@@ -55,6 +59,7 @@ class FleetOfTrucks():
     def __init__(self):
         self.trucks = pygame.sprite.Group([])
         self.orders_shipped = []
+        self.open_storage_img = pygame.image.load(f'./resources/storage-right-open.png')
 
     def update(self, lemonade_stand, current_datetime):
         for order in lemonade_stand.lemonstock.pending_orders:
@@ -75,6 +80,10 @@ class FleetOfTrucks():
         self.trucks.update()
 
     def draw(self, screen):
+        # open garage doors
+        if any(t.unloading for t in self.trucks):
+            screen.blit(self.open_storage_img, (230, 199))
+
         self.trucks.draw(screen)
 
 

@@ -146,7 +146,9 @@ def recipe_menu(lemonade_game):
                         else:
                             ingredients[list(ingredients.keys())[int((i+1)/2)]] -=1
             if accept_recipe:
+
                 recipe.update_ratios(ingredients['lemon juice [mL]'], ingredients['sugar [g]'], ingredients['water [mL]'], ingredients['ice [units]'])
+
                 #Write something about the type of lemonade you're making
                 recipe_message = 'The recipe sounds tasty'
             if return_to_game:
@@ -653,9 +655,9 @@ def employee_menu(lemonade_game):
             for i in range(len(buttons)):
                 if buttons[i]:
                     if i % 2 == 0:
-                        lemonade_stand.fire_employee(lemonade_stand.employee_image_dict,wages[int(i/2)])
+                        lemonade_stand.fire_employee(lemonade_stand.employee_image_dict,lemonade_game.current_datetime.time(),wages[int(i/2)])
                     else:
-                        lemonade_stand.hire_employee(lemonade_stand.opening_time, lemonade_stand.closing_time, lemonade_stand.employee_image_dict,wages[int((i-1)/2)])
+                        lemonade_stand.hire_employee(lemonade_stand.opening_time,lemonade_stand.closing_time,lemonade_stand.employee_image_dict,lemonade_game.current_datetime.time(),wages[int((i-1)/2)])
             if return_to_game:
                 done = True
 
