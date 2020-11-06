@@ -607,3 +607,70 @@ def ice_order_menu(lemonade_game):
                 # Escape key pressed
                 if event.key == pygame.K_ESCAPE:
                     done = True
+
+def employee_menu(lemonade_game):
+    screen = lemonade_game.screen
+    background = create_menu_background(screen)
+    employee_image = pygame.image.load('./resources/background.png')
+    lemonade_stand = lemonade_game.lemonade_stand
+    wages = [20, 30, 40]
+    done = False
+    click = False
+    while not done:
+        current_employees = lemonade_stand.get_current_employees() #Get employees
+        employee_count = [0, 0, 0]
+        for employee in current_employees:
+            if employee.get_daily_wage() == wages[0]:
+                employee_count[0] += 1
+            elif employee.get_daily_wage() == wages[1]:
+                employee_count[1] += 1
+            else:
+                employee_count[2] += 1
+        screen.blit(background, (0,0))
+        screen.blit(employee_image, (0,0))
+
+        font = pygame.font.Font(FONT_STYLE,15) #Edit fonts here
+        draw_text('Current Staff', font, (255, 255, 255), screen, 20, 20)
+
+        #Try to make this into a loop through different employee wage
+        buttons = [False]*len(wages)*2
+        index = 0
+        x_start, y_start = 20, 100
+        button_h, button_w = 75, 25
+        spacing = 100
+        for i in range(len(wages)):
+            item_name_x = x_start
+            item_name_y = y_start + index*spacing #Next line is 30 down
+            item_display = str(employee_count[i]) + ' employees paid at '+ str(wages[i]) + ' $/day'#+ ', quantity ordered:' + str(round(value))
+            draw_text(item_display, font, (255, 255, 255), screen , item_name_x, item_name_y)
+            buttons[index*2] = button(screen, 'Fire', (0,0,0,100), (0,0,0,255), (item_name_x+290,item_name_y+25,button_h,button_w), font, click)
+            buttons[index*2+1] = button(screen, 'Hire', (0,0,0,100), (0,0,0,255), (item_name_x+390,item_name_y+25,button_h,button_w), font, click)
+            index += 1
+        #Buttons to accept recipe and return to game
+        return_to_game = button(screen, 'Resume Game', (0,0,0,100), (0,0,0,255), (400,500,300,50), font, click)
+        if click:
+            for i in range(len(buttons)):
+                if buttons[i]:
+                    if i % 2 == 0:
+                        lemonade_stand.fire_employee(lemonade_stand.employee_image_dict,wages[int(i/2)])
+                    else:
+                        lemonade_stand.hire_employee(lemonade_stand.opening_time, lemonade_stand.closing_time, lemonade_stand.employee_image_dict,wages[int((i-1)/2)])
+            if return_to_game:
+                done = True
+
+        click = False
+        pygame.display.update()
+
+        #Events
+        for event in pygame.event.get():
+            # Close button clicked
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                #Clicked on start game
+                if event.button == 1:
+                    click = True
+            if event.type == pygame.KEYDOWN:
+                # Escape key pressed
+                if event.key == pygame.K_ESCAPE:
+                    done = True

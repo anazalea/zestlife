@@ -2,36 +2,24 @@ import datetime
 import glob
 import numpy as np
 import pygame
-from dailychores import start_day, end_day
+from dailychores import get_starting_customers, end_day
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
-from entities.customer import Customer, CustomerArrivalTimeGenerator, CustomerPreferenceGenerator
 from entities.scenery import Town, Trees
 from entities.truck import FleetOfTrucks
+from entities.customer import CustomerArrivalTimeGenerator
 from recipe import Recipe
 from temperature import get_temperature
+
+
+KAREN_PROB = .1
+HIPSTER_PROB = .1
 
 class LemonadeGame():
     def __init__(self, sound, config=None):
         self.sound = sound
-        # customer
-        customer_image_dict = {}
-        for s in ['walking']:
-            images_path = sorted(glob.glob(f'./resources/customer_{s}_*.png'))
-            customer_image_dict[s+'_right'] = [pygame.image.load(img_path) for img_path in images_path]
-            customer_image_dict[s+'_left'] = [pygame.transform.flip(image, True, False) \
-                                                    for image in customer_image_dict[s+'_right']]
-        self.customer_image_dict = customer_image_dict
         self.arrival_time_generator = CustomerArrivalTimeGenerator()
-        self.preference_generator = CustomerPreferenceGenerator()
-
-        # customer accessories
-        acc_ims = ['drink_large_straw']
-        accessory_image_dict = {}
-        for im in acc_ims:
-            accessory_image_dict[im] = ((0,0), pygame.image.load(f'./resources/{im}.png'))
-        self.accessory_image_dict = accessory_image_dict
 
         # employee
         employee_image_dict = {}
@@ -52,9 +40,19 @@ class LemonadeGame():
         self.trucks = FleetOfTrucks() 
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
-        customers = start_day(self)
+        customers = self.get_starting_customers()
         self.future_customers = pygame.sprite.Group(customers)
         self.active_customers = pygame.sprite.Group([])
+
+    def get_starting_customers(self):
+        return get_starting_customers(
+            dt=self.current_datetime.date(),
+            word_of_mouth_effect=self.word_of_mouth_effect,
+            arrival_time_generator=self.arrival_time_generator,
+            customer_karen_prob=KAREN_PROB,
+            customer_hipster_prob=HIPSTER_PROB,
+            lineup=self.lemonade_stand.lineup,
+        )
 
     def update_world(self, game_speed):
         old_datetime = self.current_datetime
@@ -73,7 +71,7 @@ class LemonadeGame():
             print(outcomes)
             self.word_of_mouth_effect = word_of_mouth_effect
             self.customer_outcomes = []
-            customers = start_day(self)
+            customers = self.get_starting_customers()
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
