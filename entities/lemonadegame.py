@@ -146,7 +146,9 @@ class LemonadeGame():
                 self.last_thinking_customer = self.customer_thoughts[-1][0]
                 self.thought_frames = 0
             else:
-                self.thought_frames += 0
+                self.thought_frames += 1
+            # if self.thought_frames > 30:
+            #     self.last_customer_thought = ''
 
     def print_thought(self):
         font = pygame.font.Font(FONT_STYLE, 14)
