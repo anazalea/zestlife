@@ -102,7 +102,7 @@ def recipe_menu(lemonade_game):
     screen = lemonade_game.screen
     background = create_menu_background(screen)
     recipe = lemonade_game.recipe
-    ingredients = {'lemon juice' : recipe.lemon_juice, 'sugar' : recipe.sugar, 'water' : recipe.water, 'ice' : recipe.ice} #Get this from another class
+    ingredients = {'lemon juice [mL]' : recipe.lemon_juice, 'sugar [g]' : recipe.sugar, 'water [mL]' : recipe.water, 'ice [units]' : recipe.ice} #Get this from another class
     ingredient_min, ingredient_max = 0, 500
     recipe_message = ''
     done = False
@@ -146,7 +146,7 @@ def recipe_menu(lemonade_game):
                         else:
                             ingredients[list(ingredients.keys())[int((i+1)/2)]] -=1
             if accept_recipe:
-                recipe.update_ratios(ingredients['lemon juice'], ingredients['sugar'], ingredients['water'], ingredients['ice'])
+                recipe.update_ratios(ingredients['lemon juice [mL]'], ingredients['sugar [g]'], ingredients['water [mL]'], ingredients['ice [units]'])
                 #Write something about the type of lemonade you're making
                 recipe_message = 'The recipe sounds tasty'
             if return_to_game:
@@ -192,7 +192,7 @@ def price_menu(lemonade_game):
         item_name_x = x_start
         item_name_y = y_start
         button_coords = [(430,y_start, button_dimension, button_dimension), (490,y_start, button_dimension, button_dimension), (550,y_start, button_dimension, button_dimension)]
-        draw_text('Price', font, (255, 255, 255), screen , item_name_x, item_name_y)
+        draw_text('Price [$]', font, (255, 255, 255), screen , item_name_x, item_name_y)
         button_1 = button(screen, '-', (0,0,0,100), (0,0,0,255), button_coords[0], font, click)
         button(screen, str(price), (0,0,0,0), (0,0,0,0), button_coords[1], font, click)
         button_2 = button(screen, '+', (0,0,0,100), (0,0,0,255), button_coords[2], font, click)
@@ -235,7 +235,7 @@ def inventory_menu(lemonade_game):
     background = create_menu_background(screen)
     inventory_image = pygame.image.load('./resources/background.png') #Update with recipe image
     lemonade_stand = lemonade_game.lemonade_stand
-    stock_items = {'lemon juice' : lemonade_stand.lemonstock.current_units, 'sugar' : lemonade_stand.sugarstock.current_units, 'ice' : lemonade_stand.icestock.current_units} #Get this from another class
+    stock_items = {'lemons [units]' : lemonade_stand.lemonstock.current_units, 'sugar [g]' : lemonade_stand.sugarstock.current_units, 'ice [units]' : lemonade_stand.icestock.current_units} #Get this from another class
     done = False
     click = False
     while not done:
@@ -306,7 +306,7 @@ def lemon_order_menu(lemonade_game):
         screen.blit(order_lemon_image, (0,0))
         font = pygame.font.Font(FONT_STYLE,15)
         draw_text('Order Lemons', font, (255, 255, 255), screen, 20, 20)
-        draw_text('Quantity', font, (255, 255, 255), screen, 20, 70)
+        draw_text('Quantity [units]', font, (255, 255, 255), screen, 20, 70)
         draw_text('Arrives In', font, (255, 255, 255), screen, 20+200, 70)
         draw_text('Price', font, (255, 255, 255), screen, 20+400, 70)
         draw_text('Order', font, (255, 255, 255), screen, 20+600, 70)
@@ -412,7 +412,7 @@ def sugar_order_menu(lemonade_game):
         screen.blit(order_sugar_image, (0,0))
         font = pygame.font.Font(FONT_STYLE,15)
         draw_text('Order Sugar', font, (255, 255, 255), screen, 20, 20)
-        draw_text('Quantity', font, (255, 255, 255), screen, 20, 70)
+        draw_text('Quantity [g]', font, (255, 255, 255), screen, 20, 70)
         draw_text('Arrives In', font, (255, 255, 255), screen, 20+200, 70)
         draw_text('Price', font, (255, 255, 255), screen, 20+400, 70)
         draw_text('Order', font, (255, 255, 255), screen, 20+600, 70)
@@ -509,7 +509,7 @@ def ice_order_menu(lemonade_game):
     order_ice_image = pygame.image.load('./resources/background.png')
     order_message = ''
     #(amount, time(hrs))
-    possible_orders = [(1,1),(5,2),(10,6),(100,24)]
+    possible_orders = [(50,4),(100,8),(200,10),(500,12)]
     order_amounts = [0] * len(possible_orders)
     lemonade_stand = lemonade_game.lemonade_stand
     done = False
@@ -519,7 +519,7 @@ def ice_order_menu(lemonade_game):
         screen.blit(order_ice_image, (0,0))
         font = pygame.font.Font(FONT_STYLE,15)
         draw_text('Order Ice', font, (255, 255, 255), screen, 20, 20)
-        draw_text('Quantity', font, (255, 255, 255), screen, 20, 70)
+        draw_text('Quantity [units]', font, (255, 255, 255), screen, 20, 70)
         draw_text('Arrives In', font, (255, 255, 255), screen, 20+200, 70)
         draw_text('Price', font, (255, 255, 255), screen, 20+400, 70)
         draw_text('Order', font, (255, 255, 255), screen, 20+600, 70)
