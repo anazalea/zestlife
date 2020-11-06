@@ -55,6 +55,7 @@ class LemonadeGame():
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
         customers = self.get_starting_customers()
+        track_day_start_stats(self)
         self.future_customers = pygame.sprite.Group(customers)
         self.active_customers = pygame.sprite.Group([])
         self.daily_report = {}
