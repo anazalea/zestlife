@@ -140,15 +140,16 @@ class LemonadeGame():
         temp_color = (max(17 * (temp - 15), 255), 0, 0) if temp > 25 else (0, 0, 0)
         temp_txt = font.render(str(temp), 1, temp_color)
 
+        # draw background of the stats
         self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (270, 65)), [10, 530])
 
-        stat_bar_bg_img
         margin = 32
         img_size = 24
+        # draw icons
         for i, img in enumerate([lemon_img, sugar_img, ice_img]):
             self.screen.blit(pygame.transform.scale(img, (img_size, img_size)),
                              [20 + (img_size + margin) * i, 540])
-
+        # draw values
         for i, txt in enumerate([n_lemons, g_sugar, n_ice, money]):
             self.screen.blit(txt, [20 + (img_size + margin) * i, 565])
 
