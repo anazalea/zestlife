@@ -4,7 +4,7 @@ import datetime
 
 class AnalogClock():
     def __init__(self, current_time, screen):
-        self.bg = pygame.image.load('./resources/clcock2.png')
+        self.bg = pygame.image.load(f'./resources/clock_face.png')
         self.current_time = current_time
         self.height = self.bg.get_height()
         self.width = self.bg.get_width()

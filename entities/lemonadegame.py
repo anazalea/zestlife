@@ -26,7 +26,9 @@ ice_img = pygame.image.load(f'./resources/ice_cube.png')
 lemon_img = pygame.image.load(f'./resources/lemon.png')
 sugar_img = pygame.image.load(f'./resources/sugar.png')
 straw_img = pygame.image.load(f'./resources/straw.png')
-stat_bar = pygame.image.load(f'./resources/inventory_mini_stat.png')
+stat_bar_bg_img = pygame.image.load(f'./resources/inventory_mini_stat.png')
+clock_img = pygame.image.load(f'./resources/clock_face.png')
+thermo_img = pygame.image.load(f'./resources/thermometer.png')
 
 class LemonadeGame():
     def __init__(self, sound, config=None):
@@ -113,12 +115,14 @@ class LemonadeGame():
     def print_stats(self):
         font = pygame.font.Font(FONT_STYLE, 14)  # Edit fonts here
         txt_color = (255, 255, 255)
+
         # time_stamp = font.render(
-        #     '{datetimstr} ({tempinc} Celcius)'.format(
+        #     '{datetimstr} ({temp_txt} Celcius)'.format(
         #         datetimstr=self.current_datetime.strftime('%Y-%m-%d %H:%M %p'),
-        #         tempinc=get_temperature(self.current_datetime)
+        #         temp_txt=get_temperature(self.current_datetime)
         #     ), 1, txt_color)
         # current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, txt_color)
+
         n_lemons = font.render(str(int(np.round(
             self.lemonade_stand.lemonstock.current_units, 0))), 1, txt_color)
         g_sugar = font.render(str(int(np.round(
@@ -126,12 +130,17 @@ class LemonadeGame():
         n_ice = font.render(str(int(np.round(
             self.lemonade_stand.icestock.current_units, 0))), 1, txt_color)
 
-        money = font.render('$ ' + str(self.lemonade_stand.account_balance), 1,  (0, 255, 0))
+        money = self.lemonade_stand.account_balance
+        money_color = (0, 255, 0) if money > 0 else (255, 0, 0)
+        money = font.render('$ ' + str(money), 1, money_color)
 
-        # TODO: Alpha does not work here!
-        self.screen.blit(pygame.transform.scale(stat_bar, (270, 65)), [10, 530])
+        temp = get_temperature(self.current_datetime)
+        temp_color = (max(17 * (temp - 15), 255), 0, 0) if temp > 25 else (0, 0, 0)
+        temp_txt = font.render(str(temp), 1, temp_color)
 
-        stat_bar
+        self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (270, 65)), [10, 530])
+
+        stat_bar_bg_img
         margin = 32
         img_size = 24
         for i, img in enumerate([lemon_img, sugar_img, ice_img]):
@@ -141,6 +150,8 @@ class LemonadeGame():
         for i, txt in enumerate([n_lemons, g_sugar, n_ice, money]):
             self.screen.blit(txt, [20 + (img_size + margin) * i, 565])
 
+        self.screen.blit(thermo_img, [0, 5])
+        self.screen.blit(temp_txt, [40, 20])
 
-
+        self.analog_clock.draw(self.screen)
 

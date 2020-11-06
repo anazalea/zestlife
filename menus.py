@@ -683,8 +683,10 @@ def daily_report_menu(lemonade_game):
     while not done:
         screen.blit(MENU_BG, (0, 0))
         draw_text("DAILY REPORT", title_font, (255, 255, 0), screen, 250, 20)
+        top_margin = 80
+        line_space = 20
         for i, line in enumerate(lemonade_game.daily_report):
-            draw_text(line, font, (255, 255, 255), screen, 20, 60 + i * 20)
+            draw_text(line, font, (255, 255, 255), screen, 40, top_margin + i * line_space)
 
         draw_text("Press any key to continue.", font, (0, 0, 0), screen, 250, 560)
 

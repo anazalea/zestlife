@@ -34,6 +34,16 @@ def get_starting_customers(
                          hold_for_n_frames = 5))
     return customers
 
+def track_day_start_stats(lemonade_game):
+    # TODO: not nice! this is monkey patching
+    ls = lemonade_game.lemonade_stand
+    ls._day_start_sugar = ls.sugarstock.current_units
+    ls._day_start_lemon = ls.lemonstock.current_units
+    ls._day_start_ice = ls.icestock.current_units
+    ls._day_start_acc_balance = ls.account_balance
+
+
+yesterday_suger = 0
 
 def end_day(lemonade_game):
     # TODO: don't take the entire lemonade_game object. Await merge of https://github.com/anazalea/lemonade/pull/23/files
@@ -41,21 +51,31 @@ def end_day(lemonade_game):
     word_of_mouth_effect = outcomes['Satisfied Customer'] - outcomes['Bad Experience']
 
     # pay employees
-    for employee in lemonade_game.lemonade_stand.employees:
-        lemonade_game.lemonade_stand.account_balance -= employee.daily_wage
+    total_wage = sum(e.daily_wage for e in lemonade_game.lemonade_stand.employees)
+    lemonade_game.lemonade_stand.account_balance -= total_wage
+    lemonade_game.lemonade_stand
+
+
+    ls = lemonade_game.lemonade_stand
 
     daily_report = [
-        f"new orders arrived: {0}",
-        f"unsatisfied customers: {0}", "",
-        f"inventory:",
-        f"    lemon: {50}",
-        f"    sugar: {500}",
-        f"    straw: {0}"
-        f"    ice cube: {5}", "",
-        f"change in inventory:",
-        f"wages deduced: {0}",
-        f"expenses: {0}",
-        f"    storage rent: {0}",
-        f"revenue: ${0.0}",
+        f"Customers:                          {sum(outcomes.values())}",
+        f"    Left because line was too long: {outcomes['Line Too Long']}",
+        f"    Bad Experience:                 {outcomes['Bad Experience']}",
+        f"    Satisfied Customer:             {outcomes['Satisfied Customer']}",
+        "",
+        f"Change in inventory:",
+        f"    lemon: {ls.lemonstock.current_units - ls._day_start_lemon:.2f}",
+        f"    sugar: {ls.sugarstock.current_units - ls._day_start_sugar:.2f}",
+        f"    ice cube: {ls.icestock.current_units - ls._day_start_ice:.2f}",
+        "",
+        f"Current inventory:",
+        f"    lemon: {ls.lemonstock.current_units:.2f}",
+        f"    sugar: {ls.sugarstock.current_units:.2f}",
+        f"    ice cube: {ls.icestock.current_units:.2f}",
+        "",
+        f"Wages deduced: ${total_wage:.2f}",
+        "",
+        f"revenue: ${ls.account_balance - ls._day_start_acc_balance:.2f}",
     ]
     return outcomes, word_of_mouth_effect, daily_report
