@@ -9,7 +9,7 @@ from recipe import Recipe
 from inventory import Stock
 
 class LemonadeStand():
-    def __init__(self, screen, current_datetime, employee_image_dict, sound, n_employees=0,):
+    def __init__(self, screen, current_datetime, employee_image_dict, sound, n_employees=3,):
         self.image_open = pygame.image.load('./resources/standA_small.png')
         self.image_closed = pygame.image.load('./resources/standA_small.png')
         self.im_height = self.image_open.get_height()
@@ -31,13 +31,14 @@ class LemonadeStand():
         self.time_serving_customer = 0
         self.recent_customer_thought = ''
         self.employees = []
+        self.outstanding_wages = 0
         self.workforce = pygame.sprite.Group(self.employees)
         self.employee_image_dict = employee_image_dict
         self.coin_group = pygame.sprite.Group([])
         self.lemonade_stand_level = 0
 
         for i in range(n_employees):
-            self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict)
+            self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict,current_datetime.time(),daily_wage=(i+2)*10)
 
     def set_lemonade_stand_image(self):
         if self.lemonade_stand_level == 0:
@@ -77,9 +78,10 @@ class LemonadeStand():
         else:
             self.prep_time = 3 * (len(self.employees) - 5) ** 2 + 5
 
-    def hire_employee(self, start_time, end_time, employee_image_dict, daily_wage=20):
+    def hire_employee(self, start_time, end_time, employee_image_dict, current_time, daily_wage=20):
         # currently, employees should go in here: (270,350,90,50)
         new_employee = Employee((250,350), employee_image_dict, self.opening_time, self.closing_time, daily_wage=daily_wage)
+        new_employee.clock_in(current_time)
         self.employees.append(new_employee)
         # reposition existing employees
         employee_locs = np.linspace(260, 260+90, len(self.employees)+2)
@@ -94,10 +96,12 @@ class LemonadeStand():
         self.workforce = pygame.sprite.Group(self.employees)
         self.update_prep_time()
 
-    def fire_employee(self, employee_image_dict, daily_wage):
+    def fire_employee(self, employee_image_dict, current_time, daily_wage):
         #Find an employee with the right wage
         for i in range(len(self.employees)):
             if self.employees[i].daily_wage == daily_wage:
+                self.employees[i].clock_out(current_time)
+                self.outstanding_wages += self.employees[i].get_owed_wages()
                 self.employees.pop(i)
                 break
         #reposition existing employees
