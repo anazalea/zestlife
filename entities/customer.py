@@ -16,6 +16,8 @@ from lineup import Lineup
 BASE_CUSTOMER_WALKING_ANIMATIONS = [
     [pygame.image.load(p) for p in sorted(glob.glob(f'./resources/customer_walking_*.png'))],
     [pygame.image.load(p) for p in sorted(glob.glob(f'./resources/customer1_walking_*.png'))],
+    [pygame.image.load(p) for p in sorted(glob.glob(f'./resources/customer2_walking_*.png'))],
+    [pygame.image.load(p) for p in sorted(glob.glob(f'./resources/customer3_walking_*.png'))],
 ]
 
 ACCESSORIES_DICT_HAIR = {
