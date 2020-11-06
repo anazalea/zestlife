@@ -679,7 +679,7 @@ def employee_menu(lemonade_game):
 def upgrade_menu(lemonade_game):
     screen = lemonade_game.screen
     background = create_menu_background(screen)
-    stand_image = pygame.image.load('./resources/background.png')
+    stand_image = pygame.image.load('./resources/background_upgrade_stand_menu.png')
     lemonade_stand = lemonade_game.lemonade_stand
 
     # current and upgrade/downgrade paths
