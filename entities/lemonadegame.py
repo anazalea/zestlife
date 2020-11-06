@@ -134,7 +134,7 @@ class LemonadeGame():
 
         money = self.lemonade_stand.account_balance
         money_color = (0, 255, 0) if money > 0 else (255, 0, 0)
-        money = font.render('$ ' + str(money), 1, money_color)
+        money = font.render('$ %.2f' % money, 1, money_color)
 
         temp = get_temperature(self.current_datetime)
         temp_color = (max(17 * (temp - 15), 255), 0, 0) if temp > 25 else (0, 0, 0)
