@@ -144,7 +144,7 @@ class LemonadeGame():
         # current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, txt_color)
 
         margin = 32
-        img_size = 24
+        icon_size = 24
         self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (270, 65)), [10, 530])
         icon_imgs = [
             lemon_img,
@@ -158,24 +158,24 @@ class LemonadeGame():
         ]
         # draw icons
         for i, img in enumerate(icon_imgs):
-            self.screen.blit(pygame.transform.scale(img, (img_size, img_size)),
-                             [20 + (img_size + margin) * i, 540])
+            self.screen.blit(pygame.transform.scale(img, (icon_size, icon_size)),
+                             [20 + (icon_size + margin) * i, 540])
         # draw values
         for i, stock in enumerate(stocks):
             self.screen.blit(
                 font.render('%.0f' % stock.current_units, 1, txt_color),
-                [20 + (img_size + margin) * i, 565]
+                [20 + (icon_size + margin) * i, 565]
             )
             self.screen.blit(
                 font.render('/%.0f' % stock.capacity, 1, txt_color),
-                [20 + (img_size + margin) * i, 578]
+                [20 + (icon_size + margin) * i, 578]
             )
 
         # draw money
         money = self.lemonade_stand.account_balance
         self.screen.blit(
             font.render('$ %.0f' % money, 1, RGB_GREEN if money > 0 else RGB_RED),
-            [20 + (img_size + margin) * len(stocks), 565]
+            [20 + (icon_size + margin) * len(stocks), 565]
         )
         # draw countdown
         countdown_offset = 505
@@ -188,7 +188,7 @@ class LemonadeGame():
                 time_to_next_order_string = get_compact_rep_timedelta(delivery_dt - self.current_datetime)
             self.screen.blit(
                 font.render(time_to_next_order_string, 1, txt_color),
-                [20 + (img_size + margin) * i, countdown_offset]
+                [20 + (icon_size + margin) * i, countdown_offset]
             )
             amount_of_next_order_string = ''
             will_fit = True
@@ -197,7 +197,7 @@ class LemonadeGame():
                 will_fit = (stock.current_units + amount) <= stock.capacity
             self.screen.blit(
                 font.render(amount_of_next_order_string, 1, txt_color if will_fit else RGB_RED),
-                [20 + (img_size + margin) * i, countdown_offset - 20]
+                [20 + (icon_size + margin) * i, countdown_offset - 20]
             )
         if any_pending_orders:
             self.screen.blit(
