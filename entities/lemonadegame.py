@@ -6,8 +6,9 @@ from dailychores import get_starting_customers, end_day
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
+from entities.scenery import Town, Trees
+from entities.truck import FleetOfTrucks
 from entities.customer import CustomerArrivalTimeGenerator
-from entities.town import Town
 from recipe import Recipe
 from temperature import get_temperature
 
@@ -25,7 +26,6 @@ class LemonadeGame():
         for s in ['juggle','shake','watch']:
             images_path = sorted(glob.glob(f'./resources/employee_{s}_*'))
             employee_image_dict[s] = [pygame.image.load(img_path) for img_path in images_path]
-        print (employee_image_dict)
         self.employee_image_dict = employee_image_dict
         self.screen = pygame.display.set_mode((800, 600))
         self.current_datetime = datetime.datetime(2020,6,10,10)
@@ -33,10 +33,11 @@ class LemonadeGame():
         self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime, self.employee_image_dict, sound, n_employees=3)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
         self.town = Town(self.current_datetime.time())
-        # self.scenery = pygame.image.load('./resources/background.png')
+        self.trees = Trees()
         self.customer_outcomes = []
         self.word_of_mouth_effect = 0
-
+        self.impending_shipments = []
+        self.trucks = FleetOfTrucks() 
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
         customers = self.get_starting_customers()
@@ -60,6 +61,8 @@ class LemonadeGame():
         self.town.update_town_time(self.current_datetime.time())
         self.background_sky.update_color(self.current_datetime.time())
         self.analog_clock.current_time = self.current_datetime.time()
+        # check for new orders
+        self.trucks.update(self.lemonade_stand, self.current_datetime)
 
         # if it's the end of the day, recap, setup for tomorrow
         if not self.current_datetime.date() == old_datetime.date():
@@ -85,8 +88,8 @@ class LemonadeGame():
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))
         self.town.draw(self.screen)
-        # self.screen.blit(self.scenery, (0,0))
-        # self.lemonade_stand.workforce.draw(self.screen)
+        self.trucks.draw(self.screen)
+        self.trees.draw(self.screen)
         self.lemonade_stand.draw(self.current_datetime.time(),
                                     self.screen)
         self.active_customers.draw(self.screen)
