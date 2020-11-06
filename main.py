@@ -40,7 +40,7 @@ def play():
                                            normal='./resources/upgrade_button_norm.png',
                                            highlight='./resources/upgrade_button_hover.png')
 
-    order_button = pygbutton.PygButton((190, 535, 83, 23),
+    order_button = pygbutton.PygButton((42*5, 535, 83, 23),
                                            normal='./resources/order_button_norm.png',  
                                            highlight='./resources/order_button_hover.png')
 
