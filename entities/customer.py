@@ -70,6 +70,13 @@ def get_speed(customer_type: CustomerType):
         return 1
     return 7
 
+def get_preference_generator(customer_type: CustomerType) -> CustomerPreferenceGenerator:
+    if customer_type == CustomerType.karen:
+        return KarenPreferenceGenerator()
+    if customer_type == CustomerType.hipster:
+        return HipsterPreferenceGenerator()
+    return CustomerPreferenceGenerator()
+
 
 class Customer(AnimatedSprite):
     class CustomerState(Enum):
@@ -287,11 +294,3 @@ class KarenPreferenceGenerator(CustomerPreferenceGenerator):
     sugar_width = 10/350
     straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw', 'anti_paper_straw']
     straw_pref_probs = [0., .5, 0., .5]
-
-
-def get_preference_generator(customer_type: CustomerType) -> CustomerPreferenceGenerator:
-    if customer_type == CustomerType.karen:
-        return KarenPreferenceGenerator()
-    if customer_type == CustomerType.hipster:
-        return HipsterPreferenceGenerator()
-    return CustomerPreferenceGenerator()
