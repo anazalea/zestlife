@@ -24,12 +24,14 @@ def play():
     ##############################################################################################
     ##############################################################################################
 
-    recipe_button = pygbutton.PygButton((800 - 80, 520, 64, 64), normal='./resources/flask.png')
-    price_button = pygbutton.PygButton((800 - 80 - 8 - 64, 520, 64, 64),
-                                       normal='./resources/dollar-coin.png')
-    inventory_button = pygbutton.PygButton((800 - 80 - 8 - 64 - 8 - 64, 520, 64, 64),
-                                       normal='./resources/delivery-truck.png')
-
+    buttons_top = 550
+    button_width = 130
+    recipe_button = pygbutton.PygButton((800 - button_width, buttons_top, 64, 64),
+                                        normal='./resources/recipe_button.png')
+    price_button = pygbutton.PygButton((800 - 2 * button_width, buttons_top, 64, 64),
+                                       normal='./resources/price_button.png')
+    inventory_button = pygbutton.PygButton((800 - 3 * button_width, buttons_top, 64, 64),
+                                           normal='./resources/inventory_button.png')
     employees_button = pygbutton.PygButton((800 - 80 - 8 - 64 - 8 - 64 - 8 - 64, 520, 64, 64),
                                        normal='./resources/flask.png')
 

@@ -2,10 +2,16 @@ import datetime
 import glob
 import numpy as np
 import pygame
-from dailychores import get_starting_customers, end_day
+from pygame import draw
+from pygame.draw import rect
+
+import menus
+from dailychores import get_starting_customers, end_day, track_day_start_stats
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
+from entities.town import Town
+from menus import FONT_STYLE
 from entities.scenery import Town, Trees
 from entities.truck import FleetOfTrucks
 from entities.customer import CustomerArrivalTimeGenerator
@@ -15,6 +21,14 @@ from temperature import get_temperature
 
 KAREN_PROB = .1
 HIPSTER_PROB = .1
+
+ice_img = pygame.image.load(f'./resources/ice_cube.png')
+lemon_img = pygame.image.load(f'./resources/lemon.png')
+sugar_img = pygame.image.load(f'./resources/sugar.png')
+straw_img = pygame.image.load(f'./resources/straw.png')
+stat_bar_bg_img = pygame.image.load(f'./resources/inventory_mini_stat.png')
+clock_img = pygame.image.load(f'./resources/clock_face.png')
+thermo_img = pygame.image.load(f'./resources/thermometer.png')
 
 class LemonadeGame():
     def __init__(self, sound, config=None):
@@ -37,12 +51,14 @@ class LemonadeGame():
         self.customer_outcomes = []
         self.word_of_mouth_effect = 0
         self.impending_shipments = []
-        self.trucks = FleetOfTrucks() 
+        self.trucks = FleetOfTrucks()
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
         customers = self.get_starting_customers()
+        track_day_start_stats(self)
         self.future_customers = pygame.sprite.Group(customers)
         self.active_customers = pygame.sprite.Group([])
+        self.daily_report = {}
 
     def get_starting_customers(self):
         return get_starting_customers(
@@ -68,14 +84,16 @@ class LemonadeGame():
         # if it's the end of the day, recap, setup for tomorrow
         if not self.current_datetime.date() == old_datetime.date():
             print('END OF DAY')
-            outcomes, word_of_mouth_effect = end_day(self)
+            outcomes, word_of_mouth_effect, self.daily_report = end_day(self)
             print(outcomes)
             self.word_of_mouth_effect = word_of_mouth_effect
             self.customer_outcomes = []
             customers = self.get_starting_customers()
+            track_day_start_stats(self)
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
+            menus.daily_report_menu(self)
 
         # check for new customers arriving, add them to the update group
         for customer in self.future_customers.sprites():
@@ -97,26 +115,45 @@ class LemonadeGame():
 
 
     def print_stats(self):
-        font = pygame.font.SysFont('comicsansmsttf',20)
-        time_stamp = font.render(
-            '{datetimstr} ({tempinc} Celcius)'.format(
-                datetimstr=self.current_datetime.strftime('%Y-%m-%d %H:%M %p'),
-                tempinc=get_temperature(self.current_datetime)
-            ), 1, (214, 26, 13))
-        current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, (214, 26, 13))
-        n_lemons = font.render(str(np.round(self.lemonade_stand.lemonstock.current_units, 0)) + ' LEMONS ON HAND', 1,
-                                (214, 26, 13))
-        g_sugar = font.render(str(np.round(self.lemonade_stand.sugarstock.current_units, 0)) + ' g SUGAR ON HAND', 1, (214, 26, 13))
-        juice_eff = font.render(
-            f'JUICING EFFICIENCY {str(self.lemonade_stand.juicing_efficiency)} mL/lemon', 1,
-            (214, 26, 13))
-        money = font.render(str(self.lemonade_stand.account_balance) + ' $', 1, (0, 0, 0))
-        thoughts = font.render(self.lemonade_stand.recent_customer_thought, 1, (0, 0, 0))
+        font = pygame.font.Font(FONT_STYLE, 14)  # Edit fonts here
+        txt_color = (255, 255, 255)
 
-        self.screen.blit(time_stamp, [20, 20])
-        self.screen.blit(current_price, [20, 40])
-        self.screen.blit(juice_eff, [20, 60])
-        self.screen.blit(n_lemons, [20, 80])
-        self.screen.blit(g_sugar, [20, 100])
-        self.screen.blit(money, [20, 120])
-        self.screen.blit(thoughts, [10, 580])
+        # time_stamp = font.render(
+        #     '{datetimstr} ({temp_txt} Celcius)'.format(
+        #         datetimstr=self.current_datetime.strftime('%Y-%m-%d %H:%M %p'),
+        #         temp_txt=get_temperature(self.current_datetime)
+        #     ), 1, txt_color)
+        # current_price = font.render(str(self.lemonade_stand.price) + ' $ / CUP', 1, txt_color)
+
+        n_lemons = font.render(str(int(np.round(
+            self.lemonade_stand.lemonstock.current_units, 0))), 1, txt_color)
+        g_sugar = font.render(str(int(np.round(
+            self.lemonade_stand.sugarstock.current_units, 0))), 1, txt_color)
+        n_ice = font.render(str(int(np.round(
+            self.lemonade_stand.icestock.current_units, 0))), 1, txt_color)
+
+        money = self.lemonade_stand.account_balance
+        money_color = (0, 255, 0) if money > 0 else (255, 0, 0)
+        money = font.render('$ ' + str(money), 1, money_color)
+
+        temp = get_temperature(self.current_datetime)
+        temp_color = (max(17 * (temp - 15), 255), 0, 0) if temp > 25 else (0, 0, 0)
+        temp_txt = font.render(str(temp), 1, temp_color)
+
+        self.screen.blit(pygame.transform.scale(stat_bar_bg_img, (270, 65)), [10, 530])
+
+        stat_bar_bg_img
+        margin = 32
+        img_size = 24
+        for i, img in enumerate([lemon_img, sugar_img, ice_img]):
+            self.screen.blit(pygame.transform.scale(img, (img_size, img_size)),
+                             [20 + (img_size + margin) * i, 540])
+
+        for i, txt in enumerate([n_lemons, g_sugar, n_ice, money]):
+            self.screen.blit(txt, [20 + (img_size + margin) * i, 565])
+
+        self.screen.blit(thermo_img, [0, 5])
+        self.screen.blit(temp_txt, [40, 20])
+
+        self.analog_clock.draw(self.screen)
+
