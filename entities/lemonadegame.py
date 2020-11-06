@@ -6,16 +6,19 @@ from dailychores import get_starting_customers, end_day
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
-from entities.customer import Customer, CustomerArrivalTimeGenerator, CustomerPreferenceGenerator
+from entities.customer import CustomerArrivalTimeGenerator
 from entities.town import Town
 from recipe import Recipe
 from temperature import get_temperature
+
+
+KAREN_PROB = .1
+HIPSTER_PROB = .1
 
 class LemonadeGame():
     def __init__(self, sound, config=None):
         self.sound = sound
         self.arrival_time_generator = CustomerArrivalTimeGenerator()
-        self.preference_generator = CustomerPreferenceGenerator()
 
         # employee
         employee_image_dict = {}
@@ -45,7 +48,8 @@ class LemonadeGame():
             dt=self.current_datetime.date(),
             word_of_mouth_effect=self.word_of_mouth_effect,
             arrival_time_generator=self.arrival_time_generator,
-            preference_generator=self.preference_generator,
+            customer_karen_prob=KAREN_PROB,
+            customer_hipster_prob=HIPSTER_PROB,
             lineup=self.lemonade_stand.lineup,
         )
 

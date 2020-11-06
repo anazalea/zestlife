@@ -6,7 +6,7 @@ from collections import Counter
 from demand import demand_seasonality
 from lineup import Lineup
 from typing import List
-from entities.customer import CustomerArrivalTimeGenerator, CustomerPreferenceGenerator
+from entities.customer import CustomerArrivalTimeGenerator, CustomerType
 
 
 def predict_demand(dt: datetime.date, word_of_mouth_effect: float) -> int:
@@ -16,16 +16,22 @@ def get_starting_customers(
         dt: datetime.date,
         word_of_mouth_effect: float,
         arrival_time_generator: CustomerArrivalTimeGenerator,
-        preference_generator: CustomerPreferenceGenerator,
+        customer_karen_prob: float,
+        customer_hipster_prob: float,
         lineup: Lineup
 ) -> List[Customer]:
-    n_customers_today = predict_demand(dt=dt, word_of_mouth_effect=word_of_mouth_effect)
-    customers =[Customer(position=(np.random.choice([-150,950]), 500 + np.random.randint(-25,25)),
+    default_prob = 1 - customer_hipster_prob - customer_karen_prob
+    customers = []
+    for _ in range(predict_demand(dt=dt, word_of_mouth_effect=word_of_mouth_effect)):
+        customer_type = np.random.choice(
+            [CustomerType.default, CustomerType.hipster, CustomerType.karen],
+            p=[default_prob, customer_hipster_prob, customer_karen_prob]
+        )
+        customers.append(Customer(position=(np.random.choice([-150,950]), 500 + np.random.randint(-25,25)),
                          arrival_time_generator=arrival_time_generator,
-                         pref_generator=preference_generator,
+                         customer_type=customer_type,
                          lineup=lineup,
-                         hold_for_n_frames = 5)
-                for _ in range(n_customers_today)]
+                         hold_for_n_frames = 5))
     return customers
 
 def end_day(lemonade_game):

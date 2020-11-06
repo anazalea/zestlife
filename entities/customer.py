@@ -7,7 +7,7 @@ import datetime
 import math
 import glob
 
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Optional
 from entities.base import AnimatedSprite
 from pygame.math import Vector2
 from lineup import Lineup
@@ -40,6 +40,37 @@ def get_randomized_customer_image_dict():
     return {'walking': BASE_CUSTOMER_WALKING_ANIMATIONS[random_i]}
 
 
+class CustomerType(Enum):
+    default = 'default'
+    karen = 'karen'
+    hipster = 'hipster'
+
+def get_accessory_keys_randomly(customer_type: CustomerType):
+    karen_keys = {'karen'}
+    hipster_keys = {'beard', 'shades', 'bun'}
+    if customer_type == CustomerType.default:
+        resl = []
+        for d in [ACCESSORIES_DICT_FACE, ACCESSORIES_DICT_HAIR]:
+            potential_keys = list(set(d.keys()) - karen_keys - hipster_keys)
+            # adding None because sometimes people don't have shit on their faces
+            resl.append(np.random.choice(potential_keys + [None] * len(d)))
+        return set([s for s in resl if s is not None])
+    elif customer_type == CustomerType.karen:
+        return karen_keys
+    elif customer_type == CustomerType.hipster:
+        return hipster_keys
+    return {}
+
+def get_speed(customer_type: CustomerType):
+    if customer_type == CustomerType.default:
+        return 3 + np.random.randint(2,6)  # pixels/minute
+    elif customer_type == CustomerType.karen:
+        return 12
+    elif customer_type == CustomerType.hipster:
+        return 1
+    return 7
+
+
 class Customer(AnimatedSprite):
     class CustomerState(Enum):
         WALKING = 'walking'
@@ -47,7 +78,7 @@ class Customer(AnimatedSprite):
     def __init__(self,
                  position: Tuple[int, int],
                  arrival_time_generator: CustomerArrivalTimeGenerator,
-                 pref_generator: CustomerPreferenceGenerator,
+                 customer_type: CustomerType,
                  lineup: Lineup,
                  hold_for_n_frames=1,
                  image_dict: Dict[str, List[pygame.image]] = None,
@@ -63,23 +94,18 @@ class Customer(AnimatedSprite):
                 **ACCESSORIES_DICT_HAIR,
                 **ACCESSORIES_DICT_FACE,
             }
-            visible_accessories = {
-                # sometimes people don't have shit on their faces
-                np.random.choice(list(d.keys()) + [None]*len(d))
-                for d in [ACCESSORIES_DICT_FACE, ACCESSORIES_DICT_HAIR]
-            }
-            visible_accessories = {k for k in visible_accessories if k is not None}
+            visible_accessories = get_accessory_keys_randomly(customer_type)
 
         super().__init__(position, image_dict, hold_for_n_frames=hold_for_n_frames,
                          accessory_images=accessory_images, visible_accessories=visible_accessories)
         self.spawn_location = position
         self.arrival_time = arrival_time_generator.sample()
-        self.speed = 3 + np.random.randint(2,6)  # pixels/minute
+        self.speed = get_speed(customer_type)
         self.has_lemonade = False
         self.has_seen_recipe = False
         self.likes_recipe = True
         self.reason = ''
-        self.set_preferences(pref_generator)
+        self.set_preferences(get_preference_generator(customer_type))
         self.destination = lineup.last_loc
         self.queue_position = lineup.n_positions + 1
 
@@ -252,7 +278,7 @@ class HipsterPreferenceGenerator(CustomerPreferenceGenerator):
     max_lemon = 120 / 350  # mL per 350 mL
     lemon_width = 10 / 350
     straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw', 'anti_paper_straw']
-    straw_pref_probs = [0., 1., .8, 0.01]
+    straw_pref_probs = [0., .5, .5, 0.]
 
 
 class KarenPreferenceGenerator(CustomerPreferenceGenerator):
@@ -260,4 +286,12 @@ class KarenPreferenceGenerator(CustomerPreferenceGenerator):
     max_sugar = 120/350 # g per 350 mL
     sugar_width = 10/350
     straw_prefs = ['no_preference', 'needs_straw', 'anti_plastic_straw', 'anti_paper_straw']
-    straw_pref_probs = [0., 1., 0.01, .8]
+    straw_pref_probs = [0., .5, 0., .5]
+
+
+def get_preference_generator(customer_type: CustomerType) -> CustomerPreferenceGenerator:
+    if customer_type == CustomerType.karen:
+        return KarenPreferenceGenerator()
+    if customer_type == CustomerType.hipster:
+        return HipsterPreferenceGenerator()
+    return CustomerPreferenceGenerator()
