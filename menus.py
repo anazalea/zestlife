@@ -13,6 +13,7 @@ from entities.lemonadestand import (
 FONT_STYLE = './resources/joystix-monospace.ttf'
 MENU_BG = pygame.image.load('./resources/menu_background.png')
 RGB_WHITE = (255, 255, 255)
+RGB_RED = (255, 0, 0)
 
 #Helper functions
 def text_objects(text, font, color):
@@ -691,7 +692,9 @@ def upgrade_menu(lemonade_game):
     downgrade_stand_type = get_stand_downgrade(current_stand_type)
     can_upgrade = upgrade_stand_type != current_stand_type
     can_downgrade = downgrade_stand_type != current_stand_type
+    can_pay_for_upgrade = stand_upgrade_cost <= lemonade_stand.account_balance
     print ('{} <- {} -> {}'.format(downgrade_stand_type, current_stand_type, upgrade_stand_type))
+    print ('can_pay_for_upgrade: {}'.format(can_pay_for_upgrade))
     # get current and upgrad/downgrade details
     current_stand_config = get_stand_config(current_stand_type)
     upgrade_stand_config = get_stand_config(upgrade_stand_type)
@@ -720,7 +723,8 @@ def upgrade_menu(lemonade_game):
                                   (left_margin, 50, button_w, button_h),
                                   font, click)
         upgrade_button = button(screen, 'Upgrade (-${})'.format(stand_upgrade_cost if can_upgrade else 0),
-                                active_color, inactive_color,
+                                active_color if can_pay_for_upgrade else RGB_RED,
+                                inactive_color if can_pay_for_upgrade else RGB_RED,
                                 (mid_x, 50, button_w, button_h),
                                 font, click)
         draw_text(
@@ -764,7 +768,8 @@ def upgrade_menu(lemonade_game):
                 lemonade_stand.downgrade_stand(dt=lemonade_game.current_datetime)
                 done = True
             if upgrade_button:
-                lemonade_stand.upgrade_stand(dt=lemonade_game.current_datetime)
+                if can_pay_for_upgrade:
+                    lemonade_stand.upgrade_stand(dt=lemonade_game.current_datetime)
             if any([return_to_game, downgrade_button, upgrade_button]):
                 done = True
 
