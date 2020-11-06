@@ -695,6 +695,8 @@ def upgrade_stand_menu(lemonade_game):
         draw_text('Current juicing efficiency : '+ str(lemonade_stand.juicing_efficiency), font, (255, 255, 255), screen , x_start, y_start)
         buttons[0] = button(screen, 'Downgrade', (0,0,0,100), (0,0,0,255), (x_start+200,y_start+75,button_h,button_w), font, click)
         buttons[1] = button(screen, 'Upgrade', (0,0,0,100), (0,0,0,255), (x_start+500,y_start+75,button_h,button_w), font, click)
+        draw_text('Upgrade costs $500', font, (255, 255, 255), screen , x_start, y_start+150)
+        draw_text('Downgrade returns $500', font, (255, 255, 255), screen , x_start, y_start+225)
         #Buttons to accept recipe and return to game
         return_to_game = button(screen, 'Resume Game', (0,0,0,100), (0,0,0,255), (400,500,300,50), font, click)
         if click:
