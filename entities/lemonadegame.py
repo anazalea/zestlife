@@ -166,7 +166,7 @@ class LemonadeGame():
         money = self.lemonade_stand.account_balance
         money_color = (0, 255, 0) if money > 0 else (255, 0, 0)
         self.screen.blit(
-            font.render('$ %.2f' % money, 1, money_color),
+            font.render('$ %.0f' % money, 1, money_color),
             [20 + (img_size + margin) * len(stocks), 565]
         )
         # draw countdown
