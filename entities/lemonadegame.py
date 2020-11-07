@@ -12,7 +12,7 @@ from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
 from entities.town import Town
 from menus import FONT_STYLE
-from entities.scenery import Town, Trees
+from entities.scenery import Town, Trees, Clouds
 from entities.truck import FleetOfTrucks
 from entities.customer import CustomerArrivalTimeGenerator
 from recipe import Recipe
@@ -74,6 +74,7 @@ class LemonadeGame():
         self.word_of_mouth_effect = 0
         self.impending_shipments = []
         self.trucks = FleetOfTrucks()
+        self.clouds = Clouds()
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
         customers = self.get_starting_customers()
@@ -102,6 +103,7 @@ class LemonadeGame():
         self.analog_clock.current_time = self.current_datetime.time()
         # check for new orders
         self.trucks.update(self.lemonade_stand, self.current_datetime, self.sound)
+        self.clouds.update()
 
         # if it's the end of the day, recap, setup for tomorrow
         if not self.current_datetime.date() == old_datetime.date():
@@ -130,6 +132,7 @@ class LemonadeGame():
 
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))
+        self.clouds.clouds.draw(self.screen)
         self.town.draw(self.screen)
         self.trucks.draw(self.screen)
         self.trees.draw(self.screen)
