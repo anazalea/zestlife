@@ -847,21 +847,29 @@ def daily_report_menu(lemonade_game):
 def victory_menu(lemonade_game):
     screen = lemonade_game.screen
     done = False
+    click = False
     font = pygame.font.Font(FONT_STYLE, 15)
     title_font = pygame.font.Font(FONT_STYLE, 30)
-    trophy = pygame.sprite.Group([Trophy((400-240,100), trophy_im_dict)])
-    # trophy = pygame.image.load('./resources/trophy.png')
-    # trophy = pygame.transform.scale(trophy, (int(trophy.get_width()*0.5),int(trophy.get_height()*0.5)))
+    trophy = pygame.sprite.Group([Trophy((400-200,130), trophy_im_dict)])
+    days_operating = lemonade_game.current_datetime - lemonade_game.start_datetime
+    score = f'You served 200 customers in {str(days_operating.days)} days and {str(days_operating.hours)} hours!'
     while not done:
         screen.blit(MENU_BG, (0,0))
         draw_text("VICTORY", title_font, (255, 255, 0), screen, 300, 20)
+        draw_text(score, font, (255,255,0), screen, 400 - int(len(score)*7), 40)
         trophy.update()
         trophy.draw(screen)
+        quit_game = button(screen, 'EXIT GAME', (0,0,0,100), (0,0,0,255), (75,525,300,50), font, click)
+        return_to_game = button(screen, 'KEEP PLAYING', (0,0,0,100), (0,0,0,255), (425,525,300,50), font, click)
+
+
         pygame.display.update()
         # Events
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN or  event.type == pygame.KEYDOWN:
                 done = True
+
+        
 
 
 
