@@ -20,6 +20,7 @@ from recipe import Recipe
 from temperature import get_temperature
 from inventory import Order
 from typing import List, Tuple, Optional
+from endgame import check_victory_condition
 
 KAREN_PROB = .1
 HIPSTER_PROB = .1
@@ -96,6 +97,7 @@ class LemonadeGame():
         )
 
     def update_world(self, game_speed_in_minutes: float):
+        check_victory_condition(self)
         """Updates state to next state given game_speed."""
         old_datetime = self.current_datetime
         self.lemonade_stand.workforce.update()
