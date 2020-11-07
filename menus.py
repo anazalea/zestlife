@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from inventory import Order
 import pricing
+from entities.trophy import Trophy, trophy_im_dict
 from entities.lemonadestand import (
     get_stand_downgrade, get_stand_upgrade, StandType, get_stand_config,
     UPGRADE_COST as stand_upgrade_cost,
@@ -843,3 +844,39 @@ def daily_report_menu(lemonade_game):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN or  event.type == pygame.KEYDOWN:
                 done = True
+
+def victory_menu(lemonade_game):
+    screen = lemonade_game.screen
+    lemonade_game.sound.play_sfx(lemonade_game.sound.victory)
+    done = False
+    click = False
+    font = pygame.font.Font(FONT_STYLE, 15)
+    title_font = pygame.font.Font(FONT_STYLE, 30)
+    trophy = pygame.sprite.Group([Trophy((400-200,120), trophy_im_dict)])
+    days_operating = lemonade_game.current_datetime - lemonade_game.start_datetime
+    score = f'You served 10 customers in {str(days_operating.days)} days and {str(int(days_operating.seconds/3600))} hours!'
+    while not done:
+        
+        screen.blit(MENU_BG, (0,0))
+        draw_text("VICTORY", title_font, (255, 255, 0), screen, 310, 20)
+        draw_text(score, font, (255,255,0), screen, 400 - int(len(score)*6), 65)
+        trophy.update()
+        trophy.draw(screen)
+        quit_game = button(screen, 'EXIT GAME', (0,0,0,100), (0,0,0,255), (75,525,300,50), font, click)
+        return_to_game = button(screen, 'KEEP PLAYING', (0,0,0,100), (0,0,0,255), (425,525,300,50), font, click)
+
+
+        pygame.display.update()
+        # Events
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN or  event.type == pygame.KEYDOWN:
+                done = True
+
+        
+
+
+
+
+def defeat_menu(lemonade_game):
+    pass
+

@@ -106,6 +106,7 @@ class LemonadeStand():
         self.employee_image_dict = employee_image_dict
         self.coin_group = pygame.sprite.Group([])
         self.lemonade_stand_level = 0
+        self.n_customers_served = 0
 
         for i in range(n_employees):
             self.hire_employee(self.opening_time, self.closing_time, self.employee_image_dict,current_datetime.time(),daily_wage=(i+2)*10)
@@ -190,6 +191,7 @@ class LemonadeStand():
         return self.opening_time < current_time < self.closing_time
 
     def make_a_sale(self, dt: datetime, recipe: Recipe):
+        self.n_customers_served += 1
         _, _ = self.lemonstock.update(t=dt, withdraw=recipe.lemon_juice / self.juicing_efficiency)
         _, _ = self.icestock.update(t=dt, withdraw=recipe.ice)
         _, _ = self.sugarstock.update(t=dt, withdraw=recipe.sugar)
