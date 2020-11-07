@@ -38,27 +38,26 @@ class Cloud(AnimatedSprite):
             hold_for_n_frames = hold_for_n_frames,
             state='being',
         )
-        self.speed = -1*(1 + 2.5 * np.random.randn())
+        self.speed = -1*np.abs((1.5 * np.random.randn()))
         scale = np.random.randint(100,300)
         self.image = pygame.transform.scale(self.image, (scale,int(scale/2)))
 
     def update(self):
         super().move(Vector2(self.speed,0))        
-        # if np.random.randn() > 0.2:
-        #     self.speed = (1)
+
         if self.rect[0] < -1*self.image.get_width():
             self.kill()
 
 
 class Clouds():
-    def __init__(self, cloudiness=0.05):
+    def __init__(self, cloudiness=0.25):
         self.clouds = pygame.sprite.Group([])
         self.cloudiness = cloudiness
 
     def update(self):
         
         self.clouds.update()
-        if np.random.uniform() > (1-self.cloudiness):
+        if np.random.uniform() > (1-self.cloudiness/10.):
             self.clouds.add(Cloud((800, np.random.randint(-100,100))))
 
         

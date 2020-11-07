@@ -151,7 +151,7 @@ class LemonadeGame():
 
     def print_thought(self):
         font = pygame.font.Font(FONT_STYLE, 14)
-        txt_color = RGB_WHITE
+        txt_color = (184, 178, 140)
         if self.thought_frames < 30:
             self.screen.blit(
                     font.render(self.last_customer_thought, 1, txt_color), 
