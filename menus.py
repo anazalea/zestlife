@@ -97,11 +97,24 @@ def create_menu_background(screen):
     background.fill(color)
     return background
 
+def update_straw_button_highlight(straw):
+    if straw == 'no':
+        return pygame.rect.Rect(13,298,204,34)
+    if straw == 'paper':
+        return pygame.rect.Rect(233,298,254,34)
+    if straw == 'plastic':
+        return pygame.rect.Rect(508,298,279,34)
+
+
+
+
 def recipe_menu(lemonade_game):
     screen = lemonade_game.screen
     background = create_menu_background(screen)
     recipe = lemonade_game.recipe
-    ingredients = {'lemon juice [mL]' : recipe.lemon_juice, 'sugar [g]' : recipe.sugar, 'water [mL]' : recipe.water, 'ice [units]' : recipe.ice} #Get this from another class
+    ingredients = {'lemon juice [mL]' : recipe.lemon_juice, 'sugar [g]' : recipe.sugar, 'water [mL]' : recipe.water,\
+                         'ice [units]' : recipe.ice, 'straw': recipe.straw} #Get this from another class
+    straw_highlight = update_straw_button_highlight(ingredients['straw'])
     ingredient_min, ingredient_max = 0, 500
     recipe_message = ''
     done = False
@@ -119,14 +132,20 @@ def recipe_menu(lemonade_game):
         x_start, y_start = 20, 100
         button_dimension = 25
         for item, value in ingredients.items():
-            item_name_x = x_start
-            item_name_y = y_start + index*30 #Next line is 30 down
-            button_coords = [(430,y_start + index*30, button_dimension, button_dimension), (480,y_start + index*30, button_dimension, button_dimension), (530,y_start + index*30, button_dimension, button_dimension)]
-            draw_text(item, font, (255, 255, 255), screen , item_name_x, item_name_y)
-            buttons[index*2] = button(screen, '-', (0,0,0,100), (0,0,0,255), button_coords[0], font, click)
-            button(screen, str(value), (0,0,0,0), (0,0,0,0), button_coords[1], font, click)
-            buttons[index*2+1] = button(screen, '+', (0,0,0,100), (0,0,0,255), button_coords[2], font, click)
-            index +=1
+            if item != 'straw':
+                item_name_x = x_start
+                item_name_y = y_start + index*30 #Next line is 30 down
+                button_coords = [(430,y_start + index*30, button_dimension, button_dimension), (480,y_start + index*30, button_dimension, button_dimension), (530,y_start + index*30, button_dimension, button_dimension)]
+                draw_text(item, font, (255, 255, 255), screen , item_name_x, item_name_y)
+                buttons[index*2] = button(screen, '-', (0,0,0,100), (0,0,0,255), button_coords[0], font, click)
+                button(screen, str(value), (0,0,0,0), (0,0,0,0), button_coords[1], font, click)
+                buttons[index*2+1] = button(screen, '+', (0,0,0,100), (0,0,0,255), button_coords[2], font, click)
+                index +=1
+        pygame.draw.rect(screen, (255,0,0), straw_highlight)
+        no_straw = button(screen, "No Straw",(0,0,0,100), (0,0,0,255), (15,300,200,30), font, click)
+        paper_straw = button(screen, "Paper Straw",(0,0,0,100), (0,0,0,255), (235,300,250,30), font, click)
+        plastic_straw = button(screen, "Plastic Straw",(0,0,0,100), (0,0,0,255), (510,300,275,30), font, click)
+
         #Buttons to accept recipe and return to game
         accept_recipe = button(screen, 'Accept Recipe', (0,0,0,100), (0,0,0,255), (50,500,300,50), font, click)
         return_to_game = button(screen, 'Resume Game', (0,0,0,100), (0,0,0,255), (400,500,300,50), font, click)
@@ -144,9 +163,21 @@ def recipe_menu(lemonade_game):
                             pass
                         else:
                             ingredients[list(ingredients.keys())[int((i+1)/2)]] -=1
+
+            if no_straw:
+                ingredients['straw'] = 'no'
+                straw_highlight = update_straw_button_highlight(ingredients['straw'])
+            if paper_straw:
+                ingredients['straw'] = 'paper'
+                straw_highlight = update_straw_button_highlight(ingredients['straw'])
+            if plastic_straw:
+                ingredients['straw'] = 'plastic'
+                straw_highlight = update_straw_button_highlight(ingredients['straw'])
+
             if accept_recipe:
 
-                recipe.update_ratios(ingredients['lemon juice [mL]'], ingredients['sugar [g]'], ingredients['water [mL]'], ingredients['ice [units]'])
+                recipe.update_ratios(ingredients['lemon juice [mL]'], ingredients['sugar [g]'], ingredients['water [mL]'], 
+                                            ingredients['ice [units]'], ingredients['straw'])
 
                 #Write something about the type of lemonade you're making
                 recipe_message = 'The recipe sounds tasty'
