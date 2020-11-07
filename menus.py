@@ -842,3 +842,10 @@ def daily_report_menu(lemonade_game):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN or  event.type == pygame.KEYDOWN:
                 done = True
+
+def victory_menu(lemonade_game):
+    pass
+
+def defeat_menu(lemonade_game):
+    pass
+
