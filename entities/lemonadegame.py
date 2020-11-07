@@ -118,6 +118,7 @@ class LemonadeGame():
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
+            self.clouds.cloudiness = np.random.choice([0,0.2,0.4,0.6])
             menus.daily_report_menu(self)
 
         # check for new customers arriving, add them to the update group
