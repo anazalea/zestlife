@@ -1,4 +1,5 @@
 import datetime
+import calendar
 import glob
 import numpy as np
 import pygame
@@ -60,7 +61,8 @@ class LemonadeGame():
             employee_image_dict[s] = [pygame.image.load(img_path) for img_path in images_path]
         self.employee_image_dict = employee_image_dict
         self.screen = pygame.display.set_mode((800, 600))
-        self.current_datetime = datetime.datetime(2020,6,10,10)
+        self.start_datetime = datetime.datetime(2020,6,10,10)
+        self.current_datetime = self.start_datetime
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
         self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime, self.employee_image_dict, sound, n_employees=3)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
@@ -243,6 +245,15 @@ class LemonadeGame():
         temp_txt = font.render(str(temp), 1, temp_color)
         self.screen.blit(thermo_img, [0, 5])
         self.screen.blit(temp_txt, [40, 20])
+
+        # date
+        # import ipdb; ipdb.set_trace()
+        date_font = pygame.font.Font(FONT_STYLE, 12)
+        weekday = ['MON', 'TUES', 'WED', 'THUR', 'FRI', 'SAT', 'SUN']
+        months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY',' JUNE', 'JULY', 'AUG', 'SEPT', 'OCT', 'NOV', 'DEC']
+        # date_str = weekday[self.current_datetime.weekday()]+'-'+\
+        date_str = months[self.current_datetime.month]+'-'+str(self.current_datetime.day)
+        self.screen.blit(date_font.render(date_str, 1, txt_color), [40,7])
 
         # clock
         self.analog_clock.draw(self.screen)
