@@ -6,6 +6,7 @@ from pygame import draw
 from pygame.draw import rect
 
 import menus
+import endgame
 from dailychores import get_starting_customers, end_day, track_day_start_stats
 from entities.lemonadestand import LemonadeStand
 from entities.analog_clock import AnalogClock
@@ -75,6 +76,7 @@ class LemonadeGame():
         self.impending_shipments = []
         self.trucks = FleetOfTrucks()
         self.clouds = Clouds()
+        self.victorious = False
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
         customers = self.get_starting_customers()
@@ -95,6 +97,7 @@ class LemonadeGame():
 
     def update_world(self, game_speed_in_minutes: float):
         """Updates state to next state given game_speed."""
+        self.victorious = endgame.check_victory_condition(self)
         old_datetime = self.current_datetime
         self.lemonade_stand.workforce.update()
         self.current_datetime += datetime.timedelta(minutes=game_speed_in_minutes)
@@ -119,7 +122,7 @@ class LemonadeGame():
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
             self.clouds.cloudiness = np.random.choice([0,0.2,0.4,0.6])
-            menus.daily_report_menu(self)
+
 
         # check for new customers arriving, add them to the update group
         for customer in self.future_customers.sprites():

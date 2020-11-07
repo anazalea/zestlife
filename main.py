@@ -87,6 +87,7 @@ def play():
             ff_button.draw(lemonade_game.screen)
             fff_button.draw(lemonade_game.screen)
             pygame.display.update()
+            
 
         for event in pygame.event.get():
 

@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from inventory import Order
 import pricing
+from entities.trophy import Trophy, trophy_im_dict
 from entities.lemonadestand import (
     get_stand_downgrade, get_stand_upgrade, StandType, get_stand_config,
     UPGRADE_COST as stand_upgrade_cost,
@@ -844,7 +845,26 @@ def daily_report_menu(lemonade_game):
                 done = True
 
 def victory_menu(lemonade_game):
-    pass
+    screen = lemonade_game.screen
+    done = False
+    font = pygame.font.Font(FONT_STYLE, 15)
+    title_font = pygame.font.Font(FONT_STYLE, 30)
+    trophy = pygame.sprite.Group([Trophy((400-240,100), trophy_im_dict)])
+    # trophy = pygame.image.load('./resources/trophy.png')
+    # trophy = pygame.transform.scale(trophy, (int(trophy.get_width()*0.5),int(trophy.get_height()*0.5)))
+    while not done:
+        screen.blit(MENU_BG, (0,0))
+        draw_text("VICTORY", title_font, (255, 255, 0), screen, 300, 20)
+        trophy.update()
+        trophy.draw(screen)
+        pygame.display.update()
+        # Events
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN or  event.type == pygame.KEYDOWN:
+                done = True
+
+
+
 
 def defeat_menu(lemonade_game):
     pass
