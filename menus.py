@@ -846,17 +846,19 @@ def daily_report_menu(lemonade_game):
 
 def victory_menu(lemonade_game):
     screen = lemonade_game.screen
+    lemonade_game.sound.play_sfx(lemonade_game.sound.victory)
     done = False
     click = False
     font = pygame.font.Font(FONT_STYLE, 15)
     title_font = pygame.font.Font(FONT_STYLE, 30)
-    trophy = pygame.sprite.Group([Trophy((400-200,130), trophy_im_dict)])
+    trophy = pygame.sprite.Group([Trophy((400-200,120), trophy_im_dict)])
     days_operating = lemonade_game.current_datetime - lemonade_game.start_datetime
-    score = f'You served 200 customers in {str(days_operating.days)} days and {str(days_operating.hours)} hours!'
+    score = f'You served 10 customers in {str(days_operating.days)} days and {str(int(days_operating.seconds/3600))} hours!'
     while not done:
+        
         screen.blit(MENU_BG, (0,0))
-        draw_text("VICTORY", title_font, (255, 255, 0), screen, 300, 20)
-        draw_text(score, font, (255,255,0), screen, 400 - int(len(score)*7), 40)
+        draw_text("VICTORY", title_font, (255, 255, 0), screen, 310, 20)
+        draw_text(score, font, (255,255,0), screen, 400 - int(len(score)*6), 65)
         trophy.update()
         trophy.draw(screen)
         quit_game = button(screen, 'EXIT GAME', (0,0,0,100), (0,0,0,255), (75,525,300,50), font, click)

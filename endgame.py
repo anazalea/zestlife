@@ -1,9 +1,8 @@
 import pygame
 import menus
-from entities.trophy import Trophy
 
 def check_victory_condition(lemonade_game):
-    if lemonade_game.lemonade_stand.account_balance > 0:
+    if lemonade_game.lemonade_stand.n_customers_served > 10:
         menus.victory_menu(lemonade_game)
         return True
     else:

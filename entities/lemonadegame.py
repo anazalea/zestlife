@@ -61,7 +61,8 @@ class LemonadeGame():
             employee_image_dict[s] = [pygame.image.load(img_path) for img_path in images_path]
         self.employee_image_dict = employee_image_dict
         self.screen = pygame.display.set_mode((800, 600))
-        self.current_datetime = datetime.datetime(2020,6,10,10)
+        self.start_datetime = datetime.datetime(2020,6,10)
+        self.current_datetime = self.start_datetime
         self.background_sky = BackgroundSky(self.current_datetime.time(), self.screen)
         self.lemonade_stand = LemonadeStand(self.screen, self.current_datetime, self.employee_image_dict, sound, n_employees=3)
         self.analog_clock = AnalogClock(self.current_datetime.time(), self.screen)
@@ -97,7 +98,12 @@ class LemonadeGame():
 
     def update_world(self, game_speed_in_minutes: float):
         """Updates state to next state given game_speed."""
-        self.victorious = endgame.check_victory_condition(self)
+        if not self.victorious:
+            self.victorious = endgame.check_victory_condition(self)
+            # if self.victorious:
+            #     self.sound.play_sfx(self.sound.victory)
+                
+
         old_datetime = self.current_datetime
         self.lemonade_stand.workforce.update()
         self.current_datetime += datetime.timedelta(minutes=game_speed_in_minutes)

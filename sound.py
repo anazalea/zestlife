@@ -22,6 +22,7 @@ class Sound:
         # self.powerup = mixer.Sound('./sfx/powerup.ogg')
         self.powerup_appear = pygame.mixer.Sound('./resources/powerup_appears.ogg')
         self.pipe = pygame.mixer.Sound('./resources/pipe.ogg')
+        self.victory = pygame.mixer.Sound('./resources/stage_clear.ogg')
 
     def play_sfx(self, sfx):
         if self.allowSFX:
