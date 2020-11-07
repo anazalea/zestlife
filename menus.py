@@ -827,6 +827,7 @@ def daily_report_menu(lemonade_game):
     done = False
     font = pygame.font.Font(FONT_STYLE, 15)
     title_font = pygame.font.Font(FONT_STYLE, 30)
+    days_operating = str((lemonade_game.current_datetime - lemonade_game.start_datetime).days)
     while not done:
         screen.blit(MENU_BG, (0, 0))
         draw_text("DAILY REPORT", title_font, (255, 255, 0), screen, 250, 20)
@@ -834,7 +835,7 @@ def daily_report_menu(lemonade_game):
         line_space = 20
         for i, line in enumerate(lemonade_game.daily_report):
             draw_text(line, font, (255, 255, 255), screen, 40, top_margin + i * line_space)
-
+        draw_text(f'{days_operating} days in operation', font, (255, 255, 255), screen, 40, top_margin + (i+2) * line_space)
         draw_text("Press any key to continue.", font, (0, 0, 0), screen, 250, 560)
 
         pygame.display.update()

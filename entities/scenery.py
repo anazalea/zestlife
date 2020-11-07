@@ -44,7 +44,8 @@ class Cloud(AnimatedSprite):
 
     def update(self):
         super().move(Vector2(self.speed,0))        
-
+        if np.random.uniform() > 0.95:
+            self.speed -= 0.5*np.random.uniform()
         if self.rect[0] < -1*self.image.get_width():
             self.kill()
 
