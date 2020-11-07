@@ -12,7 +12,7 @@ from entities.analog_clock import AnalogClock
 from entities.background_sky import BackgroundSky
 from entities.town import Town
 from menus import FONT_STYLE
-from entities.scenery import Town, Trees
+from entities.scenery import Town, Trees, Clouds
 from entities.truck import FleetOfTrucks
 from entities.customer import CustomerArrivalTimeGenerator
 from recipe import Recipe
@@ -74,6 +74,7 @@ class LemonadeGame():
         self.word_of_mouth_effect = 0
         self.impending_shipments = []
         self.trucks = FleetOfTrucks()
+        self.clouds = Clouds()
         self.recipe = Recipe(lemon_juice=40, sugar=35, water=300, ice=5, straw='no') # initial recipe should be part of config
 
         customers = self.get_starting_customers()
@@ -102,6 +103,7 @@ class LemonadeGame():
         self.analog_clock.current_time = self.current_datetime.time()
         # check for new orders
         self.trucks.update(self.lemonade_stand, self.current_datetime, self.sound)
+        self.clouds.update()
 
         # if it's the end of the day, recap, setup for tomorrow
         if not self.current_datetime.date() == old_datetime.date():
@@ -116,6 +118,7 @@ class LemonadeGame():
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers = pygame.sprite.Group([])
             self.lemonade_stand.lineup.clear()
+            self.clouds.cloudiness = np.random.choice([0,0.2,0.4,0.6])
             menus.daily_report_menu(self)
 
         # check for new customers arriving, add them to the update group
@@ -130,6 +133,7 @@ class LemonadeGame():
 
     def draw(self):
         self.screen.blit(self.background_sky.background, (0,0))
+        self.clouds.clouds.draw(self.screen)
         self.town.draw(self.screen)
         self.trucks.draw(self.screen)
         self.trees.draw(self.screen)
@@ -148,7 +152,7 @@ class LemonadeGame():
 
     def print_thought(self):
         font = pygame.font.Font(FONT_STYLE, 14)
-        txt_color = RGB_WHITE
+        txt_color = (184, 178, 140)
         if self.thought_frames < 30:
             self.screen.blit(
                     font.render(self.last_customer_thought, 1, txt_color), 
