@@ -237,7 +237,7 @@ class Customer(AnimatedSprite):
                 likes_it = False
         if self.straw_preference == 'anti_plastic_straw':
             if recipe.straw == 'plastic':
-                reason.append("Won't somebody think of the turtles!? PLASTIC STRAWS KILL.")
+                reason.append("Save the turtles! PLASTIC STRAWS KILL.")
                 likes_it = False
         if self.max_spend < price/recipe.total_volume:
             reason.append('Too expensive.')
