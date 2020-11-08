@@ -49,7 +49,7 @@ class CustomerType(Enum):
 
 def get_accessory_keys_randomly(customer_type: CustomerType):
     karen_keys = {'karen'}
-    hipster_keys = {'beard', 'shades', 'bun'}
+    hipster_keys = {'beard', 'shades', 'bun', 'mustache'}
     if customer_type == CustomerType.default:
         resl = []
         for d in [ACCESSORIES_DICT_FACE, ACCESSORIES_DICT_HAIR]:
@@ -69,7 +69,7 @@ def get_speed(customer_type: CustomerType):
     elif customer_type == CustomerType.karen:
         return 12
     elif customer_type == CustomerType.hipster:
-        return 1
+        return 1 + np.random.randint(2,4)
     return 7
 
 def get_preference_generator(customer_type: CustomerType) -> CustomerPreferenceGenerator:
