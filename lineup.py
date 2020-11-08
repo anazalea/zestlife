@@ -28,7 +28,7 @@ class Lineup():
         #Lineup((300,400),(700,400) ,10)
         n_pieces = 8
         y = 410
-        x0 = 340
+        x0 = 350
         width = self.image.get_width() - 7
         for i in range(n_pieces):
             screen.blit(self.image, (x0 + i * width, y))

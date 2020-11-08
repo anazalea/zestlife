@@ -96,7 +96,7 @@ class LemonadeStand():
         self.open = self.is_open(current_datetime.time())
         self.account_balance = CASH_INI # $
         self.price = 2.00
-        self.lineup = Lineup((300,400),(700,400) ,10)
+        self.lineup = Lineup((300,400),(700,400) ,15)
         self.prep_time = 45 # minutes/lemonade, should depend on number of employees
         self.time_serving_customer = 0
         self.recent_customer_thought = ''
