@@ -18,4 +18,4 @@ class BackgroundSky():
         if 4 <= current_time.hour <= 20:
             x = current_time.hour + current_time.minute / 60
             y = -(x/2 - 6) ** 2 + 16  # 0 to 16 curve
-            self.background.blit(self._sun_img, (750 - (x - 4) * 43, 200 - y * 20))
+            self.background.blit(self._sun_img, (650 - (x - 4) * 43, 200 - y * 20))
