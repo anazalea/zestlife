@@ -130,13 +130,24 @@ class Customer(AnimatedSprite):
         self.max_spend = pref_generator.spend_width * np.random.randn() + pref_generator.spend_per_ml
         self.straw_preference = np.random.choice(pref_generator.straw_prefs, p = pref_generator.straw_pref_probs)
 
-    def update_destination(self, timedelta, lineup, recipe, price, customer_outcomes, customer_thoughts, sound):
+    def update_destination(self, 
+                            timedelta, 
+                            lineup, 
+                            recipe, 
+                            price, 
+                            customer_outcomes, 
+                            customer_thoughts,
+                            customers_in_line,
+                            customers_not_in_line,
+                            sound):
         if self.queue_position == -1:
             self.kill()
         # Try to get in line
         if self.destination == lineup.last_loc and self.queue_position == lineup.n_positions + 1:
             if not lineup.spots[lineup.n_positions-1].is_occupied: # take spot, destination unchanged
                 # import ipdb; ipdb.set_trace()
+                customers_in_line.add(self)
+                customers_not_in_line.remove(self)
                 self.queue_position = lineup.n_positions - 1
                 lineup.spots[self.queue_position].is_occupied = True
                 lineup.spots[self.queue_position].occupant = self
@@ -165,7 +176,8 @@ class Customer(AnimatedSprite):
             if not self.likes_recipe: # Go home
                 self.destination = self.spawn_location
                 self.queue_position = -1
-                # self.state = 'sad'
+                customers_in_line.remove(self)
+                customers_not_in_line.add(self)
                 lineup.spots[0].is_occupied = False
                 lineup.spots[0].occupant = None
                 customer_outcomes.append('Bad Experience')
@@ -176,6 +188,8 @@ class Customer(AnimatedSprite):
                 self.queue_position = -1
                 lineup.spots[0].is_occupied = False
                 lineup.spots[0].occupant = None
+                customers_in_line.remove(self)
+                customers_not_in_line.add(self)
                 customer_outcomes.append('Satisfied Customer')
 
     def get_displacement(self, timedelta):
@@ -191,10 +205,12 @@ class Customer(AnimatedSprite):
             vector_to_dest.scale_to_length(distance)
             return vector_to_dest
 
-    def update(self, timedelta, lineup, recipe, price, customer_outcomes, customer_thoughts, sound):
+    def update(self, timedelta, lineup, recipe, price, customer_outcomes, customer_thoughts, customers_in_line,
+                            customers_not_in_line, sound):
         super().next_frame()
         if tuple(self.rect[:2]) == self.destination:
-            self.update_destination(timedelta, lineup, recipe, price, customer_outcomes, customer_thoughts, sound)
+            self.update_destination(timedelta, lineup, recipe, price, customer_outcomes, customer_thoughts, customers_in_line,
+                            customers_not_in_line, sound)
         displacement = self.get_displacement(timedelta)
         # face left (flip of default right) if not moving
         self.flip = displacement[0] <= 0

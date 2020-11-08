@@ -28,7 +28,7 @@ def get_starting_customers(
             [CustomerType.default, CustomerType.hipster, CustomerType.karen],
             p=[default_prob, customer_hipster_prob, customer_karen_prob]
         )
-        customers.append(Customer(position=(np.random.choice([-150,950]), 500 + np.random.randint(-25,25)),
+        customers.append(Customer(position=(np.random.choice([-128,928]), 525 + np.random.randint(-25,200)),
                          arrival_time_generator=arrival_time_generator,
                          customer_type=customer_type,
                          lineup=lineup,
