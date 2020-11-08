@@ -85,6 +85,8 @@ class LemonadeGame():
         track_day_start_stats(self)
         self.future_customers = pygame.sprite.Group(customers)
         self.active_customers = pygame.sprite.Group([])
+        self.customers_in_line = pygame.sprite.Group([])
+        self.customers_not_in_line = pygame.sprite.Group([])
         self.daily_report = {}
 
     def get_starting_customers(self):
@@ -126,7 +128,9 @@ class LemonadeGame():
             customers = self.get_starting_customers()
             track_day_start_stats(self)
             self.future_customers = pygame.sprite.Group(customers)
-            self.active_customers = pygame.sprite.Group([])
+            self.active_customers.empty()
+            self.customers_in_line.empty()
+            self.customers_not_in_line.epmty()
             self.lemonade_stand.lineup.clear()
             self.clouds.cloudiness = np.random.choice([0,0.2,0.4,0.6])
 
@@ -136,9 +140,11 @@ class LemonadeGame():
             if customer.arrival_time < self.current_datetime.time():
                 self.future_customers.remove(customer)
                 self.active_customers.add(customer)
+                self.customers_not_in_line.add(customer)
         self.lemonade_stand.update(self.current_datetime, game_speed_in_minutes, self.recipe)
         self.active_customers.update(game_speed_in_minutes, self.lemonade_stand.lineup,
-                                     self.recipe, self.lemonade_stand.price, self.customer_outcomes, self.customer_thoughts, self.sound)
+                                     self.recipe, self.lemonade_stand.price, self.customer_outcomes, self.customer_thoughts, 
+                                     self.customers_in_line, self.customers_not_in_line, self.sound)
         self.update_last_thought()
 
     def draw(self):
@@ -149,7 +155,10 @@ class LemonadeGame():
         self.trees.draw(self.screen)
         self.lemonade_stand.draw(self.current_datetime.time(),
                                     self.screen)
-        self.active_customers.draw(self.screen)
+        self.customers_in_line.draw(self.screen)
+        self.lemonade_stand.lineup.draw(self.screen)
+        self.customers_not_in_line.draw(self.screen)
+        # self.active_customers.draw(self.screen)
 
     def update_last_thought(self):
         if len(self.customer_thoughts) > 0:
