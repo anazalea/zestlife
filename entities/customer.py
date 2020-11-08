@@ -189,7 +189,7 @@ class Customer(AnimatedSprite):
                 lineup.spots[0].is_occupied = False
                 lineup.spots[0].occupant = None
                 customers_in_line.remove(self)
-                customers_not_in_line.remove(self)
+                customers_not_in_line.add(self)
                 customer_outcomes.append('Satisfied Customer')
 
     def get_displacement(self, timedelta):
