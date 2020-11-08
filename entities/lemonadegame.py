@@ -130,7 +130,7 @@ class LemonadeGame():
             self.future_customers = pygame.sprite.Group(customers)
             self.active_customers.empty()
             self.customers_in_line.empty()
-            self.customers_not_in_line.epmty()
+            self.customers_not_in_line.empty()
             self.lemonade_stand.lineup.clear()
             self.clouds.cloudiness = np.random.choice([0,0.2,0.4,0.6])
 
