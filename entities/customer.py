@@ -23,14 +23,16 @@ BASE_CUSTOMER_WALKING_ANIMATIONS = [
 ACCESSORIES_DICT_HAIR = {
     'short': ((0,0), pygame.image.load(f'./resources/customerhair_short.png')),
     'bobcut': ((0,0), pygame.image.load(f'./resources/customerhair_bobcut.png')),
-    'bun': ((0,0), pygame.image.load(f'./resources/customerhair_bun.png')),
-    'karen': ((0,0), pygame.image.load(f'./resources/customerhair_karen.png')),
+    'bun': ((0,0), pygame.image.load(f'./resources/customerhair_newmanbun.png')),
+    'karen': ((0,0), pygame.image.load(f'./resources/customerhair_assymmetricbob.png'))
+    ,
 }
 
 ACCESSORIES_DICT_FACE = {
-    'beard': ((0,0), pygame.image.load(f'./resources/customeraccessories_beard.png')),
-    'mustache': ((0,0), pygame.image.load(f'./resources/customeraccessories_mustache.png')),
-    'shades': ((0,0), pygame.image.load(f'./resources/customeraccessories_shades.png')),
+    'beard': ((0,0), pygame.image.load(f'./resources/customeraccessories_beardnew.png')),
+    'mustache': ((0,0), pygame.image.load(f'./resources/customeraccessories_mustachenew.png')),
+    'shades': ((0,0), pygame.image.load(f'./resources/customeraccessories_shadesnew.png')),
+    'lipstick': ((0,0), pygame.image.load(f'./resources/customeraccessories_lipstick.png')),
 }
 
 ACCESSORIES_DICT = {
@@ -48,7 +50,7 @@ class CustomerType(Enum):
     hipster = 'hipster'
 
 def get_accessory_keys_randomly(customer_type: CustomerType):
-    karen_keys = {'karen'}
+    karen_keys = {'karen','lipstick','shades'}
     hipster_keys = {'beard', 'shades', 'bun', 'mustache'}
     if customer_type == CustomerType.default:
         resl = []
